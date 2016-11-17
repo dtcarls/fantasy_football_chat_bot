@@ -9,7 +9,7 @@ setup(
 
     version='0.0.0',
 
-    description='ESPN fantasy football API',
+    description='ESPN fantasy football GroupMe Bot',
 
     author='Rich Barton',
 
@@ -19,7 +19,7 @@ setup(
 
     test_suite='nose.collector',
 
-    tests_require=['nose'],
+    tests_require=['nose', 'requests_mock'],
 
     url='https://github.com/rbarton65/ff_bot',
 
