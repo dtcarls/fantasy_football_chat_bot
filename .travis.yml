@@ -1,0 +1,13 @@
+language: python
+python:
+  - "3.3"
+  - "3.4"
+  - "3.5"
+
+install:
+  - python3 setup.py install
+  - pip3 install flake8
+
+script: 
+  - python3 setup.py test
+  - flake8 .
