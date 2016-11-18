@@ -1,5 +1,6 @@
 import requests
 import json
+import os
 
 
 class GroupMeBot(object):
@@ -25,7 +26,8 @@ class GroupMeBot(object):
 
 
 def main():
-    bot = GroupMeBot("b280ed5fe3b1406d4198a1715a")
+    bot_id = os.environ["BOT_ID"]
+    bot = GroupMeBot(bot_id)
     text = "Hello World!"
     bot.send_message(text)
 
