@@ -1,12 +1,17 @@
+sudo: required
+
 language: python
 python:
   - "3.3"
   - "3.4"
   - "3.5"
 
+services:
+  - docker
+
 install:
-  - python3 setup.py install
-  - pip3 install flake8
+  - docker build -t wilson .
+  - docker run --name wilson python3 /usr/src/ff_bot/setup.py test
 
 script: 
   - python3 setup.py test
