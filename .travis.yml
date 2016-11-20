@@ -10,9 +10,9 @@ services:
   - docker
 
 install:
+  - pip3 install flake8
   - docker build -t wilson .
   - docker run wilson python3 /usr/src/ff_bot/setup.py test
 
 script: 
-  - python3 setup.py test
   - flake8 .
