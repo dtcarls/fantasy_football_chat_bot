@@ -43,6 +43,14 @@ This gives an overview of all the features of `ff_bot`
 >>> docker run -e BOT_ID=$BOT_ID ff_bot
 ```
 
+### Running without Docker
+
+```bash
+>>> export BOT_ID = [enter your GroupMe Bot ID]
+>>> cd ff_bot
+>>> python3 ff_bot/ff_bot.py
+```
+
 ## Running the tests
 
 Automated tests for this package are included in the `tests` directory. After installation,
