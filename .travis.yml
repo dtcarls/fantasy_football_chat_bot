@@ -1,0 +1,21 @@
+sudo: required
+
+language: python
+python:
+  - "3.3"
+  - "3.4"
+  - "3.5"
+
+services:
+  - docker
+
+install:
+  - docker build -t test_build .
+  - docker run test_build python3 /usr/src/ff_bot/setup.py test
+
+before_script:
+  - pip3 install flake8
+
+script: 
+  - docker ps -a | grep test_build
+  - flake8 .
