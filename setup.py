@@ -15,7 +15,7 @@ setup(
 
     author_email='rbart65@gmail.com',
 
-    install_requires=['espnff>=1.0.0,<2.0.0', 'requests>=2.0.0,<3.0.0'],
+    install_requires=['requests>=2.0.0,<3.0.0'],
 
     test_suite='nose.collector',
 
