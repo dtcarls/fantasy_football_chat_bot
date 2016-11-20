@@ -11,7 +11,7 @@ services:
 
 install:
   - docker build -t wilson .
-  - docker run --name wilson python3 /usr/src/ff_bot/setup.py test
+  - docker run wilson python3 /usr/src/ff_bot/setup.py test
 
 script: 
   - python3 setup.py test
