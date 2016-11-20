@@ -10,9 +10,12 @@ services:
   - docker
 
 install:
+  - docker build -t test_build .
+  - docker run test_build python3 /usr/src/ff_bot/setup.py test
+
+before_script:
   - pip3 install flake8
-  - docker build -t wilson .
-  - docker run wilson python3 /usr/src/ff_bot/setup.py test
 
 script: 
+  - docker ps -a | grep test_build
   - flake8 .
