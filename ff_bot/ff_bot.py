@@ -2,6 +2,12 @@ import requests
 import json
 import os
 
+from espnff import League
+
+
+class GroupMeException(Exception):
+    pass
+
 
 class GroupMeBot(object):
     '''Creates GroupMe Bot to send messages'''
@@ -22,13 +28,28 @@ class GroupMeBot(object):
         headers = {'content-type': 'application/json'}
         r = requests.post("https://api.groupme.com/v3/bots/post",
                           data=json.dumps(template), headers=headers)
+        if r.status_code != 202:
+            raise GroupMeException('Invalid BOT_ID')
+
         return r
+
+
+def get_scoreboard(league_id, year):
+    '''Gets current week's scoreboard'''
+    league = League(league_id, year)
+    matchups = league.scoreboard(12)
+    score = ['%s %s - %s %s' % (i.home_team.team_abbrev, i.home_score,
+             i.away_score, i.away_team.team_abbrev) for i in matchups]
+    text = ['Score Update'] + score
+    return '\n'.join(text)
 
 
 def main():
     bot_id = os.environ["BOT_ID"]
+    league_id = os.environ["LEAGUE_ID"]
+    year = os.environ["LEAGUE_YEAR"]
     bot = GroupMeBot(bot_id)
-    text = "Hello World!"
+    text = get_scoreboard(league_id, year)
     bot.send_message(text)
 
 
