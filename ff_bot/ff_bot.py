@@ -37,7 +37,7 @@ class GroupMeBot(object):
 def get_scoreboard(league_id, year):
     '''Gets current week's scoreboard'''
     league = League(league_id, year)
-    matchups = league.scoreboard(12)
+    matchups = league.scoreboard()
     score = ['%s %s - %s %s' % (i.home_team.team_abbrev, i.home_score,
              i.away_score, i.away_team.team_abbrev) for i in matchups]
     text = ['Score Update'] + score

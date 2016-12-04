@@ -38,7 +38,9 @@ This gives an overview of all the features of `ff_bot`
 ### Running with Docker
 
 ```bash
->>> export BOT_ID = [enter your GroupMe Bot ID]
+>>> export BOT_ID=[enter your GroupMe Bot ID]
+>>> export LEAGUE_ID=[enter ESPN league ID]
+>>> export LEAGUE_YEAR=[enter league year]
 >>> cd ff_bot
 >>> docker run -e BOT_ID=$BOT_ID ff_bot
 ```
@@ -46,7 +48,9 @@ This gives an overview of all the features of `ff_bot`
 ### Running without Docker
 
 ```bash
->>> export BOT_ID = [enter your GroupMe Bot ID]
+>>> export BOT_ID=[enter your GroupMe Bot ID]
+>>> export LEAGUE_ID=[enter ESPN league ID]
+>>> export LEAGUE_YEAR=[enter league year]
 >>> cd ff_bot
 >>> python3 ff_bot/ff_bot.py
 ```
