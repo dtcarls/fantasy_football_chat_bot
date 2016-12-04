@@ -42,7 +42,11 @@ This gives an overview of all the features of `ff_bot`
 >>> export LEAGUE_ID=[enter ESPN league ID]
 >>> export LEAGUE_YEAR=[enter league year]
 >>> cd ff_bot
->>> docker run -e BOT_ID=$BOT_ID ff_bot
+>>> docker run --rm=True \
+-e BOT_ID=$BOT_ID \
+-e LEAGUE_ID=$LEAGUE_ID \
+-e LEAGUE_YEAR=$LEAGUE_YEAR \
+ff_bot
 ```
 
 ### Running without Docker
