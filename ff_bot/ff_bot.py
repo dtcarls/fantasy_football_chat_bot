@@ -39,7 +39,8 @@ def get_scoreboard(league_id, year):
     league = League(league_id, year)
     matchups = league.scoreboard()
     score = ['%s %s - %s %s' % (i.home_team.team_abbrev, i.home_score,
-             i.away_score, i.away_team.team_abbrev) for i in matchups]
+             i.away_score, i.away_team.team_abbrev) for i in matchups
+             if i.away_team]
     text = ['Score Update'] + score
     return '\n'.join(text)
 
