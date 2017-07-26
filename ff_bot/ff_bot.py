@@ -64,7 +64,6 @@ def get_matchups(league):
 def get_close_scores(league):
     '''Gets current closest scores (15 points or closer)'''
     matchups = league.scoreboard()
-
     score = []
     
     for i in matchups:
@@ -77,6 +76,16 @@ def get_close_scores(league):
     if not score:
         score = ['None']
     text = ['Closest Scores'] + score
+    return '\n'.join(text)
+
+def get_power_rankings(league):
+    '''Gets current week's Matchups'''
+    pranks = league.power_rankings()
+    
+    '''score = ['%s(%s-%s) vs %s(%s-%s)' % (i.home_team.team_name, i.home_team.wins, i.home_team.losses,
+             i.away_team.team_name, i.away_team.wins, i.away_team.losses) for i in matchups
+             if i.away_team]'''
+    text = ['This Week\'s Power Rankings'] + pranks
     return '\n'.join(text)
 
 def main():
@@ -92,6 +101,8 @@ def main():
     text = get_scoreboard_short(league)
     bot.send_message(text)
     text = get_close_scores(league)
+    bot.send_message(text)
+    text = get_power_rankings(league)
     bot.send_message(text)
 
 
