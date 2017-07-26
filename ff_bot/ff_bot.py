@@ -32,7 +32,14 @@ class GroupMeBot(object):
             raise GroupMeException('Invalid BOT_ID')
 
         return r
-
+def get_scoreboard_short(league):
+    '''Gets current week's scoreboard'''
+    matchups = league.scoreboard()
+    score = ['%s %s - %s %s' % (i.home_team.team_abbrev, i.home_score,
+             i.away_score, i.away_team.team_abbrev) for i in matchups
+             if i.away_team]
+    text = ['Score Update'] + score
+return '\n'.join(text)
 
 def get_scoreboard(league):
     '''Gets current week's scoreboard'''
@@ -79,8 +86,12 @@ def main():
     bot = GroupMeBot(bot_id)
     league = League(league_id, year)
     text = get_matchups(league)
-    text += '\n' + get_scoreboard(league)
-    text += '\n' + get_close_scores(league)
+    bot.send_message(text)
+    '''text = get_scoreboard(league)
+    bot.send_message(text)'''
+    text = get_scoreboard_short(league)
+    bot.send_message(text)
+    text = get_close_scores(league)
     bot.send_message(text)
 
 
