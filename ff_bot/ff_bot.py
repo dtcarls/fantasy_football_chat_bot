@@ -46,15 +46,9 @@ def get_scoreboard(league_id, year):
 
 
 def main():
-    '''os.environ["BOT_ID"] = "916ccfd76a7fda25c74d09e1d5"
-    os.environ["LEAGUE_ID"] = "164483"
-    os.environ["LEAGUE_YEAR"] = "2017"
     bot_id = os.environ["BOT_ID"]
     league_id = os.environ["LEAGUE_ID"]
-    year = os.environ["LEAGUE_YEAR"]'''
-    bot_id = "916ccfd76a7fda25c74d09e1d5"
-    league_id = "164483"
-    year = "2017"
+    year = os.environ["LEAGUE_YEAR"]
     bot = GroupMeBot(bot_id)
     text = get_scoreboard(league_id, year)
     bot.send_message(text)
