@@ -39,7 +39,7 @@ def get_scoreboard_short(league):
              i.away_score, i.away_team.team_abbrev) for i in matchups
              if i.away_team]
     text = ['Score Update'] + score
-return '\n'.join(text)
+    return '\n'.join(text)
 
 def get_scoreboard(league):
     '''Gets current week's scoreboard'''
