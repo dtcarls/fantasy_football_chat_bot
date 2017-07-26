@@ -48,20 +48,37 @@ def get_matchups(league_id, year):
     '''Gets current week's Matchups'''
     league = League(league_id, year)
     matchups = league.scoreboard()
-    score = ['%15s(%s-%s) vs %15s(%s-%s)' % (i.home_team.team_name, i.home_team.wins, i.home_team.losses,
-             i.away_team.team_name, i.away_team.wins, i.away_team.losses,) for i in matchups
+    
+    '''TODO: NORMALIZE STRING LENGTH'''
+    score = ['%s(%s-%s) vs %s(%s-%s)' % (i.home_team.team_name, i.home_team.wins, i.home_team.losses,
+             i.away_team.team_name, i.away_team.wins, i.away_team.losses) for i in matchups
              if i.away_team]
-    text = ['This Week\'s Matchups'] + score
+    text = ['This Week\'s Matchups'] + score + ['Good Luck!']
     return '\n'.join(text)
 
+def get_close_scores(league_id, year):
+    '''Gets current closest scores (15 points or closer)'''
+    league = League(league_id, year)
+    matchups = league.scoreboard()
+
+    for i in matchups
+        if i.away_team:
+            if i.away_score - i.home_score > -16 and i.away_score - i.home_score < 16:
+                '''TODO: NORMALIZE STRING LENGTH'''
+                score = ['%s %s - %s %s' % (i.home_team.team_name, i.home_score,
+                        i.away_score, i.away_team.team_name)]
+
+    text = ['Closest Scores'] + score
+    return '\n'.join(text)
 
 def main():
     bot_id = os.environ["BOT_ID"]
     league_id = os.environ["LEAGUE_ID"]
     year = os.environ["LEAGUE_YEAR"]
     bot = GroupMeBot(bot_id)
-    text = get_scoreboard(league_id, year)
     text = get_matchups(league_id, year)
+    text = get_scoreboard(league_id, year)
+    text = get_close_scores(league_id, year)
     bot.send_message(text)
 
 
