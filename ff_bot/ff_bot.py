@@ -60,7 +60,7 @@ def get_close_scores(league, year):
     
     score = ''
 
-    for i in matchups
+    for i in matchups:
         if i.away_team:
             diffScore = i.away_score - i.home_score
             if -16 < diffScore < 16:
