@@ -54,7 +54,7 @@ def get_matchups(league):
     text = ['This Week\'s Matchups'] + score + ['Good Luck!']
     return '\n'.join(text)
 
-def get_close_scores(league, year):
+def get_close_scores(league):
     '''Gets current closest scores (15 points or closer)'''
     matchups = league.scoreboard()
     
