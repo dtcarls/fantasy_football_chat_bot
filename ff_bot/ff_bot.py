@@ -82,7 +82,7 @@ def get_power_rankings(league):
     '''Gets current week's Matchups'''
     pranks = league.power_rankings(week=1)
     
-    score = ['%s - %s' % (i[0], i[1]) for i in pranks
+    score = ['%s - %s' % (i[0], i[1].team_name) for i in pranks
              if i]
     text = ['This Week\'s Power Rankings'] + score
     return '\n'.join(text)
