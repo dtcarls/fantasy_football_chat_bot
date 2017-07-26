@@ -80,7 +80,7 @@ def get_close_scores(league):
 
 def get_power_rankings(league):
     '''Gets current week's Matchups'''
-    pranks = league.power_rankings()
+    pranks = league.power_rankings(week=1)
     
     '''score = ['%s(%s-%s) vs %s(%s-%s)' % (i.home_team.team_name, i.home_team.wins, i.home_team.losses,
              i.away_team.team_name, i.away_team.wins, i.away_team.losses) for i in matchups
