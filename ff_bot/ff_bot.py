@@ -48,7 +48,7 @@ def get_matchups(league_id, year):
     '''Gets current week's Matchups'''
     league = League(league_id, year)
     matchups = league.scoreboard()
-    score = ['%s(%s-%s) vs %s(%s-%s)' % (i.home_team.team_name, i.home_team.wins, i.home_team.losses,
+    score = ['%15s(%s-%s) vs %15s(%s-%s)' % (i.home_team.team_name, i.home_team.wins, i.home_team.losses,
              i.away_team.team_name, i.away_team.wins, i.away_team.losses,) for i in matchups
              if i.away_team]
     text = ['This Week\'s Matchups'] + score
@@ -61,7 +61,7 @@ def main():
     year = os.environ["LEAGUE_YEAR"]
     bot = GroupMeBot(bot_id)
     text = get_scoreboard(league_id, year)
-    text += get_matchups(league_id, year)
+    text = get_matchups(league_id, year)
     bot.send_message(text)
 
 
