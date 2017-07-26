@@ -84,7 +84,7 @@ def get_power_rankings(league):
     
     score = ['%s - %s' % (i[0], i[1]) for i in pranks
              if i]
-    text = ['This Week\'s Power Rankings'] + pranks
+    text = ['This Week\'s Power Rankings'] + score
     return '\n'.join(text)
 
 def main():
