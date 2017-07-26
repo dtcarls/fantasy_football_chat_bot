@@ -57,15 +57,18 @@ def get_matchups(league):
 def get_close_scores(league, year):
     '''Gets current closest scores (15 points or closer)'''
     matchups = league.scoreboard()
+    
+    score = ''
 
     for i in matchups
         if i.away_team:
             diffScore = i.away_score - i.home_score
             if -16 < diffScore < 16:
                 '''TODO: NORMALIZE STRING LENGTH'''
-                score = ['%s %s - %s %s' % (i.home_team.team_name, i.home_score,
+                score += ['%s %s - %s %s' % (i.home_team.team_name, i.home_score,
                         i.away_score, i.away_team.team_name)]
-
+    if score == '':
+        score = "None"
     text = ['Closest Scores'] + score
     return '\n'.join(text)
 
