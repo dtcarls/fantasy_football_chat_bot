@@ -121,7 +121,7 @@ if __name__ == '__main__':
     bot_main("init")
     sched = BlockingScheduler()
     print('before')
-    sched.add_job(bot_main('get_scoreboard_short'),'interval', seconds=30)
+    sched.add_job(bot_main,args='get_scoreboard_short','interval',seconds=30,replace_existing=True)
     print('after')
 
     sched.start()
