@@ -119,10 +119,10 @@ def bot_main(function):
 
 if __name__ == '__main__':
     ff_start_date = os.environ["START_DATE"]
-    if not ff_start_date
+    if not ff_start_date:
         ff_start_date='2017-09-05'
     ff_end_date = os.environ["END_DATE"]
-    if not ff_end_date
+    if not ff_end_date:
         ff_end_date='2017-09-05'
     bot_main("init")
     sched = BlockingScheduler()
@@ -135,7 +135,7 @@ if __name__ == '__main__':
     close scores go out monday evening. 
     score update monday night every hour from 8-11'''
     ff_start_date='2017-07-27'
-    sched.add_job(bot_main, 'cron', ['get_power_rankings'], day_of_week='thu', hour=18, minute=14,start_date=ff_start_date,end_date=ff_end_date,replace_existing=True)
+    sched.add_job(bot_main, 'cron', ['get_power_rankings'], day_of_week='thu', hour=18, minute=16,start_date=ff_start_date,end_date=ff_end_date,replace_existing=True)
     
     sched.add_job(bot_main, 'cron', ['get_power_rankings'], day_of_week='tue', hour=18, minute=30,start_date=ff_start_date,end_date=ff_end_date,replace_existing=True)
     sched.add_job(bot_main, 'cron', ['get_matchups'], day_of_week='thu', hour=19, minute=30,start_date=ff_start_date,end_date=ff_end_date,replace_existing=True)
