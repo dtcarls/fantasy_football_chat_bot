@@ -1,5 +1,5 @@
 from apscheduler.schedulers.blocking import BlockingScheduler
-import ff_bot
+from ff_bot import bot_main
 
 sched = BlockingScheduler()
 
