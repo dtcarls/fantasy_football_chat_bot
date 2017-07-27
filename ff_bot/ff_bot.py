@@ -108,10 +108,13 @@ def main(function):
     elif function=="get_power_rankings":
         text = get_power_rankings(league)
         bot.send_message(text)
+    elif function=="init":
+        text = "Bot initialized"
+        bot.send_message(text)
     else:
         text = "Something happened"
         bot.send_message(text)
 
 
 if __name__ == '__main__':
-    main()
+    main("init")
