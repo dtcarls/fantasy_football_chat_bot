@@ -130,7 +130,6 @@ if __name__ == '__main__':
 
     bot_main("init")
     sched = BlockingScheduler()
-    sched.add_job(bot_main,'interval',['get_scoreboard_short'],seconds=30,replace_existing=True)
     '''
     so my planned schedule is power rankings go out tuesday evening. 
     matchups go out thursday afternoon. score update thursday night. 
