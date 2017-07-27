@@ -5,5 +5,4 @@ sched = BlockingScheduler()
 
 @sched.scheduled_job(bot_main("get_scoreboard_short"),'interval', seconds=30)
 
-try:
-    sched.start()
+sched.start()
