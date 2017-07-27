@@ -14,7 +14,7 @@ install:
   - docker run test_build python3 /usr/src/ff_bot/setup.py test
 
 before_script:
-  - pip3 install flake8
+  - pip3 install requirements.txt
 
 script: 
   - docker ps -a | grep test_build
