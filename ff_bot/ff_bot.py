@@ -118,15 +118,18 @@ def bot_main(function):
 
 
 if __name__ == '__main__':
-    ff_start_date = os.environ["START_DATE"]
-    if not ff_start_date:
+    try:
+        ff_start_date = os.environ["START_DATE"]
+    except:
         ff_start_date='2017-09-05'
-    ff_end_date = os.environ["END_DATE"]
-    if not ff_end_date:
-        ff_end_date='2017-09-05'
+
+    try:
+        ff_end_date = os.environ["END_DATE"]
+    except:
+        ff_end_date='2017-12-26'
+
     bot_main("init")
     sched = BlockingScheduler()
-    print('before')
     sched.add_job(bot_main,'interval',['get_scoreboard_short'],seconds=30,replace_existing=True)
     '''
     so my planned schedule is power rankings go out tuesday evening. 
@@ -143,6 +146,5 @@ if __name__ == '__main__':
     sched.add_job(bot_main, 'cron', ['get_scoreboard_short'], day_of_week='fri,mon,tue', hour=0, minute=30,start_date=ff_start_date,end_date=ff_end_date,replace_existing=True)
     sched.add_job(bot_main, 'cron', ['get_scoreboard_short'], day_of_week='sun', hour='13,16,20',start_date=ff_start_date,end_date=ff_end_date,replace_existing=True)
     sched.add_job(bot_main, 'cron', ['get_scoreboard_short'], day_of_week='mon', hour='20',start_date=ff_start_date,end_date=ff_end_date,replace_existing=True)
-    print('after')
 
     sched.start()
