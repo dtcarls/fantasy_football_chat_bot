@@ -87,7 +87,7 @@ def get_power_rankings(league):
     text = ['This Week\'s Power Rankings'] + score
     return '\n'.join(text)
 
-def main(function):
+def bot_main(function):
     bot_id = os.environ["BOT_ID"]
     league_id = os.environ["LEAGUE_ID"]
     year = os.environ["LEAGUE_YEAR"]
@@ -117,4 +117,4 @@ def main(function):
 
 
 if __name__ == '__main__':
-    main("init")
+    bot_main("init")
