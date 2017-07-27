@@ -3,7 +3,7 @@ import ff_bot
 
 sched = BlockingScheduler()
 
-@sched.scheduled_job('interval', minutes=5)
+@sched.scheduled_job('interval', minutes=1)
 ff_bot.bot_main("get_scoreboard_short")
 
 '''@sched.scheduled_job('cron', day_of_week='mon-fri', hour=17)
