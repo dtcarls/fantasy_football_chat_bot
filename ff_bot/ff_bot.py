@@ -87,22 +87,30 @@ def get_power_rankings(league):
     text = ['This Week\'s Power Rankings'] + score
     return '\n'.join(text)
 
-def main():
+def main(function):
     bot_id = os.environ["BOT_ID"]
     league_id = os.environ["LEAGUE_ID"]
     year = os.environ["LEAGUE_YEAR"]
     bot = GroupMeBot(bot_id)
     league = League(league_id, year)
-    text = get_matchups(league)
-    bot.send_message(text)
-    '''text = get_scoreboard(league)
-    bot.send_message(text)'''
-    text = get_scoreboard_short(league)
-    bot.send_message(text)
-    text = get_close_scores(league)
-    bot.send_message(text)
-    text = get_power_rankings(league)
-    bot.send_message(text)
+    if function=="get_matchups":
+        text = get_matchups(league)
+        bot.send_message(text)
+    elif function=="get_scoreboard":
+        text = get_scoreboard(league)
+        bot.send_message(text)
+    elif function=="get_scoreboard_short":
+        text = get_scoreboard_short(league)
+        bot.send_message(text)
+    elif function=="get_close_scores":
+        text = get_close_scores(league)
+        bot.send_message(text)
+    elif function=="get_power_rankings":
+        text = get_power_rankings(league)
+        bot.send_message(text)
+    else:
+        text = "Something happened"
+        bot.send_message(text)
 
 
 if __name__ == '__main__':
