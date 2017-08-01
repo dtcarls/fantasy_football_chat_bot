@@ -135,8 +135,10 @@ if __name__ == '__main__':
     matchups go out thursday afternoon. 
     score update thursday night. 
     score update sunday at 1pm, 4pm, 8pm. 
-    close scores go out monday evening. '''
-	'''EST'''
+    close scores go out monday evening. 
+    '''
+
+    '''EST'''
     '''
     sched.add_job(bot_main, 'cron', ['get_power_rankings'], day_of_week='tue', hour=18, minute=30,start_date=ff_start_date,end_date=ff_end_date,replace_existing=True)
     sched.add_job(bot_main, 'cron', ['get_matchups'], day_of_week='thu', hour=19, minute=30,start_date=ff_start_date,end_date=ff_end_date,replace_existing=True)
@@ -145,9 +147,9 @@ if __name__ == '__main__':
     sched.add_job(bot_main, 'cron', ['get_scoreboard_short'], day_of_week='sun', hour='13,16,20',start_date=ff_start_date,end_date=ff_end_date,replace_existing=True)
     sched.add_job(bot_main, 'cron', ['get_scoreboard_short'], day_of_week='mon', hour='20',start_date=ff_start_date,end_date=ff_end_date,replace_existing=True)
     '''
-	
-	'''GMT/UTC'''
-	sched.add_job(bot_main, 'cron', ['get_power_rankings'], day_of_week='tue', hour='1,23', minute=30,start_date=ff_start_date,end_date=ff_end_date,replace_existing=True)
+
+    '''GMT/UTC'''
+    sched.add_job(bot_main, 'cron', ['get_power_rankings'], day_of_week='tue', hour='1,23', minute=30,start_date=ff_start_date,end_date=ff_end_date,replace_existing=True)
     sched.add_job(bot_main, 'cron', ['get_matchups'], day_of_week='thu', hour=23, minute=30,start_date=ff_start_date,end_date=ff_end_date,replace_existing=True)
     sched.add_job(bot_main, 'cron', ['get_close_scores'], day_of_week='mon', hour=23, minute=30,start_date=ff_start_date,end_date=ff_end_date,replace_existing=True)
     sched.add_job(bot_main, 'cron', ['get_scoreboard_short'], day_of_week='fri,mon,tue', hour=5, minute=30,start_date=ff_start_date,end_date=ff_end_date,replace_existing=True)
