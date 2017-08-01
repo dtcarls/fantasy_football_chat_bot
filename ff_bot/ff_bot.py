@@ -149,11 +149,12 @@ if __name__ == '__main__':
     '''
 
     '''GMT/UTC'''
-    sched.add_job(bot_main, 'cron', ['get_power_rankings'], day_of_week='tue', hour='1,23', minute=30,start_date=ff_start_date,end_date=ff_end_date,replace_existing=True)
+    sched.add_job(bot_main, 'cron', ['get_power_rankings'], day_of_week='tue', hour='23', minute=30,start_date=ff_start_date,end_date=ff_end_date,replace_existing=True)
     sched.add_job(bot_main, 'cron', ['get_matchups'], day_of_week='thu', hour=23, minute=30,start_date=ff_start_date,end_date=ff_end_date,replace_existing=True)
     sched.add_job(bot_main, 'cron', ['get_close_scores'], day_of_week='mon', hour=23, minute=30,start_date=ff_start_date,end_date=ff_end_date,replace_existing=True)
     sched.add_job(bot_main, 'cron', ['get_scoreboard_short'], day_of_week='fri,mon,tue', hour=5, minute=30,start_date=ff_start_date,end_date=ff_end_date,replace_existing=True)
     sched.add_job(bot_main, 'cron', ['get_scoreboard_short'], day_of_week='sun', hour='18,21',start_date=ff_start_date,end_date=ff_end_date,replace_existing=True)
     sched.add_job(bot_main, 'cron', ['get_scoreboard_short'], day_of_week='mon', hour=1,start_date=ff_start_date,end_date=ff_end_date,replace_existing=True)
+    sched.add_job(bot_main, 'cron', ['get_scoreboard_short'], day_of_week='tue', hour=1,start_date=ff_start_date,end_date=ff_end_date,replace_existing=True)
 
     sched.start()
