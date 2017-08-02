@@ -154,7 +154,7 @@ if __name__ == '__main__':
     close scores go out monday evening. 
     '''
 
-    sched.add_job(bot_main, 'interval', ['get_matchups'], seconds=30, id='get_matchups_test', replace_existing=True)
+    '''sched.add_job(bot_main, 'interval', ['get_matchups'], seconds=30, id='get_matchups_test', replace_existing=True)'''
     
     '''EST'''
     '''
