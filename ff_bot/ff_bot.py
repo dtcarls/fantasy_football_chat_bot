@@ -155,7 +155,7 @@ if __name__ == '__main__':
     '''
 
     '''sched.add_job(bot_main, 'interval', ['get_matchups'], seconds=30, id='get_matchups_test', replace_existing=True)'''
-    sched.add_job(bot_main, 'cron', ['get_scoreboard_short'], id='test', day_of_week='thu', hour='17', minute=44,start_date=ff_start_date,end_date=ff_end_date,replace_existing=True)
+    sched.add_job(bot_main, 'cron', ['get_scoreboard_short'], id='test', day_of_week='thu', hour='18', minute=01,replace_existing=True)
     
     '''EST'''
     '''
