@@ -1,0 +1,39 @@
+{
+  "name": "Fantasy Football Chat Bot",
+  "description": "ESPN FF GroupMe Chat Bot.",
+  "keywords": [
+    "fantasy football",
+    "espn",
+    "groupme",
+    "chat bot",
+    "ff"
+  ],
+  "website": "https://github.com/dtcarls/ff_bot/",
+  "repository": "https://github.com/dtcarls/ff_bot/",
+  "env": {
+    "BOT_ID": {
+      "description": "GroupMe Bot ID",
+      "value": "1"
+    },
+    "LEAGUE_ID": {
+      "description": "ESPN League ID",
+      "value": "1"
+    },
+    "LEAGUE_YEAR": {
+      "description": "ESPN League Year",
+      "value": "2017"
+    },
+    "TIMEZONE": {
+      "description": "League timezone for sending messages",
+      "value": "America/New_York"
+    },
+    "START_DATE": {
+      "description": "Season Start Date",
+      "value": "2017-09-05"
+    },
+    "END_DATE": {
+      "description": "Season End Date",
+      "value": "2017-12-26"
+    },
+  }
+}
