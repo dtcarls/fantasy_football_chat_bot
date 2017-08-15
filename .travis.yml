@@ -10,6 +10,7 @@ services:
   - docker
 
 install:
+  - pip3 install requirements.txt
   - docker build -t test_build .
   - docker run test_build python3 /usr/src/ff_bot/setup.py test
 
