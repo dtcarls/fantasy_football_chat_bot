@@ -35,5 +35,9 @@
       "description": "Season End Date",
       "value": "2017-12-26"
     },
+    "INIT_MSG": {
+      "description": "Bot Init Message",
+      "value": "Hi"
+    },
   }
 }
