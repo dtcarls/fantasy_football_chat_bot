@@ -10,16 +10,11 @@ services:
   - docker
 
 install:
-  - pip3 install requirements.txt
-  - docker build -t test_build .
-  - docker run test_build python3 /usr/src/ff_bot/setup.py test
-
-before_script:
-  - pip3 install requirements.txt
+  - pip3 install -r requirements.txt
 
 script: 
-  - docker ps -a | grep test_build
-  - flake8 .
+  - docker build -t test_build .
+  - docker run test_build python3 /usr/src/ff_bot/setup.py test
 
 env:
   - BOT_ID=916ccfd76a7fda25c74d09e1d5 LEAGUE_ID=164483
