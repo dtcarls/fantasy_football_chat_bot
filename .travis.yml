@@ -19,3 +19,7 @@ before_script:
 script: 
   - docker ps -a | grep test_build
   - flake8 .
+
+env:
+  - BOT_ID=916ccfd76a7fda25c74d09e1d5
+  - LEAGUE_ID=164483
