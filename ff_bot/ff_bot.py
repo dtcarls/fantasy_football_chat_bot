@@ -3,13 +3,11 @@ import json
 import os
 import random
 from apscheduler.schedulers.blocking import BlockingScheduler
-
 from espnff import League
 
 
 class GroupMeException(Exception):
     pass
-
 
 class GroupMeBot(object):
     '''Creates GroupMe Bot to send messages'''
@@ -74,7 +72,7 @@ def get_matchups(league):
     return '\n'.join(text)
 
 def get_close_scores(league):
-    '''Gets current closest scores (15 points or closer)'''
+    '''Gets current closest scores (15.999 points or closer)'''
     matchups = league.scoreboard()
     score = []
     
@@ -87,11 +85,12 @@ def get_close_scores(league):
                         i.away_score, i.away_team.team_name)]
     if not score:
         score = ['None']
-    text = ['Closest Scores'] + score
+    text = ['Close Scores'] + score
     return '\n'.join(text)
 
 def get_power_rankings(league):
     '''Gets current week's Matchups'''
+    '''TODO: Power rankings without passing week'''
     pranks = league.power_rankings(week=1)
     
     score = ['%s - %s' % (i[0], i[1].team_name) for i in pranks
@@ -126,8 +125,12 @@ def bot_main(function):
         text = get_power_rankings(league)
         bot.send_message(text)
     elif function=="init":
-        text = "Hai"
-        bot.send_message(text)
+        try:
+            text = os.environ["INIT_MSG"]
+            bot.send_message(text)
+        except:
+            '''do nothing here, empty init message'''
+            pass
     else:
         text = "Something happened. HALP"
         bot.send_message(text)
@@ -152,33 +155,23 @@ if __name__ == '__main__':
     bot_main("init")
     sched = BlockingScheduler()
     '''
-    power rankings go out tuesday evening. 
-    matchups go out thursday afternoon. 
-    score update thursday night. 
+    power rankings go out tuesday evening at 6:30pm. 
+    matchups go out thursday evening at 7:30pm.
+    close scores (within 15.99 points) go out monday evening at 6:30pm. 
+    score update friday, monday, and tuesday morning at 12:30am.
+    score update  night.
     score update sunday at 1pm, 4pm, 8pm. 
-    close scores go out monday evening. 
+    
     '''
 
     '''sched.add_job(bot_main, 'interval', ['get_matchups'], seconds=30, id='get_matchups_test', replace_existing=True)'''
     '''sched.add_job(bot_main, 'cron', ['get_scoreboard_short'], id='test', day_of_week='thu', hour='14', minute=50, timezone=myTimezone, replace_existing=True)'''
     
-    '''EST'''
     sched.add_job(bot_main, 'cron', ['get_power_rankings'], id='power_rankings', day_of_week='tue', hour=18, minute=30, start_date=ff_start_date, end_date=ff_end_date, timezone=myTimezone, replace_existing=True)
     sched.add_job(bot_main, 'cron', ['get_matchups'], id='matchups', day_of_week='thu', hour=19, minute=30, start_date=ff_start_date, end_date=ff_end_date, timezone=myTimezone, replace_existing=True)
     sched.add_job(bot_main, 'cron', ['get_close_scores'], id='close_scores', day_of_week='mon', hour=18, minute=30, start_date=ff_start_date, end_date=ff_end_date, timezone=myTimezone, replace_existing=True)
     sched.add_job(bot_main, 'cron', ['get_scoreboard_short'], id='scoreboard1', day_of_week='fri,mon,tue', hour=0, minute=30, start_date=ff_start_date, end_date=ff_end_date, timezone=myTimezone, replace_existing=True)
     sched.add_job(bot_main, 'cron', ['get_scoreboard_short'], id='scoreboard2', day_of_week='sun', hour='13,16,20', start_date=ff_start_date, end_date=ff_end_date, timezone=myTimezone, replace_existing=True)
     sched.add_job(bot_main, 'cron', ['get_scoreboard_short'], id='scoreboard3', day_of_week='mon', hour='20', start_date=ff_start_date, end_date=ff_end_date, timezone=myTimezone, replace_existing=True)
-    
 
-    '''GMT/UTC'''
-    '''
-    sched.add_job(bot_main, 'cron', ['get_power_rankings'], id='power_rankings', day_of_week='tue', hour='23', minute=30,start_date=ff_start_date,end_date=ff_end_date,replace_existing=True)
-    sched.add_job(bot_main, 'cron', ['get_matchups'], id='matchups', day_of_week='thu', hour=23, minute=30,start_date=ff_start_date,end_date=ff_end_date,replace_existing=True)
-    sched.add_job(bot_main, 'cron', ['get_close_scores'], id='close_scores', day_of_week='mon', hour=23, minute=30,start_date=ff_start_date,end_date=ff_end_date,replace_existing=True)
-    sched.add_job(bot_main, 'cron', ['get_scoreboard_short'], id='scoreboard1', day_of_week='fri,mon,tue', hour=5, minute=30,start_date=ff_start_date,end_date=ff_end_date,replace_existing=True)
-    sched.add_job(bot_main, 'cron', ['get_scoreboard_short'], id='scoreboard2', day_of_week='sun', hour='18,21',start_date=ff_start_date,end_date=ff_end_date,replace_existing=True)
-    sched.add_job(bot_main, 'cron', ['get_scoreboard_short'], id='scoreboard3', day_of_week='mon', hour=1,start_date=ff_start_date,end_date=ff_end_date,replace_existing=True)
-    sched.add_job(bot_main, 'cron', ['get_scoreboard_short'], id='scoreboard4', day_of_week='tue', hour=1,start_date=ff_start_date,end_date=ff_end_date,replace_existing=True)
-    '''
     sched.start()
