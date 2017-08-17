@@ -1,1 +1,6 @@
 *.pyc
+*.egg-info
+exports.sh
+run
+build/
+dist/
