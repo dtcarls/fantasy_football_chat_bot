@@ -140,7 +140,10 @@ Note: App will restart when you change any variable so your chat room may be sem
 - TIMEZONE: The timezone that the messages will look to send in. (America/New_York by default)
 - INIT_MSG: The message that the bot will say when it is started (“Hai” by default, can be blank for no message)
 
-You're done! You now have a fully featured GroupMe chat bot for ESPN leagues!
+After you have setup your variables you will need to turn it on. Navigate to the "Resources" tab of your Heroku app Dashboard.
+You should see something like below. Click the pencil on the right and toggle the buton so it is blue like depicted and click "Confirm."
+![](https://i.imgur.com/J6bpV2I.png)
+
+You're done! You now have a fully featured GroupMe chat bot for ESPN leagues! If you have an INIT_MSG you will see it exclaimed in your GroupMe chat room.
 
 Unfortunately to do auto deploys of the latest version you need admin access to the repository on git. You can check for updates on the github page (https://github.com/dtcarls/ff_bot/commits/master) and click the deploy button again; however, this will deploy a new instance and the variables will need to be edited again.
-
