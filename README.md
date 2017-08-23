@@ -121,7 +121,7 @@ Heroku is what we will be using to host the chat bot (for free)
 
 Go to https://id.heroku.com/login and sign up or login
 
-Click this handy button:
+**Click this handy button:**
 [![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
 
 Go to your dashboard (https://dashboard.heroku.com/apps)
