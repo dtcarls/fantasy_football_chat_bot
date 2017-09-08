@@ -68,7 +68,7 @@ def get_matchups(league):
     score = ['%s(%s-%s) vs %s(%s-%s)' % (i.home_team.team_name, i.home_team.wins, i.home_team.losses,
              i.away_team.team_name, i.away_team.wins, i.away_team.losses) for i in matchups
              if i.away_team]
-    text = ['This Week\'s Matchups'] + score + random_phrase()
+    text = ['This Week\'s Matchups'] + score + '\n' + random_phrase()
     return '\n'.join(text)
 
 def get_close_scores(league):
@@ -90,7 +90,7 @@ def get_close_scores(league):
 
 def get_power_rankings(league):
     '''Gets current week's Matchups'''
-    pranks = league.power_rankings()
+    pranks = league.power_rankings(week=2)
     
     score = ['%s - %s' % (i[0], i[1].team_name) for i in pranks
              if i]
@@ -158,7 +158,6 @@ if __name__ == '__main__':
     matchups go out thursday evening at 7:30pm.
     close scores (within 15.99 points) go out monday evening at 6:30pm. 
     score update friday, monday, and tuesday morning at 12:30am.
-    score update  night.
     score update sunday at 1pm, 4pm, 8pm. 
     
     '''
