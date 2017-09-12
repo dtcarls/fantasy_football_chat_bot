@@ -90,6 +90,8 @@ def get_close_scores(league):
 
 def get_power_rankings(league):
     '''Gets current week's Matchups'''
+    '''Using 2 step dominance, as well as a combination of points scored and margin of victory. 
+    It's weighted 80/15/5 respectively'''
     pranks = league.power_rankings(week=2)
     
     score = ['%s - %s' % (i[0], i[1].team_name) for i in pranks
