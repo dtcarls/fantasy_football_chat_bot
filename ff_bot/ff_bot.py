@@ -81,8 +81,8 @@ def get_close_scores(league):
             diffScore = i.away_score - i.home_score
             if -16 < diffScore < 16:
                 '''TODO: NORMALIZE STRING LENGTH'''
-                score += ['%s %.2f - %.2f %s' % (i.home_team.team_name, i.home_score,
-                        i.away_score, i.away_team.team_name)]
+                score += ['%s %.2f - %.2f %s' % (i.home_team.team_abbrev, i.home_score,
+                        i.away_score, i.away_team.team_abbrev)]
     if not score:
         score = ['None']
     text = ['Close Scores'] + score
