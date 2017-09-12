@@ -152,7 +152,7 @@ if __name__ == '__main__':
         myTimezone='America/New_York'
 
     bot_main("init")
-    sched = BlockingScheduler()
+    sched = BlockingScheduler(job_defaults={'misfire_grace_time': 15*60})
     '''
     power rankings go out tuesday evening at 6:30pm. 
     matchups go out thursday evening at 7:30pm.
