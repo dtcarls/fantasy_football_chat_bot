@@ -118,7 +118,7 @@ Side note: If you use the bot id depicted in the page you will spam an empty cha
 Heroku is what we will be using to host the chat bot (for free)
 
 **You should not need to enter credit card information for this hosting service for our needs.**
-You **may** run out of free hours without a credit card linked. If you decide to link your credit card you will have enough free hours for the month for a single application since this more than doubles your available hours. We are not respoible for any charges associated with Heroku.
+You **may** run out of free hours without a credit card linked. If you decide to link your credit card you will have enough free hours for the month for a single application since this more than doubles your available hours. We are not responsible for any charges associated with Heroku.
 
 Go to https://id.heroku.com/login and sign up or login
 
