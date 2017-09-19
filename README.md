@@ -93,6 +93,8 @@ python3 setup.py test
 
 ## Setting up GroupMe, and deploying app in Heroku
 
+** Do not deploy 2 of the same bot in the same chat. In general, you should let your commissioner do the setup **
+
 ### GroupMe Setup
 
 Go to www.groupme.com and sign up or login
