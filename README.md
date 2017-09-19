@@ -9,6 +9,15 @@ Shoutout to /u/rbart65 on reddit and rbarton65 on github for creating the origin
 This package creates a docker container that runs a GroupMe chat bot to send 
 ESPN Fantasy Football information to a GroupMe chat room.
 
+**What does this do?**
+
+- Sends out the following messages on this schedule:
+- Power rankings - tue -18:30
+- Matchups - thu - 19:30 (Just upcoming matchups)
+- Close Scores - mon - 18:30 (Games that are within 16 points of eachother to keep an eye on during the Monday night game)
+- Scoreboard - fri,mon,tue - 7:30 (Current ESPN fantasy scoreboard)
+- Scoreboard - sun - 16:30, 20:30 (Current ESPN fantasy scoreboard)
+
 ## Getting Started
 
 These instructions will get you a copy of the project up and running 
