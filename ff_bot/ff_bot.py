@@ -113,6 +113,58 @@ def get_power_rankings(league):
     text = ['This Week\'s Power Rankings'] + score
     return '\n'.join(text)
 
+def get_trophies(league):
+    '''Gets trophies for highest score, lowest score, closest score, and biggest win'''
+    matchups = league.scoreboard(week=pranks_week(league))
+    low_score = 9999
+    low_team_name = ''
+    high_score = -1
+    high_team_name = ''
+    closest_score = 9999
+    close_winner = ''
+    close_loser = ''
+    biggest_blowout = -1
+    blown_out_team_name = ''
+    ownerer_team_name = ''
+
+    for i in matchups:
+        if i.home_score > high_score:
+            high_score = i.home_score
+            high_team_name = i.home_team.team_name
+        if i.home_score < low_score:
+            low_score = i.home_score
+            low_team_name = i.home_team.team_name
+        if i.away_score > high_score:
+            high_score = i.away_score
+            high_team_name = i.away_team.team_name
+        if i.away_score < low_score:
+            low_score = i.away_score
+            low_team_name = i.away_team.team_name
+        if abs(i.away_score - i.home_score) < closest_score:
+            closest_score = abs(i.away_score - i.home_score)
+            if i.away_score - i.home_score < 0:
+                close_winner = i.home_team.team_name
+                close_loser = i.away_team.team_name
+            else:
+                close_winner = i.away_team.team_name
+                close_loser = i.home_team.team_name
+        if abs(i.away_score - i.home_score) > biggest_blowout:
+            biggest_blowout = abs(i.away_score - i.home_score)
+            if i.away_score - i.home_score < 0:
+                ownerer_team_name = i.home_team.team_name
+                blown_out_team_name = i.away_team.team_name
+            else:
+                ownerer_team_name = i.away_team.team_name
+                blown_out_team_name = i.home_team.team_name
+
+    low_score_str = 'Low score: ' + low_team_name + ' with ' + str(round(low_score,2)) + 'points.\n'
+    high_score_str = 'High score: ' + high_team_name + ' with ' + str(round(high_score,2)) + 'points.\n'
+    close_score_str = close_winner + ' squeeked out a win over ' + close_loser +  ' by a margin of ' + str(round(closest_score,2)) + '\n'
+    blowout_str = blown_out_team_name + ' blown out by ' + ownerer_team_name + ' by a margin of ' + str(round(biggest_blowout,2)) + '\n'
+
+    text = 'Trophies of the week:\n' + low_score_str + high_score_str + close_score_str + blowout_str
+    return text
+
 def bot_main(function):
     bot_id = os.environ["BOT_ID"]
     league_id = os.environ["LEAGUE_ID"]
@@ -132,6 +184,8 @@ def bot_main(function):
         print(get_scoreboard_short(league))
         print(get_close_scores(league))
         print(get_power_rankings(league))
+        print(get_trophies(league))
+        #bot.send_message(get_trophies(league))
 
     if function=="get_matchups":
         text = get_matchups(league)
@@ -147,6 +201,9 @@ def bot_main(function):
         bot.send_message(text)
     elif function=="get_power_rankings":
         text = get_power_rankings(league)
+        bot.send_message(text)
+    elif function=="get_trophies":
+        text = get_trophies(league)
         bot.send_message(text)
     elif function=="init":
         try:
@@ -180,15 +237,17 @@ if __name__ == '__main__':
     sched = BlockingScheduler(job_defaults={'misfire_grace_time': 15*60})
 
     '''
-    power rankings go out tuesday evening at 6:30pm. 
-    matchups go out thursday evening at 7:30pm.
-    close scores (within 15.99 points) go out monday evening at 6:30pm. 
-    score update friday, monday, and tuesday morning at 12:30am.
-    score update sunday at 1pm, 4pm, 8pm. 
+    power rankings:                     tuesday evening at 6:30pm. 
+    matchups:                           thursday evening at 7:30pm.
+    close scores (within 15.99 points): monday evening at 6:30pm. 
+    trophies:                           tuesday morning at 7:31am.
+    score update:                       friday, monday, and tuesday morning at 7:30am.
+    score update:                       sunday at 1pm, 4pm, 8pm. 
     '''
     sched.add_job(bot_main, 'cron', ['get_power_rankings'], id='power_rankings', day_of_week='tue', hour=18, minute=30, start_date=ff_start_date, end_date=ff_end_date, timezone=myTimezone, replace_existing=True)
     sched.add_job(bot_main, 'cron', ['get_matchups'], id='matchups', day_of_week='thu', hour=19, minute=30, start_date=ff_start_date, end_date=ff_end_date, timezone=myTimezone, replace_existing=True)
     sched.add_job(bot_main, 'cron', ['get_close_scores'], id='close_scores', day_of_week='mon', hour=18, minute=30, start_date=ff_start_date, end_date=ff_end_date, timezone=myTimezone, replace_existing=True)
+    sched.add_job(bot_main, 'cron', ['get_trophies'], id='trophies', day_of_week='tue', hour=7, minute=31, start_date=ff_start_date, end_date=ff_end_date, timezone=myTimezone, replace_existing=True)
     sched.add_job(bot_main, 'cron', ['get_scoreboard_short'], id='scoreboard1', day_of_week='fri,mon,tue', hour=7, minute=30, start_date=ff_start_date, end_date=ff_end_date, timezone=myTimezone, replace_existing=True)
     sched.add_job(bot_main, 'cron', ['get_scoreboard_short'], id='scoreboard2', day_of_week='sun', hour='16,20', start_date=ff_start_date, end_date=ff_end_date, timezone=myTimezone, replace_existing=True)
 
