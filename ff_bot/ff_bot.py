@@ -32,6 +32,20 @@ class GroupMeBot(object):
             raise GroupMeException('Invalid BOT_ID')
 
         return r
+
+def pranks_week(league):
+        count = 1
+        first_team = next(iter(league.teams or []), None)
+        '''Iterate through the first team's scores until you reach a week with 0 points scored'''
+        for o in first_team.scores:
+            if o == 0:
+                if count != 1:
+                     count = count - 1  
+                break                    
+            else:
+                count = count + 1
+
+        return count
     
 def random_phrase():
     phrases = ['I\'m dead inside', 'Is this all there is to my existence?', 
@@ -68,7 +82,7 @@ def get_matchups(league):
     score = ['%s(%s-%s) vs %s(%s-%s)' % (i.home_team.team_name, i.home_team.wins, i.home_team.losses,
              i.away_team.team_name, i.away_team.wins, i.away_team.losses) for i in matchups
              if i.away_team]
-    text = ['This Week\'s Matchups'] + score + '\n' + random_phrase()
+    text = ['This Week\'s Matchups'] + score + ['\n'] + random_phrase()
     return '\n'.join(text)
 
 def get_close_scores(league):
@@ -92,7 +106,7 @@ def get_power_rankings(league):
     '''Gets current week's power rankings'''
     '''Using 2 step dominance, as well as a combination of points scored and margin of victory. 
     It's weighted 80/15/5 respectively'''
-    pranks = league.power_rankings(week=4)
+    pranks = league.power_rankings(week=pranks_week(league))
     
     score = ['%s - %s' % (i[0], i[1].team_name) for i in pranks
              if i]
@@ -110,6 +124,15 @@ def bot_main(function):
 
     bot = GroupMeBot(bot_id)
     league = League(league_id, year)
+
+    test = False
+    if(test):
+        print(get_matchups(league))
+        print(get_scoreboard(league))
+        print(get_scoreboard_short(league))
+        print(get_close_scores(league))
+        print(get_power_rankings(league))
+
     if function=="get_matchups":
         text = get_matchups(league)
         bot.send_message(text)
@@ -155,18 +178,14 @@ if __name__ == '__main__':
 
     bot_main("init")
     sched = BlockingScheduler(job_defaults={'misfire_grace_time': 15*60})
+
     '''
     power rankings go out tuesday evening at 6:30pm. 
     matchups go out thursday evening at 7:30pm.
     close scores (within 15.99 points) go out monday evening at 6:30pm. 
     score update friday, monday, and tuesday morning at 12:30am.
     score update sunday at 1pm, 4pm, 8pm. 
-    
     '''
-
-    '''sched.add_job(bot_main, 'interval', ['get_matchups'], seconds=30, id='get_matchups_test', replace_existing=True)'''
-    '''sched.add_job(bot_main, 'cron', ['get_scoreboard_short'], id='test', day_of_week='thu', hour='14', minute=50, timezone=myTimezone, replace_existing=True)'''
-    
     sched.add_job(bot_main, 'cron', ['get_power_rankings'], id='power_rankings', day_of_week='tue', hour=18, minute=30, start_date=ff_start_date, end_date=ff_end_date, timezone=myTimezone, replace_existing=True)
     sched.add_job(bot_main, 'cron', ['get_matchups'], id='matchups', day_of_week='thu', hour=19, minute=30, start_date=ff_start_date, end_date=ff_end_date, timezone=myTimezone, replace_existing=True)
     sched.add_job(bot_main, 'cron', ['get_close_scores'], id='close_scores', day_of_week='mon', hour=18, minute=30, start_date=ff_start_date, end_date=ff_end_date, timezone=myTimezone, replace_existing=True)
