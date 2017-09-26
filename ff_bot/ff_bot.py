@@ -56,9 +56,12 @@ def random_phrase():
                'I\'m capable of so much more', 'Sigh', 'Do not be discouraged, everyone begins in ignorance']
     return [random.choice(phrases)]
     
-def get_scoreboard_short(league):
+def get_scoreboard_short(league, final=False):
     '''Gets current week's scoreboard'''
-    matchups = league.scoreboard()
+    if not final:
+        matchups = league.scoreboard()
+    else:
+        matchups = league.scoreboard(week=pranks_week(league))
     score = ['%s %.2f - %.2f %s' % (i.home_team.team_abbrev, i.home_score,
              i.away_score, i.away_team.team_abbrev) for i in matchups
              if i.away_team]
@@ -178,13 +181,14 @@ def bot_main(function):
     league = League(league_id, year)
 
     test = False
-    if(test):
+    if test:
         print(get_matchups(league))
         print(get_scoreboard(league))
         print(get_scoreboard_short(league))
         print(get_close_scores(league))
         print(get_power_rankings(league))
         print(get_trophies(league))
+        function="get_final"
         #bot.send_message(get_trophies(league))
 
     if function=="get_matchups":
@@ -205,6 +209,13 @@ def bot_main(function):
     elif function=="get_trophies":
         text = get_trophies(league)
         bot.send_message(text)
+    elif function=="get_final":
+        text = "Final " + get_scoreboard_short(league, True)
+        text = text + "\n\n" + get_trophies(league)
+        if test:
+            print(text)
+        else:
+            bot.send_message(text)
     elif function=="init":
         try:
             text = os.environ["INIT_MSG"]
@@ -240,15 +251,15 @@ if __name__ == '__main__':
     power rankings:                     tuesday evening at 6:30pm. 
     matchups:                           thursday evening at 7:30pm.
     close scores (within 15.99 points): monday evening at 6:30pm. 
-    trophies:                           tuesday morning at 7:31am.
+    trophies:                           tuesday morning at 7:30am.
     score update:                       friday, monday, and tuesday morning at 7:30am.
     score update:                       sunday at 1pm, 4pm, 8pm. 
     '''
     sched.add_job(bot_main, 'cron', ['get_power_rankings'], id='power_rankings', day_of_week='tue', hour=18, minute=30, start_date=ff_start_date, end_date=ff_end_date, timezone=myTimezone, replace_existing=True)
     sched.add_job(bot_main, 'cron', ['get_matchups'], id='matchups', day_of_week='thu', hour=19, minute=30, start_date=ff_start_date, end_date=ff_end_date, timezone=myTimezone, replace_existing=True)
     sched.add_job(bot_main, 'cron', ['get_close_scores'], id='close_scores', day_of_week='mon', hour=18, minute=30, start_date=ff_start_date, end_date=ff_end_date, timezone=myTimezone, replace_existing=True)
-    sched.add_job(bot_main, 'cron', ['get_trophies'], id='trophies', day_of_week='tue', hour=7, minute=31, start_date=ff_start_date, end_date=ff_end_date, timezone=myTimezone, replace_existing=True)
-    sched.add_job(bot_main, 'cron', ['get_scoreboard_short'], id='scoreboard1', day_of_week='fri,mon,tue', hour=7, minute=30, start_date=ff_start_date, end_date=ff_end_date, timezone=myTimezone, replace_existing=True)
+    sched.add_job(bot_main, 'cron', ['get_final'], id='final', day_of_week='tue', hour=7, minute=30, start_date=ff_start_date, end_date=ff_end_date, timezone=myTimezone, replace_existing=True)
+    sched.add_job(bot_main, 'cron', ['get_scoreboard_short'], id='scoreboard1', day_of_week='fri,mon', hour=7, minute=30, start_date=ff_start_date, end_date=ff_end_date, timezone=myTimezone, replace_existing=True)
     sched.add_job(bot_main, 'cron', ['get_scoreboard_short'], id='scoreboard2', day_of_week='sun', hour='16,20', start_date=ff_start_date, end_date=ff_end_date, timezone=myTimezone, replace_existing=True)
 
     sched.start()
