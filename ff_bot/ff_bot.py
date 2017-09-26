@@ -160,13 +160,13 @@ def get_trophies(league):
                 ownerer_team_name = i.away_team.team_name
                 blown_out_team_name = i.home_team.team_name
 
-    low_score_str = 'Low score: ' + low_team_name + ' with ' + str(round(low_score,2)) + 'points.\n'
-    high_score_str = 'High score: ' + high_team_name + ' with ' + str(round(high_score,2)) + 'points.\n'
-    close_score_str = close_winner + ' squeeked out a win over ' + close_loser +  ' by a margin of ' + str(round(closest_score,2)) + '\n'
-    blowout_str = blown_out_team_name + ' blown out by ' + ownerer_team_name + ' by a margin of ' + str(round(biggest_blowout,2)) + '\n'
+    low_score_str = ['Low score: %s with %.2f points' % (low_team_name, low_score)]
+    high_score_str = ['High score: %s with %.2f points' % (high_team_name, high_score)]
+    close_score_str = ['%s barely beat %s by a margin of %.2f' % (close_winner, close_loser, closest_score)]
+    blowout_str = ['%s blown out by %s by a margin of %.2f' % (blown_out_team_name, ownerer_team_name, biggest_blowout)]
 
-    text = 'Trophies of the week:\n' + low_score_str + high_score_str + close_score_str + blowout_str
-    return text
+    text = ['Trophies of the week:'] + low_score_str + high_score_str + close_score_str + blowout_str
+    return '\n'.join(text)
 
 def bot_main(function):
     bot_id = os.environ["BOT_ID"]
