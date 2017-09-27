@@ -10,7 +10,7 @@ class GroupMeException(Exception):
     pass
 
 class GroupMeBot(object):
-    '''Creates GroupMe Bot to send messages'''
+    #Creates GroupMe Bot to send messages
     def __init__(self, bot_id):
         self.bot_id = bot_id
 
@@ -18,7 +18,7 @@ class GroupMeBot(object):
         return "GroupMeBot(%s)" % self.bot_id
 
     def send_message(self, text):
-        '''Sends a message to the chatroom'''
+        #Sends a message to the chatroom
         template = {
                     "bot_id": self.bot_id,
                     "text": text,
@@ -36,7 +36,7 @@ class GroupMeBot(object):
 def pranks_week(league):
         count = 1
         first_team = next(iter(league.teams or []), None)
-        '''Iterate through the first team's scores until you reach a week with 0 points scored'''
+        #Iterate through the first team's scores until you reach a week with 0 points scored
         for o in first_team.scores:
             if o == 0:
                 if count != 1:
@@ -57,7 +57,7 @@ def random_phrase():
     return [random.choice(phrases)]
     
 def get_scoreboard_short(league, final=False):
-    '''Gets current week's scoreboard'''
+    #Gets current week's scoreboard
     if not final:
         matchups = league.scoreboard()
     else:
@@ -69,7 +69,7 @@ def get_scoreboard_short(league, final=False):
     return '\n'.join(text)
 
 def get_scoreboard(league):
-    '''Gets current week's scoreboard'''
+    #Gets current week's scoreboard
     matchups = league.scoreboard()
     score = ['%s %.2f - %.2f %s' % (i.home_team.team_name, i.home_score,
              i.away_score, i.away_team.team_name) for i in matchups
@@ -78,10 +78,9 @@ def get_scoreboard(league):
     return '\n'.join(text)
 
 def get_matchups(league):
-    '''Gets current week's Matchups'''
+    #Gets current week's Matchups
     matchups = league.scoreboard()
-    
-    '''TODO: NORMALIZE STRING LENGTH'''
+
     score = ['%s(%s-%s) vs %s(%s-%s)' % (i.home_team.team_name, i.home_team.wins, i.home_team.losses,
              i.away_team.team_name, i.away_team.wins, i.away_team.losses) for i in matchups
              if i.away_team]
@@ -89,7 +88,7 @@ def get_matchups(league):
     return '\n'.join(text)
 
 def get_close_scores(league):
-    '''Gets current closest scores (15.999 points or closer)'''
+    #Gets current closest scores (15.999 points or closer)
     matchups = league.scoreboard()
     score = []
     
@@ -97,7 +96,6 @@ def get_close_scores(league):
         if i.away_team:
             diffScore = i.away_score - i.home_score
             if -16 < diffScore < 16:
-                '''TODO: NORMALIZE STRING LENGTH'''
                 score += ['%s %.2f - %.2f %s' % (i.home_team.team_abbrev, i.home_score,
                         i.away_score, i.away_team.team_abbrev)]
     if not score:
@@ -106,9 +104,9 @@ def get_close_scores(league):
     return '\n'.join(text)
 
 def get_power_rankings(league):
-    '''Gets current week's power rankings'''
-    '''Using 2 step dominance, as well as a combination of points scored and margin of victory.
-    It's weighted 80/15/5 respectively'''
+    #Gets current week's power rankings
+    #Using 2 step dominance, as well as a combination of points scored and margin of victory.
+    #It's weighted 80/15/5 respectively
     pranks = league.power_rankings(week=pranks_week(league))
     
     score = ['%s - %s' % (i[0], i[1].team_name) for i in pranks
@@ -117,7 +115,7 @@ def get_power_rankings(league):
     return '\n'.join(text)
 
 def get_trophies(league):
-    '''Gets trophies for highest score, lowest score, closest score, and biggest win'''
+    #Gets trophies for highest score, lowest score, closest score, and biggest win
     matchups = league.scoreboard(week=pranks_week(league))
     low_score = 9999
     low_team_name = ''
@@ -221,7 +219,7 @@ def bot_main(function):
             text = os.environ["INIT_MSG"]
             bot.send_message(text)
         except:
-            '''do nothing here, empty init message'''
+            #do nothing here, empty init message
             pass
     else:
         text = "Something happened. HALP"
@@ -247,14 +245,13 @@ if __name__ == '__main__':
     bot_main("init")
     sched = BlockingScheduler(job_defaults={'misfire_grace_time': 15*60})
 
-    '''
-    power rankings:                     tuesday evening at 6:30pm.
-    matchups:                           thursday evening at 7:30pm.
-    close scores (within 15.99 points): monday evening at 6:30pm.
-    trophies:                           tuesday morning at 7:30am.
-    score update:                       friday, monday, and tuesday morning at 7:30am.
-    score update:                       sunday at 1pm, 4pm, 8pm.
-    '''
+    #power rankings:                     tuesday evening at 6:30pm.
+    #matchups:                           thursday evening at 7:30pm.
+    #close scores (within 15.99 points): monday evening at 6:30pm.
+    #trophies:                           tuesday morning at 7:30am.
+    #score update:                       friday, monday, and tuesday morning at 7:30am.
+    #score update:                       sunday at 1pm, 4pm, 8pm.
+
     sched.add_job(bot_main, 'cron', ['get_power_rankings'], id='power_rankings', day_of_week='tue', hour=18, minute=30, start_date=ff_start_date, end_date=ff_end_date, timezone=myTimezone, replace_existing=True)
     sched.add_job(bot_main, 'cron', ['get_matchups'], id='matchups', day_of_week='thu', hour=19, minute=30, start_date=ff_start_date, end_date=ff_end_date, timezone=myTimezone, replace_existing=True)
     sched.add_job(bot_main, 'cron', ['get_close_scores'], id='close_scores', day_of_week='mon', hour=18, minute=30, start_date=ff_start_date, end_date=ff_end_date, timezone=myTimezone, replace_existing=True)
