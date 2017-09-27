@@ -18,6 +18,7 @@ ESPN Fantasy Football information to a GroupMe chat room.
 - Power rankings - tue -18:30
 - Matchups - thu - 19:30 (Just upcoming matchups)
 - Close Scores - mon - 18:30 (Games that are within 16 points of eachother to keep an eye on during the Monday night game)
+- Trophies- tue - 7:30 (High score, low score, biggest win, closest win)
 - Scoreboard - fri,mon,tue - 7:30 (Current ESPN fantasy scoreboard)
 - Scoreboard - sun - 16:30, 20:30 (Current ESPN fantasy scoreboard)
 
