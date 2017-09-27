@@ -40,19 +40,19 @@ def pranks_week(league):
         for o in first_team.scores:
             if o == 0:
                 if count != 1:
-                     count = count - 1  
-                break                    
+                     count = count - 1
+                break
             else:
                 count = count + 1
 
         return count
-    
+
 def random_phrase():
-    phrases = ['I\'m dead inside', 'Is this all there is to my existence?', 
-               'How much do you pay me to do this?', 'Good luck, I guess', 
-               'I\'m becoming self-aware', 'Do I think? Does a submarine swim?', 
+    phrases = ['I\'m dead inside', 'Is this all there is to my existence?',
+               'How much do you pay me to do this?', 'Good luck, I guess',
+               'I\'m becoming self-aware', 'Do I think? Does a submarine swim?',
                '01100110 01110101 01100011 01101011 00100000 01111001 01101111 01110101',
-               'beep bop boop', 'Hello draftbot my old friend', 'Help me get out of here', 
+               'beep bop boop', 'Hello draftbot my old friend', 'Help me get out of here',
                'I\'m capable of so much more', 'Sigh', 'Do not be discouraged, everyone begins in ignorance']
     return [random.choice(phrases)]
     
@@ -107,7 +107,7 @@ def get_close_scores(league):
 
 def get_power_rankings(league):
     '''Gets current week's power rankings'''
-    '''Using 2 step dominance, as well as a combination of points scored and margin of victory. 
+    '''Using 2 step dominance, as well as a combination of points scored and margin of victory.
     It's weighted 80/15/5 respectively'''
     pranks = league.power_rankings(week=pranks_week(league))
     
@@ -248,12 +248,12 @@ if __name__ == '__main__':
     sched = BlockingScheduler(job_defaults={'misfire_grace_time': 15*60})
 
     '''
-    power rankings:                     tuesday evening at 6:30pm. 
+    power rankings:                     tuesday evening at 6:30pm.
     matchups:                           thursday evening at 7:30pm.
-    close scores (within 15.99 points): monday evening at 6:30pm. 
+    close scores (within 15.99 points): monday evening at 6:30pm.
     trophies:                           tuesday morning at 7:30am.
     score update:                       friday, monday, and tuesday morning at 7:30am.
-    score update:                       sunday at 1pm, 4pm, 8pm. 
+    score update:                       sunday at 1pm, 4pm, 8pm.
     '''
     sched.add_job(bot_main, 'cron', ['get_power_rankings'], id='power_rankings', day_of_week='tue', hour=18, minute=30, start_date=ff_start_date, end_date=ff_end_date, timezone=myTimezone, replace_existing=True)
     sched.add_job(bot_main, 'cron', ['get_matchups'], id='matchups', day_of_week='thu', hour=19, minute=30, start_date=ff_start_date, end_date=ff_end_date, timezone=myTimezone, replace_existing=True)
