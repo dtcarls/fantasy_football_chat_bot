@@ -91,7 +91,7 @@ def get_close_scores(league):
     #Gets current closest scores (15.999 points or closer)
     matchups = league.scoreboard()
     score = []
-    
+
     for i in matchups:
         if i.away_team:
             diffScore = i.away_score - i.home_score
