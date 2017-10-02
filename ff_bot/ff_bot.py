@@ -55,7 +55,7 @@ def random_phrase():
                'beep bop boop', 'Hello draftbot my old friend', 'Help me get out of here',
                'I\'m capable of so much more', 'Sigh', 'Do not be discouraged, everyone begins in ignorance']
     return [random.choice(phrases)]
-    
+
 def get_scoreboard_short(league, final=False):
     #Gets current week's scoreboard
     if not final:
@@ -172,13 +172,13 @@ def bot_main(function):
 
     try:
         year = os.environ["LEAGUE_YEAR"]
-    except:
+    except KeyError:
         year=2017
 
     bot = GroupMeBot(bot_id)
     league = League(league_id, year)
 
-    test = False
+    test = True
     if test:
         print(get_matchups(league))
         print(get_scoreboard(league))
@@ -218,7 +218,7 @@ def bot_main(function):
         try:
             text = os.environ["INIT_MSG"]
             bot.send_message(text)
-        except:
+        except KeyError:
             #do nothing here, empty init message
             pass
     else:
@@ -229,17 +229,17 @@ def bot_main(function):
 if __name__ == '__main__':
     try:
         ff_start_date = os.environ["START_DATE"]
-    except:
+    except KeyError:
         ff_start_date='2017-09-05'
 
     try:
         ff_end_date = os.environ["END_DATE"]
-    except:
+    except KeyError:
         ff_end_date='2017-12-26'
 
     try:
         myTimezone = os.environ["TIMEZONE"]
-    except:
+    except KeyError:
         myTimezone='America/New_York'
 
     bot_main("init")
@@ -252,11 +252,23 @@ if __name__ == '__main__':
     #score update:                       friday, monday, and tuesday morning at 7:30am.
     #score update:                       sunday at 1pm, 4pm, 8pm.
 
-    sched.add_job(bot_main, 'cron', ['get_power_rankings'], id='power_rankings', day_of_week='tue', hour=18, minute=30, start_date=ff_start_date, end_date=ff_end_date, timezone=myTimezone, replace_existing=True)
-    sched.add_job(bot_main, 'cron', ['get_matchups'], id='matchups', day_of_week='thu', hour=19, minute=30, start_date=ff_start_date, end_date=ff_end_date, timezone=myTimezone, replace_existing=True)
-    sched.add_job(bot_main, 'cron', ['get_close_scores'], id='close_scores', day_of_week='mon', hour=18, minute=30, start_date=ff_start_date, end_date=ff_end_date, timezone=myTimezone, replace_existing=True)
-    sched.add_job(bot_main, 'cron', ['get_final'], id='final', day_of_week='tue', hour=7, minute=30, start_date=ff_start_date, end_date=ff_end_date, timezone=myTimezone, replace_existing=True)
-    sched.add_job(bot_main, 'cron', ['get_scoreboard_short'], id='scoreboard1', day_of_week='fri,mon', hour=7, minute=30, start_date=ff_start_date, end_date=ff_end_date, timezone=myTimezone, replace_existing=True)
-    sched.add_job(bot_main, 'cron', ['get_scoreboard_short'], id='scoreboard2', day_of_week='sun', hour='16,20', start_date=ff_start_date, end_date=ff_end_date, timezone=myTimezone, replace_existing=True)
+    sched.add_job(bot_main, 'cron', ['get_power_rankings'], id='power_rankings',
+        day_of_week='tue', hour=18, minute=30, start_date=ff_start_date, end_date=ff_end_date,
+        timezone=myTimezone, replace_existing=True)
+    sched.add_job(bot_main, 'cron', ['get_matchups'], id='matchups',
+        day_of_week='thu', hour=19, minute=30, start_date=ff_start_date, end_date=ff_end_date,
+        timezone=myTimezone, replace_existing=True)
+    sched.add_job(bot_main, 'cron', ['get_close_scores'], id='close_scores',
+        day_of_week='mon', hour=18, minute=30, start_date=ff_start_date, end_date=ff_end_date,
+        timezone=myTimezone, replace_existing=True)
+    sched.add_job(bot_main, 'cron', ['get_final'], id='final',
+        day_of_week='tue', hour=7, minute=30, start_date=ff_start_date, end_date=ff_end_date,
+        timezone=myTimezone, replace_existing=True)
+    sched.add_job(bot_main, 'cron', ['get_scoreboard_short'], id='scoreboard1',
+        day_of_week='fri,mon', hour=7, minute=30, start_date=ff_start_date, end_date=ff_end_date,
+        timezone=myTimezone, replace_existing=True)
+    sched.add_job(bot_main, 'cron', ['get_scoreboard_short'], id='scoreboard2',
+        day_of_week='sun', hour='16,20', start_date=ff_start_date, end_date=ff_end_date,
+        timezone=myTimezone, replace_existing=True)
 
     sched.start()
