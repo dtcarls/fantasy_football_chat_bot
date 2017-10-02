@@ -38,6 +38,6 @@
     "INIT_MSG": {
       "description": "Bot Init Message",
       "value": "Hi"
-    },
+    }
   }
 }
