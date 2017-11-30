@@ -108,7 +108,7 @@ def get_power_rankings(league):
     #Using 2 step dominance, as well as a combination of points scored and margin of victory.
     #It's weighted 80/15/5 respectively
     pranks = league.power_rankings(week=pranks_week(league))
-    
+
     score = ['%s - %s' % (i[0], i[1].team_name) for i in pranks
              if i]
     text = ['This Week\'s Power Rankings'] + score
