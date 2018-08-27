@@ -173,7 +173,7 @@ def bot_main(function):
     try:
         year = os.environ["LEAGUE_YEAR"]
     except KeyError:
-        year=2017
+        year=2018
 
     bot = GroupMeBot(bot_id)
     league = League(league_id, year)
@@ -230,12 +230,12 @@ if __name__ == '__main__':
     try:
         ff_start_date = os.environ["START_DATE"]
     except KeyError:
-        ff_start_date='2017-09-05'
+        ff_start_date='2018-09-05'
 
     try:
         ff_end_date = os.environ["END_DATE"]
     except KeyError:
-        ff_end_date='2017-12-26'
+        ff_end_date='201-12-26'
 
     try:
         myTimezone = os.environ["TIMEZONE"]
