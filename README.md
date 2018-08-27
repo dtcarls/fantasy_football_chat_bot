@@ -56,9 +56,9 @@ This gives an overview of all the features of `ff_bot`
 
 - BOT_ID: This is your Bot ID from the GroupMe developers page (REQUIRED)
 - LEAGUE_ID: This is your ESPN league id (REQUIRED)
-- START_DATE: This is when the bot will start paying attention and sending messages to GroupMe. (2017-09-05 by default)
-- END_DATE: This is when the bot will stop paying attention and stop sending messages to GroupMe. (2017-12-26 by default)
-- LEAGUE_YEAR: ESPN League year to look at (2017 by default)
+- START_DATE: This is when the bot will start paying attention and sending messages to GroupMe. (2018-09-05 by default)
+- END_DATE: This is when the bot will stop paying attention and stop sending messages to GroupMe. (2018-12-26 by default)
+- LEAGUE_YEAR: ESPN League year to look at (2018 by default)
 - TIMEZONE: The timezone that the messages will look to send in. (America/New_York by default)
 - INIT_MSG: The message that the bot will say when it is started (“Hai” by default, can be blank for no message)
 
@@ -155,9 +155,9 @@ Note: App will restart when you change any variable so your chat room may be sem
 
 - BOT_ID: This is your Bot ID from the GroupMe developers page (REQUIRED)
 - LEAGUE_ID: This is your ESPN league id (REQUIRED)
-- START_DATE: This is when the bot will start paying attention and sending messages to GroupMe. (2017-09-05 by default)
-- END_DATE: This is when the bot will stop paying attention and stop sending messages to GroupMe. (2017-12-26 by default)
-- LEAGUE_YEAR: ESPN League year to look at (2017 by default)
+- START_DATE: This is when the bot will start paying attention and sending messages to GroupMe. (2018-09-05 by default)
+- END_DATE: This is when the bot will stop paying attention and stop sending messages to GroupMe. (2018-12-26 by default)
+- LEAGUE_YEAR: ESPN League year to look at (2018 by default)
 - TIMEZONE: The timezone that the messages will look to send in. (America/New_York by default)
 - INIT_MSG: The message that the bot will say when it is started (“Hai” by default, can be blank for no message)
 
