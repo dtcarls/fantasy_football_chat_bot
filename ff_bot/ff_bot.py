@@ -9,6 +9,8 @@ from espnff import League
 class GroupMeException(Exception):
     pass
 
+class SlackException(Exception):
+
 class GroupMeBot(object):
     #Creates GroupMe Bot to send messages
     def __init__(self, bot_id):
@@ -26,12 +28,39 @@ class GroupMeBot(object):
                     }
 
         headers = {'content-type': 'application/json'}
-        r = requests.post("https://api.groupme.com/v3/bots/post",
-                          data=json.dumps(template), headers=headers)
-        if r.status_code != 202:
-            raise GroupMeException('Invalid BOT_ID')
 
-        return r
+        if self.bot_id != 1:
+            r = requests.post("https://api.groupme.com/v3/bots/post",
+                              data=json.dumps(template), headers=headers)
+            if r.status_code != 202:
+                raise GroupMeException('Invalid BOT_ID')
+
+            return r
+
+class SlackBot(object):
+    #Creates GroupMe Bot to send messages
+    def __init__(self, webhook_url):
+        self.webhook_url = webhook_url
+
+    def __repr__(self):
+        return "Slack Webhook Url(%s)" % self.webhook_url
+
+    def send_message(self, text):
+        #Sends a message to the chatroom
+        template = {
+                    "text":"Hello, World!"
+                    }
+
+        headers = {'content-type': 'application/json'}
+
+        if self.webhook_url != 1:
+            r = requests.post(self.webhook_url,
+                              data=json.dumps(template), headers=headers)
+
+            if r.status_code != 200:
+                raise SlackException('WEBHOOK_URL')
+
+            return r
 
 def pranks_week(league):
         count = 1
@@ -168,6 +197,7 @@ def get_trophies(league):
 
 def bot_main(function):
     bot_id = os.environ["BOT_ID"]
+    webhook_url = os.environ["WEBHOOK_URL"]
     league_id = os.environ["LEAGUE_ID"]
 
     try:
@@ -176,6 +206,7 @@ def bot_main(function):
         year=2018
 
     bot = GroupMeBot(bot_id)
+    slack_bot = SlackBot(webhook_url)
     league = League(league_id, year)
 
     test = False
@@ -192,21 +223,27 @@ def bot_main(function):
     if function=="get_matchups":
         text = get_matchups(league)
         bot.send_message(text)
+        slack_bot.send_message(text)
     elif function=="get_scoreboard":
         text = get_scoreboard(league)
         bot.send_message(text)
+        slack_bot.send_message(text)
     elif function=="get_scoreboard_short":
         text = get_scoreboard_short(league)
         bot.send_message(text)
+        slack_bot.send_message(text)
     elif function=="get_close_scores":
         text = get_close_scores(league)
         bot.send_message(text)
+        slack_bot.send_message(text)
     elif function=="get_power_rankings":
         text = get_power_rankings(league)
         bot.send_message(text)
+        slack_bot.send_message(text)
     elif function=="get_trophies":
         text = get_trophies(league)
         bot.send_message(text)
+        slack_bot.send_message(text)
     elif function=="get_final":
         text = "Final " + get_scoreboard_short(league, True)
         text = text + "\n\n" + get_trophies(league)
@@ -214,16 +251,19 @@ def bot_main(function):
             print(text)
         else:
             bot.send_message(text)
+            slack_bot.send_message(text)
     elif function=="init":
         try:
             text = os.environ["INIT_MSG"]
             bot.send_message(text)
+            slack_bot.send_message(text)
         except KeyError:
             #do nothing here, empty init message
             pass
     else:
         text = "Something happened. HALP"
         bot.send_message(text)
+        slack_bot.send_message(text)
 
 
 if __name__ == '__main__':
@@ -253,7 +293,7 @@ if __name__ == '__main__':
     #score update:                       sunday at 1pm, 4pm, 8pm.
 
     sched.add_job(bot_main, 'cron', ['get_power_rankings'], id='power_rankings',
-        day_of_week='tue', hour=18, minute=30, start_date=ff_start_date, end_date=ff_end_date,
+        day_of_week='mon', hour=19, minute=47, start_date=ff_start_date, end_date=ff_end_date,
         timezone=myTimezone, replace_existing=True)
     sched.add_job(bot_main, 'cron', ['get_matchups'], id='matchups',
         day_of_week='thu', hour=19, minute=30, start_date=ff_start_date, end_date=ff_end_date,
