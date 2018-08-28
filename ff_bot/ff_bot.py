@@ -10,6 +10,7 @@ class GroupMeException(Exception):
     pass
 
 class SlackException(Exception):
+    pass
 
 class GroupMeBot(object):
     #Creates GroupMe Bot to send messages
@@ -29,7 +30,7 @@ class GroupMeBot(object):
 
         headers = {'content-type': 'application/json'}
 
-        if self.bot_id != 1:
+        if self.bot_id != "1":
             r = requests.post("https://api.groupme.com/v3/bots/post",
                               data=json.dumps(template), headers=headers)
             if r.status_code != 202:
@@ -47,13 +48,14 @@ class SlackBot(object):
 
     def send_message(self, text):
         #Sends a message to the chatroom
+        message = "```{0}```".format(text)
         template = {
-                    "text":"Hello, World!"
+                    "text":message
                     }
 
         headers = {'content-type': 'application/json'}
 
-        if self.webhook_url != 1:
+        if self.webhook_url != "1":
             r = requests.post(self.webhook_url,
                               data=json.dumps(template), headers=headers)
 
@@ -293,7 +295,7 @@ if __name__ == '__main__':
     #score update:                       sunday at 1pm, 4pm, 8pm.
 
     sched.add_job(bot_main, 'cron', ['get_power_rankings'], id='power_rankings',
-        day_of_week='mon', hour=19, minute=47, start_date=ff_start_date, end_date=ff_end_date,
+        day_of_week='mon', hour=19, minute=59, start_date=ff_start_date, end_date=ff_end_date,
         timezone=myTimezone, replace_existing=True)
     sched.add_job(bot_main, 'cron', ['get_matchups'], id='matchups',
         day_of_week='thu', hour=19, minute=30, start_date=ff_start_date, end_date=ff_end_date,
