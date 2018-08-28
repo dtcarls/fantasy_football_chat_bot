@@ -12,7 +12,7 @@ class SlackTestCase(unittest.TestCase):
 
     def setUp(self):
         self.url = "https://hooks.slack.com/services/A1B2C3/ABC1ABC2/abcABC1abcABC2"
-        self.test_bot = SlackBot(url)
+        self.test_bot = SlackBot(self.url)
         self.test_text = "This is a test."
 
     @requests_mock.Mocker()
