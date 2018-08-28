@@ -235,7 +235,7 @@ if __name__ == '__main__':
     try:
         ff_end_date = os.environ["END_DATE"]
     except KeyError:
-        ff_end_date='201-12-26'
+        ff_end_date='2018-12-26'
 
     try:
         myTimezone = os.environ["TIMEZONE"]
