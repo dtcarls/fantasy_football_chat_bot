@@ -147,13 +147,6 @@ Go to https://api.slack.com/apps/new
 
 Name the app, and choose the intended workspace from the dropdown.
 
-///Select the Bot Users section on the side.
-
-![](https://i.imgur.com/pGy6xvK.png)
-
-Select Add a Bot User, set the display name and username, choose if you want
-to show the bot as always offline or not, and then press Add Bot User.///
-
 Select the Incoming Webhooks section on the side.
 
 ![](https://i.imgur.com/ziRQCVP.png)
