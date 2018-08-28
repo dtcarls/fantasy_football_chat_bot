@@ -25,5 +25,5 @@ class SlackTestCase(unittest.TestCase):
     def test_bad_bot_id(self, m):
         '''Does the expected error raise when a bot id is incorrect?'''
         m.post(self.url, status_code=404)
-        with self.assertRaises(GroupMeException):
+        with self.assertRaises(SlackException):
             self.test_bot.send_message(self.test_text)
