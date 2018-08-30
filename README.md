@@ -205,3 +205,9 @@ You should see something like below. Click the pencil on the right and toggle th
 You're done! You now have a fully featured GroupMe/Slack chat bot for ESPN leagues! If you have an INIT_MSG you will see it exclaimed in your GroupMe or Slack chat room.
 
 Unfortunately to do auto deploys of the latest version you need admin access to the repository on git. You can check for updates on the github page (https://github.com/dtcarls/ff_bot/commits/master) and click the deploy button again; however, this will deploy a new instance and the variables will need to be edited again.
+
+Like the bot? Consider making a donation
+------
+* BTC: 3C8SEcDh52iDSYQY55kwELrNWoQRMkXLCR
+* ETH: 0xA098c4e8CC1c12422d5B34d6454133190CDdCAC3
+* LTC: MHx74YbrHE592ePBbdQ4cL9ZQC15xaAjtM
