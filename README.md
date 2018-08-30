@@ -9,8 +9,8 @@ Shoutout to /u/rbart65 on reddit and rbarton65 on github for creating the origin
 
 # ESPN Fantasy Football GroupMe Bot
 
-This package creates a docker container that runs a GroupMe chat bot to send 
-ESPN Fantasy Football information to a GroupMe chat room.
+This package creates a docker container that runs a GroupMe or Slack chat bot to send
+ESPN Fantasy Football information to a GroupMe or Slack chat room.
 
 **What does this do?**
 
@@ -24,7 +24,7 @@ ESPN Fantasy Football information to a GroupMe chat room.
 
 ## Getting Started
 
-These instructions will get you a copy of the project up and running 
+These instructions will get you a copy of the project up and running
 on your local machine for development and testing purposes.
 
 ### Installing
@@ -54,18 +54,22 @@ This gives an overview of all the features of `ff_bot`
 
 ### Environment Variables
 
-- BOT_ID: This is your Bot ID from the GroupMe developers page (REQUIRED)
+- BOT_ID: This is your Bot ID from the GroupMe developers page (REQUIRED IF USING GROUPME)
+- WEBHOOK_URL: This is your Webhook URL from the Slack App page (REQUIRED IF USING SLACK)
 - LEAGUE_ID: This is your ESPN league id (REQUIRED)
-- START_DATE: This is when the bot will start paying attention and sending messages to GroupMe. (2017-09-05 by default)
-- END_DATE: This is when the bot will stop paying attention and stop sending messages to GroupMe. (2017-12-26 by default)
-- LEAGUE_YEAR: ESPN League year to look at (2017 by default)
+- START_DATE: This is when the bot will start paying attention and sending messages to GroupMe or Slack. (2018-09-05 by default)
+- END_DATE: This is when the bot will stop paying attention and stop sending messages to GroupMe or Slack. (2018-12-26 by default)
+- LEAGUE_YEAR: ESPN League year to look at (2018 by default)
 - TIMEZONE: The timezone that the messages will look to send in. (America/New_York by default)
 - INIT_MSG: The message that the bot will say when it is started (“Hai” by default, can be blank for no message)
 
 ### Running with Docker
 
+Use BOT_ID if using Groupme, and WEBHOOK_URL if using Slack (or both to get messages in both places)
+
 ```bash
 >>> export BOT_ID=[enter your GroupMe Bot ID]
+>>> export WEBHOOK_URL=[enter your Webhook URL]
 >>> export LEAGUE_ID=[enter ESPN league ID]
 >>> export LEAGUE_YEAR=[enter league year]
 >>> cd ff_bot
@@ -78,8 +82,11 @@ ff_bot
 
 ### Running without Docker
 
+Use BOT_ID if using Groupme, and WEBHOOK_URL if using Slack (or both to get messages in both places)
+
 ```bash
 >>> export BOT_ID=[enter your GroupMe Bot ID]
+>>> export WEBHOOK_URL=[enter your Webhook URL]
 >>> export LEAGUE_ID=[enter ESPN league ID]
 >>> export LEAGUE_YEAR=[enter league year]
 >>> cd ff_bot
@@ -95,7 +102,7 @@ you can run these tests by changing the directory to the `ff_bot` directory and 
 python3 setup.py test
 ```
 
-## Setting up GroupMe, and deploying app in Heroku
+## Setting up GroupMe or Slack, and deploying app in Heroku
 
 **Do not deploy 2 of the same bot in the same chat. In general, you should let your commissioner do the setup**
 
@@ -128,6 +135,35 @@ Side note: If you use the bot id depicted in the page you will spam an empty cha
 
 ![](https://i.imgur.com/k65EZFJ.png)
 
+### Slack setup
+
+Go to https://slack.com/signin and sign in to the workspace the bot will be in
+
+If you don't have one for your league already, create a new League Channel
+
+Next we will setup the bot for Slack
+
+Go to https://api.slack.com/apps/new
+
+Name the app, and choose the intended workspace from the dropdown.
+
+Select the Incoming Webhooks section on the side.
+
+![](https://i.imgur.com/ziRQCVP.png)
+
+Change the toggle from Off to On.
+
+Select Add New Webhook to Workspace
+
+![](https://i.imgur.com/tJRRrfz.png)
+
+In the Post to dropdown, select the channel you want to send messages to, then
+select Authorize.
+
+This page is important as you will need the "Webhook URL" on this page.
+
+![](https://i.imgur.com/mmzhDS0.png)
+
 ### Heroku setup
 
 Heroku is what we will be using to host the chat bot (for free)
@@ -153,11 +189,12 @@ Now you will need to setup your environment variables so that it works for your 
 Now we will need to edit these variables (click the pencil to the right of the variable to modify)
 Note: App will restart when you change any variable so your chat room may be semi-spammed with the init message of "Hai" you can change the INIT_MSG variable to be blank to have no init message. It should also be noted that Heroku seems to restart the app about once a day
 
-- BOT_ID: This is your Bot ID from the GroupMe developers page (REQUIRED)
+- BOT_ID: This is your Bot ID from the GroupMe developers page (REQUIRED IF USING GROUPME)
+- WEBHOOK_URL: This is your Webhook URL from the Slack App page (REQUIRED IF USING SLACK)
 - LEAGUE_ID: This is your ESPN league id (REQUIRED)
-- START_DATE: This is when the bot will start paying attention and sending messages to GroupMe. (2017-09-05 by default)
-- END_DATE: This is when the bot will stop paying attention and stop sending messages to GroupMe. (2017-12-26 by default)
-- LEAGUE_YEAR: ESPN League year to look at (2017 by default)
+- START_DATE: This is when the bot will start paying attention and sending messages to GroupMe or Slack. (2018-09-05 by default)
+- END_DATE: This is when the bot will stop paying attention and stop sending messages to GroupMe or Slack. (2018-12-26 by default)
+- LEAGUE_YEAR: ESPN League year to look at (2018 by default)
 - TIMEZONE: The timezone that the messages will look to send in. (America/New_York by default)
 - INIT_MSG: The message that the bot will say when it is started (“Hai” by default, can be blank for no message)
 
@@ -165,6 +202,6 @@ After you have setup your variables you will need to turn it on. Navigate to the
 You should see something like below. Click the pencil on the right and toggle the buton so it is blue like depicted and click "Confirm."
 ![](https://i.imgur.com/J6bpV2I.png)
 
-You're done! You now have a fully featured GroupMe chat bot for ESPN leagues! If you have an INIT_MSG you will see it exclaimed in your GroupMe chat room.
+You're done! You now have a fully featured GroupMe/Slack chat bot for ESPN leagues! If you have an INIT_MSG you will see it exclaimed in your GroupMe or Slack chat room.
 
 Unfortunately to do auto deploys of the latest version you need admin access to the repository on git. You can check for updates on the github page (https://github.com/dtcarls/ff_bot/commits/master) and click the deploy button again; however, this will deploy a new instance and the variables will need to be edited again.

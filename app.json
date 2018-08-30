@@ -15,13 +15,17 @@
       "description": "GroupMe Bot ID",
       "value": "1"
     },
+    "WEBHOOK_URL": {
+      "description": "Slack Webhook URL",
+      "value": "1"
+    },
     "LEAGUE_ID": {
       "description": "ESPN League ID",
       "value": "1"
     },
     "LEAGUE_YEAR": {
       "description": "ESPN League Year",
-      "value": "2017"
+      "value": "2018"
     },
     "TIMEZONE": {
       "description": "League timezone for sending messages",
@@ -29,11 +33,11 @@
     },
     "START_DATE": {
       "description": "Season Start Date",
-      "value": "2017-09-05"
+      "value": "2018-09-05"
     },
     "END_DATE": {
       "description": "Season End Date",
-      "value": "2017-12-26"
+      "value": "2018-12-26"
     },
     "INIT_MSG": {
       "description": "Bot Init Message",
