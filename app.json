@@ -15,6 +15,10 @@
       "description": "GroupMe Bot ID",
       "value": "1"
     },
+    "WEBHOOK_URL": {
+      "description": "Slack Webhook URL",
+      "value": "1"
+    },
     "LEAGUE_ID": {
       "description": "ESPN League ID",
       "value": "1"
