@@ -198,8 +198,16 @@ def get_trophies(league):
     return '\n'.join(text)
 
 def bot_main(function):
-    bot_id = os.environ["BOT_ID"]
-    webhook_url = os.environ["WEBHOOK_URL"]
+    try:
+        bot_id = os.environ["BOT_ID"]
+    except KeyError:
+        bot_id = 1
+
+    try:
+        webhook_url = os.environ["WEBHOOK_URL"]
+    except KeyError:
+        webhook_url = 1
+
     league_id = os.environ["LEAGUE_ID"]
 
     try:
@@ -221,6 +229,8 @@ def bot_main(function):
         print(get_trophies(league))
         function="get_final"
         #bot.send_message(get_trophies(league))
+        bot.send_message("test complete")
+        slack_bot.send_message("test complete")
 
     if function=="get_matchups":
         text = get_matchups(league)
@@ -277,7 +287,7 @@ if __name__ == '__main__':
     try:
         ff_end_date = os.environ["END_DATE"]
     except KeyError:
-        ff_end_date='201-12-26'
+        ff_end_date='2018-12-26'
 
     try:
         myTimezone = os.environ["TIMEZONE"]
