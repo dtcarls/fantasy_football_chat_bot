@@ -30,7 +30,7 @@ class GroupMeBot(object):
 
         headers = {'content-type': 'application/json'}
 
-        if self.bot_id != "1":
+        if self.bot_id not in (1, "1"):
             r = requests.post("https://api.groupme.com/v3/bots/post",
                               data=json.dumps(template), headers=headers)
             if r.status_code != 202:
@@ -55,7 +55,7 @@ class SlackBot(object):
 
         headers = {'content-type': 'application/json'}
 
-        if self.webhook_url != "1":
+        if self.webhook_url not in (1, "1"):
             r = requests.post(self.webhook_url,
                               data=json.dumps(template), headers=headers)
 
