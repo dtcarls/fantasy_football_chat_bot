@@ -173,11 +173,19 @@ Go to or create a discord server to receive messages in
 
 Open the server settings
 
+![](https://i.imgur.com/bDk2ttJ.png)
+
 Go to Webhooks
+
+![](https://i.imgur.com/mfFHGbT.png)
 
 Create a webhook, give it a name and pick which channel to receive messages in
 
+![](https://i.imgur.com/NAJLv6D.png)
+
 Save the "Webhook URL" on this page
+
+![](https://i.imgur.com/U4MKZSY.png)
 
 ### Heroku setup
 
