@@ -15,8 +15,12 @@
       "description": "GroupMe Bot ID",
       "value": "1"
     },
-    "WEBHOOK_URL": {
+    "SLACK_WEBHOOK_URL": {
       "description": "Slack Webhook URL",
+      "value": "1"
+    },
+    "DISCORD_WEBHOOK_URL": {
+      "description": "Discord Webhook URL",
       "value": "1"
     },
     "LEAGUE_ID": {
