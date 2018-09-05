@@ -251,7 +251,7 @@ def bot_main(function):
 
     bot = GroupMeBot(bot_id)
     slack_bot = SlackBot(slack_webhook_url)
-    discord_bot = DiscrodBot(discord_webhook_url)
+    discord_bot = DiscordBot(discord_webhook_url)
     league = League(league_id, year)
 
     test = False
