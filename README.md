@@ -7,7 +7,7 @@ Shoutout to /u/rbart65 on reddit and rbarton65 on github for creating the origin
 
 [![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
 
-# ESPN Fantasy Football GroupMe Bot
+# ESPN Fantasy Football GroupMe Slack and Discord Chat Bot
 
 This package creates a docker container that runs a GroupMe, Discord, or Slack chat bot to send
 ESPN Fantasy Football information to a GroupMe, Discord or Slack chat room.
