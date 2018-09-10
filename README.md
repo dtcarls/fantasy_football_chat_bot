@@ -15,12 +15,12 @@ ESPN Fantasy Football information to a GroupMe or Slack chat room.
 **What does this do?**
 
 - Sends out the following messages on this schedule:
-- Power rankings - tue -18:30
-- Matchups - thu - 19:30 (Just upcoming matchups)
-- Close Scores - mon - 18:30 (Games that are within 16 points of eachother to keep an eye on during the Monday night game)
-- Trophies- tue - 7:30 (High score, low score, biggest win, closest win)
-- Scoreboard - fri,mon,tue - 7:30 (Current ESPN fantasy scoreboard)
-- Scoreboard - sun - 16:30, 20:30 (Current ESPN fantasy scoreboard)
+- Power rankings - Tue -18:30
+- Matchups - Thu - 19:30 (Just upcoming matchups)
+- Close Scores - Mon - 18:30 (Games that are within 16 points of eachother to keep an eye on during the Monday night game)
+- Trophies- Tue - 7:30 (High score, low score, biggest win, closest win)
+- Scoreboard - Fri,Mon,Tue - 7:30 (Current ESPN fantasy scoreboard)
+- Scoreboard - Sun - 16:00, 20:00 (Current ESPN fantasy scoreboard)
 
 ## Getting Started
 
