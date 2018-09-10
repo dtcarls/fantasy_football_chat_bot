@@ -267,8 +267,9 @@ def bot_main(function):
     elif function=="init":
         try:
             text = os.environ["INIT_MSG"]
-            bot.send_message(text)
-            slack_bot.send_message(text)
+            if(text!=''):
+                bot.send_message(text)
+                slack_bot.send_message(text)
         except KeyError:
             #do nothing here, empty init message
             pass
