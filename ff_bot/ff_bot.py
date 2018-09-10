@@ -33,7 +33,7 @@ class GroupMeBot(object):
 
         headers = {'content-type': 'application/json'}
 
-        if self.bot_id not in (1, "1"):
+        if self.bot_id not in (1, "1", ''):
             r = requests.post("https://api.groupme.com/v3/bots/post",
                               data=json.dumps(template), headers=headers)
             if r.status_code != 202:
@@ -58,7 +58,7 @@ class SlackBot(object):
 
         headers = {'content-type': 'application/json'}
 
-        if self.webhook_url not in (1, "1"):
+        if self.webhook_url not in (1, "1", ''):
             r = requests.post(self.webhook_url,
                               data=json.dumps(template), headers=headers)
 
@@ -84,7 +84,7 @@ class DiscordBot(object):
 
         headers = {'content-type': 'application/json'}
 
-        if self.webhook_url not in (1, "1"):
+        if self.webhook_url not in (1, "1", ''):
             r = requests.post(self.webhook_url,
                               data=json.dumps(template), headers=headers)
 
@@ -310,9 +310,10 @@ def bot_main(function):
     elif function=="init":
         try:
             text = os.environ["INIT_MSG"]
-            bot.send_message(text)
-            slack_bot.send_message(text)
-            discord_bot.send_message(text)
+            if text != '':
+                bot.send_message(text)
+                slack_bot.send_message(text)
+                discord_bot.send_message(text)
         except KeyError:
             #do nothing here, empty init message
             pass
