@@ -249,10 +249,28 @@ def bot_main(function):
     except KeyError:
         year=2019
 
+    try:
+        swid = os.environ["SWID"]
+    except KeyError:
+        swid='{1}'
+
+    if swid.find("{",0) == -1:
+        swid = "{" + swid
+    if swid.find("}",-1) == -1:
+        swid = swid + "}"
+
+    try:
+        espn_s2 = os.environ["ESPN_S2"]
+    except KeyError:
+        espn_s2 = '1'
+
     bot = GroupMeBot(bot_id)
     slack_bot = SlackBot(slack_webhook_url)
     discord_bot = DiscordBot(discord_webhook_url)
-    league = League(league_id, year)
+    if swid == '{1}' and espn_s2 == '1':
+        league = League(league_id, year)
+    else:
+        league = League(league_id, year, espn_s2, swid)
 
     test = False
     if test:

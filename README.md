@@ -58,11 +58,13 @@ This gives an overview of all the features of `ff_bot`
 - SLACK_WEBHOOK_URL: This is your Webhook URL from the Slack App page (REQUIRED IF USING SLACK)
 - DISCORD_WEBHOOK_URL: This is your Webhook URL from the Discord Settings page (REQUIRED IF USING DISCORD)
 - LEAGUE_ID: This is your ESPN league id (REQUIRED)
-- START_DATE: This is when the bot will start paying attention and sending messages to your chat. (2018-09-05 by default)
-- END_DATE: This is when the bot will stop paying attention and stop sending messages to your chat. (2018-12-26 by default)
-- LEAGUE_YEAR: ESPN League year to look at (2018 by default)
+- START_DATE: This is when the bot will start paying attention and sending messages to your chat. (2019-09-04 by default)
+- END_DATE: This is when the bot will stop paying attention and stop sending messages to your chat. (2019-12-30 by default)
+- LEAGUE_YEAR: ESPN League year to look at (2019 by default)
 - TIMEZONE: The timezone that the messages will look to send in. (America/New_York by default)
-- INIT_MSG: The message that the bot will say when it is started (“Hai” by default, can be blank for no message)
+- INIT_MSG: The message that the bot will say when it is started (“Hi” by default, can be blank for no message)
+- ESPN_S2: Used for private leagues. See [Private Leagues Section](#private-leagues) for documentation
+- SWID: Used for private leagues. See [Private Leagues Section](#private-leagues) for documentation
 
 ### Running with Docker
 
@@ -210,17 +212,19 @@ Now you will need to setup your environment variables so that it works for your 
 ![](https://i.imgur.com/7a1V6v8.png)
 
 Now we will need to edit these variables (click the pencil to the right of the variable to modify)
-Note: App will restart when you change any variable so your chat room may be semi-spammed with the init message of "Hai" you can change the INIT_MSG variable to be blank to have no init message. It should also be noted that Heroku seems to restart the app about once a day
+Note: App will restart when you change any variable so your chat room may be semi-spammed with the init message of "Hi" you can change the INIT_MSG variable to be blank to have no init message. It should also be noted that Heroku seems to restart the app about once a day
 
 - BOT_ID: This is your Bot ID from the GroupMe developers page (REQUIRED IF USING GROUPME)
 - SLACK_WEBHOOK_URL: This is your Webhook URL from the Slack App page (REQUIRED IF USING SLACK)
 - DISCORD_WEBHOOK_URL: This is your Webhook URL from the Discord Settings page (REQUIRED IF USING DISCORD)
 - LEAGUE_ID: This is your ESPN league id (REQUIRED)
-- START_DATE: This is when the bot will start paying attention and sending messages to your chat. (2018-09-05 by default)
-- END_DATE: This is when the bot will stop paying attention and stop sending messages to your chat. (2018-12-26 by default)
-- LEAGUE_YEAR: ESPN League year to look at (2018 by default)
+- START_DATE: This is when the bot will start paying attention and sending messages to your chat. (2019-09-04 by default)
+- END_DATE: This is when the bot will stop paying attention and stop sending messages to your chat. (2019-12-30 by default)
+- LEAGUE_YEAR: ESPN League year to look at (2019 by default)
 - TIMEZONE: The timezone that the messages will look to send in. (America/New_York by default)
-- INIT_MSG: The message that the bot will say when it is started (“Hai” by default, can be blank for no message)
+- INIT_MSG: The message that the bot will say when it is started (“Hi” by default, can be blank for no message)
+- ESPN_S2: Used for private leagues. See [Private Leagues Section](#private-leagues) for documentation
+- SWID: Used for private leagues. See [Private Leagues Section](#private-leagues) for documentation
 
 After you have setup your variables you will need to turn it on. Navigate to the "Resources" tab of your Heroku app Dashboard.
 You should see something like below. Click the pencil on the right and toggle the buton so it is blue like depicted and click "Confirm."
@@ -229,6 +233,9 @@ You should see something like below. Click the pencil on the right and toggle th
 You're done! You now have a fully featured GroupMe/Slack/Discord chat bot for ESPN leagues! If you have an INIT_MSG you will see it exclaimed in your GroupMe, Discord, or Slack chat room.
 
 Unfortunately to do auto deploys of the latest version you need admin access to the repository on git. You can check for updates on the github page (https://github.com/dtcarls/ff_bot/commits/master) and click the deploy button again; however, this will deploy a new instance and the variables will need to be edited again.
+
+#### Private Leagues
+For private league you will need to get your swid and espn_s2.(Chrome Browser) You can find these two values after logging into your espn fantasy football account on espn's website. Then right click anywhere on the website and click inspect option. From there click Application on the top bar. On the left under Storage section click Cookies then http://fantasy.espn.com. From there you should be able to find your swid and espn_s2 variables and values!
 
 Like the bot? Consider making a donation
 ------
