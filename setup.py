@@ -7,15 +7,15 @@ setup(
 
     include_package_data=True,
 
-    version='0.1.1',
+    version='0.2.0',
 
     description='ESPN fantasy football GroupMe Bot',
 
-    author='Rich Barton, Dean Carlson',
+    author='Dean Carlson',
 
-    author_email='rbart65@gmail.com',
+    author_email='deantcarlson@gmail.com',
 
-    install_requires=['requests>=2.0.0,<3.0.0', 'espnff>=1.2.1,<3.0.0', 'apscheduler>3.0.0'],
+    install_requires=['requests>=2.0.0,<3.0.0', 'ff_espn_api>=1.0.4', 'apscheduler>3.0.0'],
 
     test_suite='nose.collector',
 

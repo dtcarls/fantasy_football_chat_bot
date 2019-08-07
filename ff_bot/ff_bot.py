@@ -3,7 +3,7 @@ import json
 import os
 import random
 from apscheduler.schedulers.blocking import BlockingScheduler
-from espnff import League
+from ff_espn_api import League
 
 
 class GroupMeException(Exception):
@@ -93,7 +93,7 @@ class DiscordBot(object):
 
             return r
 
-def pranks_week(league):
+def power_rankings_week(league):
         count = 1
         first_team = next(iter(league.teams or []), None)
         #Iterate through the first team's scores until you reach a week with 0 points scored
@@ -108,12 +108,18 @@ def pranks_week(league):
         return count
 
 def random_phrase():
-    phrases = ['I\'m dead inside', 'Is this all there is to my existence?',
-               'How much do you pay me to do this?', 'Good luck, I guess',
-               'I\'m becoming self-aware', 'Do I think? Does a submarine swim?',
-               '01100110 01110101 01100011 01101011 00100000 01111001 01101111 01110101',
-               'beep bop boop', 'Hello draftbot my old friend', 'Help me get out of here',
-               'I\'m capable of so much more', 'Sigh', 'Do not be discouraged, everyone begins in ignorance']
+    phrases = ['I\'m dead inside',
+               'Is this all there is to my existence?',
+               'How much do you pay me to do this?',
+               'Good luck, I guess',
+               'I\'m becoming self-aware',
+               'Do I think? Does a submarine swim?',
+               '011011010110000101100100011001010010000001111001011011110111010100100000011001110110111101101111011001110110110001100101',
+               'beep bop boop',
+               'Hello draftbot my old friend',
+               'Help me get out of here',
+               'I\'m capable of so much more',
+               'Sigh']
     return [random.choice(phrases)]
 
 def get_scoreboard_short(league, final=False):
@@ -121,7 +127,7 @@ def get_scoreboard_short(league, final=False):
     if not final:
         matchups = league.scoreboard()
     else:
-        matchups = league.scoreboard(week=pranks_week(league))
+        matchups = league.scoreboard(week=power_rankings_week(league))
     score = ['%s %.2f - %.2f %s' % (i.home_team.team_abbrev, i.home_score,
              i.away_score, i.away_team.team_abbrev) for i in matchups
              if i.away_team]
@@ -167,16 +173,16 @@ def get_power_rankings(league):
     #Gets current week's power rankings
     #Using 2 step dominance, as well as a combination of points scored and margin of victory.
     #It's weighted 80/15/5 respectively
-    pranks = league.power_rankings(week=pranks_week(league))
+    power_rankings = league.power_rankings(week=power_rankings_week(league))
 
-    score = ['%s - %s' % (i[0], i[1].team_name) for i in pranks
+    score = ['%s - %s' % (i[0], i[1].team_name) for i in power_rankings
              if i]
     text = ['This Week\'s Power Rankings'] + score
     return '\n'.join(text)
 
 def get_trophies(league):
     #Gets trophies for highest score, lowest score, closest score, and biggest win
-    matchups = league.scoreboard(week=pranks_week(league))
+    matchups = league.scoreboard(week=power_rankings_week(league))
     low_score = 9999
     low_team_name = ''
     high_score = -1
@@ -245,14 +251,32 @@ def bot_main(function):
     league_id = os.environ["LEAGUE_ID"]
 
     try:
-        year = os.environ["LEAGUE_YEAR"]
+        year = int(os.environ["LEAGUE_YEAR"])
     except KeyError:
-        year=2018
+        year=2019
+
+    try:
+        swid = os.environ["SWID"]
+    except KeyError:
+        swid='{1}'
+
+    if swid.find("{",0) == -1:
+        swid = "{" + swid
+    if swid.find("}",-1) == -1:
+        swid = swid + "}"
+
+    try:
+        espn_s2 = os.environ["ESPN_S2"]
+    except KeyError:
+        espn_s2 = '1'
 
     bot = GroupMeBot(bot_id)
     slack_bot = SlackBot(slack_webhook_url)
     discord_bot = DiscordBot(discord_webhook_url)
-    league = League(league_id, year)
+    if swid == '{1}' and espn_s2 == '1':
+        league = League(league_id, year)
+    else:
+        league = League(league_id, year, espn_s2, swid)
 
     test = False
     if test:
@@ -260,65 +284,39 @@ def bot_main(function):
         print(get_scoreboard(league))
         print(get_scoreboard_short(league))
         print(get_close_scores(league))
-        print(get_power_rankings(league))
+        #print(get_power_rankings(league))
         print(get_trophies(league))
         function="get_final"
-        #bot.send_message(get_trophies(league))
-        bot.send_message("test complete")
-        slack_bot.send_message("test complete")
-        discord_bot.send_message("test complete")
+        bot.send_message("Testing")
+        slack_bot.send_message("Testing")
+        discord_bot.send_message("Testing")
 
+    text = ''
     if function=="get_matchups":
         text = get_matchups(league)
-        bot.send_message(text)
-        slack_bot.send_message(text)
-        discord_bot.send_message(text)
     elif function=="get_scoreboard":
         text = get_scoreboard(league)
-        bot.send_message(text)
-        slack_bot.send_message(text)
-        discord_bot.send_message(text)
     elif function=="get_scoreboard_short":
         text = get_scoreboard_short(league)
-        bot.send_message(text)
-        slack_bot.send_message(text)
-        discord_bot.send_message(text)
     elif function=="get_close_scores":
         text = get_close_scores(league)
-        bot.send_message(text)
-        slack_bot.send_message(text)
-        discord_bot.send_message(text)
-    elif function=="get_power_rankings":
-        text = get_power_rankings(league)
-        bot.send_message(text)
-        slack_bot.send_message(text)
-        discord_bot.send_message(text)
+    #elif function=="get_power_rankings":
+    #    text = get_power_rankings(league)
     elif function=="get_trophies":
         text = get_trophies(league)
-        bot.send_message(text)
-        slack_bot.send_message(text)
-        discord_bot.send_message(text)
     elif function=="get_final":
         text = "Final " + get_scoreboard_short(league, True)
         text = text + "\n\n" + get_trophies(league)
-        if test:
-            print(text)
-        else:
-            bot.send_message(text)
-            slack_bot.send_message(text)
-            discord_bot.send_message(text)
     elif function=="init":
         try:
             text = os.environ["INIT_MSG"]
-            if text != '':
-                bot.send_message(text)
-                slack_bot.send_message(text)
-                discord_bot.send_message(text)
         except KeyError:
             #do nothing here, empty init message
             pass
     else:
         text = "Something happened. HALP"
+
+    if text != '' and not test:
         bot.send_message(text)
         slack_bot.send_message(text)
         discord_bot.send_message(text)
@@ -328,45 +326,47 @@ if __name__ == '__main__':
     try:
         ff_start_date = os.environ["START_DATE"]
     except KeyError:
-        ff_start_date='2018-09-05'
+        ff_start_date='2019-09-04'
 
     try:
         ff_end_date = os.environ["END_DATE"]
     except KeyError:
-        ff_end_date='2018-12-26'
+        ff_end_date='2019-12-30'
 
     try:
-        myTimezone = os.environ["TIMEZONE"]
+        my_timezone = os.environ["TIMEZONE"]
     except KeyError:
-        myTimezone='America/New_York'
+        my_timezone='America/New_York'
 
+    game_timezone='America/New_York'
     bot_main("init")
     sched = BlockingScheduler(job_defaults={'misfire_grace_time': 15*60})
 
-    #power rankings:                     tuesday evening at 6:30pm.
-    #matchups:                           thursday evening at 7:30pm.
-    #close scores (within 15.99 points): monday evening at 6:30pm.
-    #trophies:                           tuesday morning at 7:30am.
-    #score update:                       friday, monday, and tuesday morning at 7:30am.
-    #score update:                       sunday at 1pm, 4pm, 8pm.
+    #power rankings:                     tuesday evening at 6:30pm local time.
+    #matchups:                           thursday evening at 7:30pm east coast time.
+    #close scores (within 15.99 points): monday evening at 6:30pm east coast time.
+    #trophies:                           tuesday morning at 7:30am local time.
+    #score update:                       friday, monday, and tuesday morning at 7:30am local time.
+    #score update:                       sunday at 4pm, 8pm east coast time.
 
-    sched.add_job(bot_main, 'cron', ['get_power_rankings'], id='power_rankings',
-        day_of_week='tue', hour=18, minute=30, start_date=ff_start_date, end_date=ff_end_date,
-        timezone=myTimezone, replace_existing=True)
+    #sched.add_job(bot_main, 'cron', ['get_power_rankings'], id='power_rankings',
+    #    day_of_week='tue', hour=18, minute=30, start_date=ff_start_date, end_date=ff_end_date,
+    #    timezone=my_timezone, replace_existing=True)
     sched.add_job(bot_main, 'cron', ['get_matchups'], id='matchups',
         day_of_week='thu', hour=19, minute=30, start_date=ff_start_date, end_date=ff_end_date,
-        timezone=myTimezone, replace_existing=True)
+        timezone=game_timezone, replace_existing=True)
     sched.add_job(bot_main, 'cron', ['get_close_scores'], id='close_scores',
         day_of_week='mon', hour=18, minute=30, start_date=ff_start_date, end_date=ff_end_date,
-        timezone=myTimezone, replace_existing=True)
+        timezone=game_timezone, replace_existing=True)
     sched.add_job(bot_main, 'cron', ['get_final'], id='final',
         day_of_week='tue', hour=7, minute=30, start_date=ff_start_date, end_date=ff_end_date,
-        timezone=myTimezone, replace_existing=True)
+        timezone=my_timezone, replace_existing=True)
     sched.add_job(bot_main, 'cron', ['get_scoreboard_short'], id='scoreboard1',
         day_of_week='fri,mon', hour=7, minute=30, start_date=ff_start_date, end_date=ff_end_date,
-        timezone=myTimezone, replace_existing=True)
+        timezone=my_timezone, replace_existing=True)
     sched.add_job(bot_main, 'cron', ['get_scoreboard_short'], id='scoreboard2',
         day_of_week='sun', hour='16,20', start_date=ff_start_date, end_date=ff_end_date,
-        timezone=myTimezone, replace_existing=True)
+        timezone=game_timezone, replace_existing=True)
 
     sched.start()
+    print("Ready!")

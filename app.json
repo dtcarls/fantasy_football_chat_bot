@@ -1,10 +1,12 @@
 {
   "name": "Fantasy Football Chat Bot",
-  "description": "ESPN FF GroupMe Chat Bot.",
+  "description": "ESPN Fantasy Football GroupMe, Slack, and Discord Chat Bot.",
   "keywords": [
     "fantasy football",
     "espn",
     "groupme",
+    "slack",
+    "discord",
     "chat bot",
     "ff"
   ],
@@ -29,7 +31,7 @@
     },
     "LEAGUE_YEAR": {
       "description": "ESPN League Year",
-      "value": "2018"
+      "value": "2019"
     },
     "TIMEZONE": {
       "description": "League timezone for sending messages",
@@ -37,11 +39,11 @@
     },
     "START_DATE": {
       "description": "Season Start Date",
-      "value": "2018-09-05"
+      "value": "2019-09-04"
     },
     "END_DATE": {
       "description": "Season End Date",
-      "value": "2018-12-26"
+      "value": "2019-12-30"
     },
     "INIT_MSG": {
       "description": "Bot Init Message",
