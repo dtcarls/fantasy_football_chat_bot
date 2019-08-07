@@ -284,7 +284,8 @@ def bot_main(function):
         bot.send_message("Testing")
         slack_bot.send_message("Testing")
         discord_bot.send_message("Testing")
-        
+       
+    text = '' 
     if function=="get_matchups":
         text = get_matchups(league)
     elif function=="get_scoreboard":
