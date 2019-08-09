@@ -284,7 +284,7 @@ def bot_main(function):
         print(get_scoreboard(league))
         print(get_scoreboard_short(league))
         print(get_close_scores(league))
-        #print(get_power_rankings(league))
+        print(get_power_rankings(league))
         print(get_trophies(league))
         function="get_final"
         bot.send_message("Testing")
@@ -300,8 +300,8 @@ def bot_main(function):
         text = get_scoreboard_short(league)
     elif function=="get_close_scores":
         text = get_close_scores(league)
-    #elif function=="get_power_rankings":
-    #    text = get_power_rankings(league)
+    elif function=="get_power_rankings":
+        text = get_power_rankings(league)
     elif function=="get_trophies":
         text = get_trophies(league)
     elif function=="get_final":
@@ -349,9 +349,9 @@ if __name__ == '__main__':
     #score update:                       friday, monday, and tuesday morning at 7:30am local time.
     #score update:                       sunday at 4pm, 8pm east coast time.
 
-    #sched.add_job(bot_main, 'cron', ['get_power_rankings'], id='power_rankings',
-    #    day_of_week='tue', hour=18, minute=30, start_date=ff_start_date, end_date=ff_end_date,
-    #    timezone=my_timezone, replace_existing=True)
+    sched.add_job(bot_main, 'cron', ['get_power_rankings'], id='power_rankings',
+        day_of_week='tue', hour=18, minute=30, start_date=ff_start_date, end_date=ff_end_date,
+        timezone=my_timezone, replace_existing=True)
     sched.add_job(bot_main, 'cron', ['get_matchups'], id='matchups',
         day_of_week='thu', hour=19, minute=30, start_date=ff_start_date, end_date=ff_end_date,
         timezone=game_timezone, replace_existing=True)
