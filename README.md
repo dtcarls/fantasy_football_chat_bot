@@ -1,5 +1,3 @@
-Shoutout to /u/rbart65 on reddit and rbarton65 on github for creating the original version of the chatbot and the ESPN FF API
-
 [![Build Status](https://travis-ci.org/dtcarls/ff_bot.svg?branch=master)](https://travis-ci.org/dtcarls/ff_bot)
 [![Come join the chat](https://badges.gitter.im/dtcarls/Lobby.svg)](https://gitter.im/dtcarls/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/d8506396005d48d1a52dee114f2c05ae)](https://www.codacy.com/app/dtcarls/ff_bot?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=dtcarls/ff_bot&amp;utm_campaign=Badge_Grade)
@@ -17,8 +15,8 @@ ESPN Fantasy Football information to a GroupMe, Discord or Slack chat room.
 - Close Scores - Mon - 18:30 east coast time (Games that are within 16 points of eachother to keep an eye on during the Monday night game)
 - Scoreboard - Mon,Tue,Fri - 7:30 local time (Current ESPN fantasy scoreboard)
 - Trophies- Tue - 7:30 local time (High score, low score, biggest win, closest win)
-- Power rankings - Tue -18:30 local time **This feature is currently disabled**
-- Matchups - Thu - 19:30 east coast time (Just upcoming matchups)
+- Power rankings - Tue -18:30 local time
+- Matchups - Thu - 19:30 east coast time (Upcoming matchups)
 - Scoreboard - Sun - 16:00, 20:00 east coast time (Current ESPN fantasy scoreboard)
 
 ## Getting Started
@@ -26,7 +24,7 @@ ESPN Fantasy Football information to a GroupMe, Discord or Slack chat room.
 These instructions will get you a copy of the project up and running
 on your local machine for development and testing purposes.
 
-### Installing
+### Installing for development
 With Docker:
 ```bash
 git clone https://github.com/dtcarls/ff_bot
@@ -264,8 +262,8 @@ Remove your init message and it will stop. The init message is really for first 
 How do I set another timezone?  
 Specify your variable https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List
 
-Is there a version of this for Messanger/WhatsApp/[insert other chat]?  
-No, but I am open to pull requests implementing their API for cross platform support.
+Is there a version of this for Messenger/WhatsApp/[insert other chat]?  
+No, but I am open to pull requests implementing their API for additional cross platform support.
 
 Like the bot? Star the repository and consider making a donation to buy me a coffee
 ------
