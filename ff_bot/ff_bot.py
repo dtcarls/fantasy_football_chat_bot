@@ -328,9 +328,9 @@ if __name__ == '__main__':
     try:
         my_timezone = os.environ["TIMEZONE"]
     except KeyError:
-        my_timezone='America/Los_Angeles'
+        my_timezone='America/New_York'
 
-    game_timezone='America/Los_Angeles'
+    game_timezone='America/New_York'
     bot_main("init")
     sched = BlockingScheduler(job_defaults={'misfire_grace_time': 15*60})
 
