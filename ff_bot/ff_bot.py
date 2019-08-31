@@ -318,7 +318,7 @@ if __name__ == '__main__':
     try:
         ff_start_date = os.environ["START_DATE"]
     except KeyError:
-        ff_start_date='2019-09-04'
+        ff_start_date='2019-08-30'
 
     try:
         ff_end_date = os.environ["END_DATE"]
@@ -345,7 +345,7 @@ if __name__ == '__main__':
         day_of_week='tue', hour=18, minute=30, start_date=ff_start_date, end_date=ff_end_date,
         timezone=my_timezone, replace_existing=True)
     sched.add_job(bot_main, 'cron', ['get_matchups'], id='matchups',
-        day_of_week='sat', hour=13, minute=20, start_date=ff_start_date, end_date=ff_end_date,
+        day_of_week='sat', hour=13, minute=30, start_date=ff_start_date, end_date=ff_end_date,
         timezone=game_timezone, replace_existing=True)
     sched.add_job(bot_main, 'cron', ['get_close_scores'], id='close_scores',
         day_of_week='mon', hour=18, minute=30, start_date=ff_start_date, end_date=ff_end_date,
