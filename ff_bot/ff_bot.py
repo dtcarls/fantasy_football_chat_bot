@@ -93,7 +93,7 @@ class DiscordBot(object):
 
             return r
 
-def power_rankings_week(league):
+def get_current_week(league):
         count = 1
         first_team = next(iter(league.teams or []), None)
         #Iterate through the first team's scores until you reach a week with 0 points scored
@@ -122,26 +122,30 @@ def random_phrase():
                'Sigh']
     return [random.choice(phrases)]
 
-def get_scoreboard_short(league, final=False):
+def get_scoreboard_short(league):
     #Gets current week's scoreboard
-    if not final:
-        matchups = league.scoreboard()
-    else:
-        matchups = league.scoreboard(week=power_rankings_week(league))
+    box_scores = league.box_scores(get_current_week(league))
     score = ['%s %.2f - %.2f %s' % (i.home_team.team_abbrev, i.home_score,
-             i.away_score, i.away_team.team_abbrev) for i in matchups
+             i.away_score, i.away_team.team_abbrev) for i in box_scores
              if i.away_team]
-    text = ['Score Update'] + score
+    text = ['Actual Score Update'] + score
     return '\n'.join(text)
 
-def get_scoreboard(league):
-    #Gets current week's scoreboard
-    matchups = league.scoreboard()
-    score = ['%s %.2f - %.2f %s' % (i.home_team.team_name, i.home_score,
-             i.away_score, i.away_team.team_name) for i in matchups
+def get_projected_scoreboard(league):
+    #Gets current week's scoreboard projections
+    box_scores = league.box_scores(get_current_week(league))
+    score = ['%s %.2f - %.2f %s' % (i.home_team.team_abbrev, get_projected_total(i.home_lineup),
+                                    get_projected_total(i.away_lineup), i.away_team.team_abbrev) for i in box_scores
              if i.away_team]
-    text = ['Score Update'] + score
+    text = ['Projected Scores'] + score
     return '\n'.join(text)
+
+def get_projected_total(lineup):
+    total_projected = 0
+    for i in lineup:
+        if i.slot_position != 'BE':
+            total_projected += i.projected_points
+    return total_projected
 
 def get_matchups(league):
     #Gets current week's Matchups
@@ -150,7 +154,7 @@ def get_matchups(league):
     score = ['%s(%s-%s) vs %s(%s-%s)' % (i.home_team.team_name, i.home_team.wins, i.home_team.losses,
              i.away_team.team_name, i.away_team.wins, i.away_team.losses) for i in matchups
              if i.away_team]
-    text = ['This Week\'s Matchups'] + score + ['\n'] + random_phrase()
+    text = ['This Week\'s Matchups'] + score + random_phrase()
     return '\n'.join(text)
 
 def get_close_scores(league):
@@ -173,7 +177,7 @@ def get_power_rankings(league):
     #Gets current week's power rankings
     #Using 2 step dominance, as well as a combination of points scored and margin of victory.
     #It's weighted 80/15/5 respectively
-    power_rankings = league.power_rankings(week=power_rankings_week(league))
+    power_rankings = league.power_rankings(week=get_current_week(league))
 
     score = ['%s - %s' % (i[0], i[1].team_name) for i in power_rankings
              if i]
@@ -182,7 +186,7 @@ def get_power_rankings(league):
 
 def get_trophies(league):
     #Gets trophies for highest score, lowest score, closest score, and biggest win
-    matchups = league.scoreboard(week=power_rankings_week(league))
+    matchups = league.scoreboard(week=get_current_week(league))
     low_score = 9999
     low_team_name = ''
     high_score = -1
@@ -281,8 +285,8 @@ def bot_main(function):
     test = False
     if test:
         print(get_matchups(league))
-        print(get_scoreboard(league))
         print(get_scoreboard_short(league))
+        print(get_projected_scoreboard(league))
         print(get_close_scores(league))
         print(get_power_rankings(league))
         print(get_trophies(league))
@@ -294,10 +298,12 @@ def bot_main(function):
     text = ''
     if function=="get_matchups":
         text = get_matchups(league)
-    elif function=="get_scoreboard":
-        text = get_scoreboard(league)
+        #text = text + "\n" + get_projected_scoreboard(league)
     elif function=="get_scoreboard_short":
         text = get_scoreboard_short(league)
+        #text = text + "\n" + get_projected_scoreboard(league)
+    elif function=="get_projected_scoreboard":
+        text = get_projected_scoreboard(league)
     elif function=="get_close_scores":
         text = get_close_scores(league)
     elif function=="get_power_rankings":
@@ -305,7 +311,7 @@ def bot_main(function):
     elif function=="get_trophies":
         text = get_trophies(league)
     elif function=="get_final":
-        text = "Final " + get_scoreboard_short(league, True)
+        text = "Final " + get_scoreboard_short(league)
         text = text + "\n\n" + get_trophies(league)
     elif function=="init":
         try:
@@ -368,5 +374,5 @@ if __name__ == '__main__':
         day_of_week='sun', hour='16,20', start_date=ff_start_date, end_date=ff_end_date,
         timezone=game_timezone, replace_existing=True)
 
-    sched.start()
     print("Ready!")
+    sched.start()
