@@ -142,9 +142,13 @@ def get_projected_scoreboard(league):
 
 def get_projected_total(lineup):
     total_projected = 0
+    #print("TEAM--------------------")
     for i in lineup:
         if i.slot_position != 'BE':
-            total_projected += i.projected_points
+            if i.points != 0:
+                total_projected += i.points
+            else:
+                total_projected += i.projected_points
     return total_projected
 
 def get_matchups(league):
@@ -282,7 +286,7 @@ def bot_main(function):
     else:
         league = League(league_id, year, espn_s2, swid)
 
-    test = False
+    test = True
     if test:
         print(get_matchups(league))
         print(get_scoreboard_short(league))
@@ -291,9 +295,9 @@ def bot_main(function):
         print(get_power_rankings(league))
         print(get_trophies(league))
         function="get_final"
-        bot.send_message("Testing")
-        slack_bot.send_message("Testing")
-        discord_bot.send_message("Testing")
+        #bot.send_message("Testing")
+        #slack_bot.send_message("Testing")
+        #discord_bot.send_message("Testing")
 
     text = ''
     if function=="get_matchups":
