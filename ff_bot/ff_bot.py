@@ -143,7 +143,8 @@ def get_projected_scoreboard(league):
 def get_projected_total(lineup):
     total_projected = 0
     for i in lineup:
-        total_projected += i.projected_points
+        if i.slot_position != 'BE':
+            total_projected += i.projected_points
     return total_projected
 
 def get_matchups(league):
@@ -153,7 +154,7 @@ def get_matchups(league):
     score = ['%s(%s-%s) vs %s(%s-%s)' % (i.home_team.team_name, i.home_team.wins, i.home_team.losses,
              i.away_team.team_name, i.away_team.wins, i.away_team.losses) for i in matchups
              if i.away_team]
-    text = ['This Week\'s Matchups'] + score + ['\n'] + random_phrase()
+    text = ['This Week\'s Matchups'] + score + random_phrase()
     return '\n'.join(text)
 
 def get_close_scores(league):
@@ -297,10 +298,10 @@ def bot_main(function):
     text = ''
     if function=="get_matchups":
         text = get_matchups(league)
-        text = text + "\n" + get_projected_scoreboard(league)
+        #text = text + "\n" + get_projected_scoreboard(league)
     elif function=="get_scoreboard_short":
         text = get_scoreboard_short(league)
-        text = text + "\n" + get_projected_scoreboard(league)
+        #text = text + "\n" + get_projected_scoreboard(league)
     elif function=="get_projected_scoreboard":
         text = get_projected_scoreboard(league)
     elif function=="get_close_scores":
