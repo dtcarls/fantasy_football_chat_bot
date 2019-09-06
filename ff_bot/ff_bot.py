@@ -298,10 +298,10 @@ def bot_main(function):
     text = ''
     if function=="get_matchups":
         text = get_matchups(league)
-        #text = text + "\n" + get_projected_scoreboard(league)
+        text = text + "\n" + get_projected_scoreboard(league)
     elif function=="get_scoreboard_short":
         text = get_scoreboard_short(league)
-        #text = text + "\n" + get_projected_scoreboard(league)
+        text = text + "\n" + get_projected_scoreboard(league)
     elif function=="get_projected_scoreboard":
         text = get_projected_scoreboard(league)
     elif function=="get_close_scores":
