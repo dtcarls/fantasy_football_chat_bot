@@ -253,8 +253,8 @@ def bot_main(function):
         discord_webhook_url = os.environ["DISCORD_WEBHOOK_URL"]
     except KeyError:
         discord_webhook_url = 1
- 
-    if (len(str(bot_id)) <= 1 and 
+
+    if (len(str(bot_id)) <= 1 and
         len(str(slack_webhook_url)) <= 1 and
         len(str(discord_webhook_url)) <= 1):
         #Ensure that there's info for at least one messaging platform,
