@@ -113,7 +113,7 @@ def get_scoreboard_short(league):
     score = ['%s %.2f - %.2f %s' % (i.home_team.team_abbrev, i.home_score,
              i.away_score, i.away_team.team_abbrev) for i in box_scores
              if i.away_team]
-    text = ['Actual Score Update'] + score
+    text = ['Score Update'] + score
     return '\n'.join(text)
 
 def get_projected_scoreboard(league):
@@ -122,7 +122,7 @@ def get_projected_scoreboard(league):
     score = ['%s %.2f - %.2f %s' % (i.home_team.team_abbrev, get_projected_total(i.home_lineup),
                                     get_projected_total(i.away_lineup), i.away_team.team_abbrev) for i in box_scores
              if i.away_team]
-    text = ['Projected Scores'] + score
+    text = ['Approximate Projected Scores'] + score
     return '\n'.join(text)
 
 def get_projected_total(lineup):
@@ -137,17 +137,17 @@ def get_projected_total(lineup):
 
 def get_matchups(league):
     #Gets current week's Matchups
-    matchups = league.scoreboard()
+    matchups = league.box_scores()
 
     score = ['%s(%s-%s) vs %s(%s-%s)' % (i.home_team.team_name, i.home_team.wins, i.home_team.losses,
              i.away_team.team_name, i.away_team.wins, i.away_team.losses) for i in matchups
              if i.away_team]
-    text = ['This Week\'s Matchups'] + score + random_phrase()
+    text = ['Matchups'] + score + random_phrase()
     return '\n'.join(text)
 
 def get_close_scores(league):
     #Gets current closest scores (15.999 points or closer)
-    matchups = league.scoreboard()
+    matchups = league.box_scores()
     score = []
 
     for i in matchups:
@@ -169,12 +169,12 @@ def get_power_rankings(league):
 
     score = ['%s - %s' % (i[0], i[1].team_name) for i in power_rankings
              if i]
-    text = ['This Week\'s Power Rankings'] + score
+    text = ['Power Rankings'] + score
     return '\n'.join(text)
 
 def get_trophies(league):
     #Gets trophies for highest score, lowest score, closest score, and biggest win
-    matchups = league.scoreboard()
+    matchups = league.box_scores()
     low_score = 9999
     low_team_name = ''
     high_score = -1
