@@ -4,3 +4,5 @@ exports.sh
 run*
 build/
 dist/
+venv/
+env/

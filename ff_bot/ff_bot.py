@@ -5,6 +5,8 @@ import random
 from apscheduler.schedulers.blocking import BlockingScheduler
 from ff_espn_api import League
 
+# ff_espn_api allows current week as 0
+CURRENT_WEEK = 0
 
 class GroupMeException(Exception):
     pass
@@ -93,20 +95,6 @@ class DiscordBot(object):
 
             return r
 
-def get_current_week(league):
-        count = 1
-        first_team = next(iter(league.teams or []), None)
-        #Iterate through the first team's scores until you reach a week with 0 points scored
-        for o in first_team.scores:
-            if o == 0:
-                if count != 1:
-                     count = count - 1
-                break
-            else:
-                count = count + 1
-
-        return count
-
 def random_phrase():
     phrases = ['I\'m dead inside',
                'Is this all there is to my existence?',
@@ -124,7 +112,7 @@ def random_phrase():
 
 def get_scoreboard_short(league):
     #Gets current week's scoreboard
-    box_scores = league.box_scores(get_current_week(league))
+    box_scores = league.box_scores(CURRENT_WEEK)
     score = ['%s %.2f - %.2f %s' % (i.home_team.team_abbrev, i.home_score,
              i.away_score, i.away_team.team_abbrev) for i in box_scores
              if i.away_team]
@@ -133,7 +121,7 @@ def get_scoreboard_short(league):
 
 def get_projected_scoreboard(league):
     #Gets current week's scoreboard projections
-    box_scores = league.box_scores(get_current_week(league))
+    box_scores = league.box_scores(CURRENT_WEEK)
     score = ['%s %.2f - %.2f %s' % (i.home_team.team_abbrev, get_projected_total(i.home_lineup),
                                     get_projected_total(i.away_lineup), i.away_team.team_abbrev) for i in box_scores
              if i.away_team]
@@ -180,7 +168,7 @@ def get_power_rankings(league):
     #Gets current week's power rankings
     #Using 2 step dominance, as well as a combination of points scored and margin of victory.
     #It's weighted 80/15/5 respectively
-    power_rankings = league.power_rankings(week=get_current_week(league))
+    power_rankings = league.power_rankings(week=CURRENT_WEEK)
 
     score = ['%s - %s' % (i[0], i[1].team_name) for i in power_rankings
              if i]
@@ -189,7 +177,7 @@ def get_power_rankings(league):
 
 def get_trophies(league):
     #Gets trophies for highest score, lowest score, closest score, and biggest win
-    matchups = league.scoreboard(week=get_current_week(league))
+    matchups = league.scoreboard(week=CURRENT_WEEK)
     low_score = 9999
     low_team_name = ''
     high_score = -1
