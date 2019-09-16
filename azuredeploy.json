@@ -1,0 +1,161 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+      "appName": {
+        "type": "string",
+        "metadata": {
+          "description": "The name of the function app that you wish to create."
+        }
+      },
+      "location": {
+        "type": "string",
+        "defaultValue": "[resourceGroup().location]",
+        "metadata": {
+          "description": "Location for all resources."
+        }
+      },
+      "SLACK_WEBHOOK_URL": {
+        "type": "string",
+        "metadata": {
+          "description": "This is your Webhook URL from the Slack App page (REQUIRED IF USING SLACK)"
+        },
+        "minLength": 10
+      },
+      "LEAGUE_ID": {
+        "type": "string",
+        "metadata": {
+          "description": "This is your ESPN league id (REQUIRED)"
+        },
+        "minLength": 4
+      },
+      "START_DATE": {
+        "type": "string",
+        "defaultValue": "2019-09-04",
+        "metadata": {
+          "description": "This is when the bot will start paying attention and sending messages to your chat. (2019-09-04 by default)"
+        }
+      },
+      "END_DATE": {
+        "type": "string",
+        "defaultValue": "2019-12-30",
+        "metadata": {
+          "description": "This is when the bot will stop paying attention and stop sending messages to your chat. (2019-12-30 by default)"
+        }
+      },
+      "TIMEZONE": {
+        "type": "string",
+        "defaultValue": "America/New_York",
+        "metadata": {
+          "description": "The timezone that the messages will look to send in. (America/New_York by default)"
+        }
+      },
+      "INIT_MSG": {
+        "type": "string",
+        "defaultValue": "Hi from Azure Functions",
+        "metadata": {
+          "description": "The message that the bot will say when it is started (“Hi from Azure Functions” by default, can be blank for no message)"
+        }
+      }
+    },
+    "variables": {
+      "functionAppName": "[parameters('appName')]",
+      "hostingPlanName": "[parameters('appName')]",
+      "applicationInsightsName": "[parameters('appName')]",
+      "storageAccountName": "[concat(uniquestring(resourceGroup().id), 'azfunctions')]",
+      "storageAccountid": "[concat(resourceGroup().id,'/providers/','Microsoft.Storage/storageAccounts/', variables('storageAccountName'))]"
+    },
+    "resources": [
+      {
+        "type": "Microsoft.Storage/storageAccounts",
+        "name": "[variables('storageAccountName')]",
+        "apiVersion": "2018-07-01",
+        "location": "[parameters('location')]",
+        "kind": "StorageV2",
+        "sku": {
+          "name": "Standard_LRS"
+        }
+      },
+      {
+        "apiVersion": "2015-08-01",
+        "type": "Microsoft.Web/sites",
+        "name": "[variables('functionAppName')]",
+        "location": "[parameters('location')]",
+        "kind": "functionapp,linux",
+        "dependsOn": [
+          "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]"
+        ],
+        "properties": {
+          "siteConfig": {
+            "appSettings": [
+              {
+                "name": "AzureWebJobsDashboard",
+                "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('storageAccountName'), ';AccountKey=', listKeys(variables('storageAccountid'),'2015-05-01-preview').key1)]"
+              },
+              {
+                "name": "AzureWebJobsStorage",
+                "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('storageAccountName'), ';AccountKey=', listKeys(variables('storageAccountid'),'2015-05-01-preview').key1)]"
+              },
+              {
+                "name": "WEBSITE_CONTENTAZUREFILECONNECTIONSTRING",
+                "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('storageAccountName'), ';AccountKey=', listKeys(variables('storageAccountid'),'2015-05-01-preview').key1)]"
+              },
+              {
+                "name": "WEBSITE_CONTENTSHARE",
+                "value": "[toLower(variables('functionAppName'))]"
+              },
+              {
+                "name": "FUNCTIONS_EXTENSION_VERSION",
+                "value": "~2"
+              },
+              {
+                "name": "FUNCTIONS_WORKER_RUNTIME",
+                "value": "python"
+              },
+              {
+                "name": "SLACK_WEBHOOK_URL",
+                "value": "[parameters('SLACK_WEBHOOK_URL')]"
+              },
+              {
+                "name": "LEAGUE_ID",
+                "value": "[parameters('LEAGUE_ID')]"
+              },
+              {
+                "name": "START_DATE",
+                "value": "[parameters('START_DATE')]"
+              },
+              {
+                "name": "END_DATE",
+                "value": "[parameters('END_DATE')]"
+              },
+              {
+                "name": "TIMEZONE",
+                "value": "[parameters('TIMEZONE')]"
+              },
+              {
+                "name": "INIT_MSG",
+                "value": "[parameters('INIT_MSG')]"
+              }
+            ]
+          },
+          "reserved": true
+        },
+        "resources": [
+          {
+            "apiVersion": "2015-08-01",
+            "name": "web",
+            "type": "sourcecontrols",
+            "dependsOn": [
+              "[resourceId('Microsoft.Web/Sites', variables('functionAppName'))]"
+            ],
+            "properties": {
+              "RepoUrl": "https://github.com/mikaelweave/fantasy_football_chat_bot.git",
+              "branch": "master",
+              "publishRunbook": true,
+              "IsManualIntegration": true
+            }
+          }
+        ]
+      }
+    ]
+  }

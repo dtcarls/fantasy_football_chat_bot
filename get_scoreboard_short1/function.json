@@ -1,0 +1,12 @@
+{
+  "scriptFile": "__init__.py",
+  "entryPoint": "main",
+  "bindings": [
+    {
+      "name": "getScoreboardShort1",
+      "type": "timerTrigger",
+      "direction": "in",
+      "schedule": "0 30 7 * * fri,mon"
+    }
+  ]
+}

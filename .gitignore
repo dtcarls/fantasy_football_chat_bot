@@ -4,3 +4,7 @@ exports.sh
 run*
 build/
 dist/
+Pipfile
+local.settings.json
+.venv
+.python_packages
