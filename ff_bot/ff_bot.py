@@ -288,7 +288,7 @@ def bot_main(function):
     else:
         league = League(league_id, year, espn_s2, swid)
 
-    test = False
+    test = True
     if test:
         print(get_matchups(league))
         print(get_scoreboard_short(league))
@@ -321,7 +321,7 @@ def bot_main(function):
         text = get_trophies(league)
     elif function=="get_final":
         # on Tuesday we need to get the scores of last week
-        week = league.get_current_week - 1
+        week = league.current_week - 1
         text = "Final " + get_scoreboard_short(league, week=week)
         text = text + "\n\n" + get_trophies(league)
     elif function=="init":
