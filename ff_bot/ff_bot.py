@@ -308,7 +308,7 @@ def bot_main(function):
         # on Tuesday we need to get the scores of last week
         week = league.current_week - 1
         text = "Final " + get_scoreboard_short(league, week=week)
-        text = text + "\n\n" + get_trophies(league)
+        text = text + "\n\n" + get_trophies(league, week=week)
     elif function=="init":
         try:
             text = os.environ["INIT_MSG"]
