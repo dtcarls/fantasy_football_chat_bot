@@ -288,7 +288,7 @@ def bot_main(function):
     else:
         league = League(league_id, year, espn_s2, swid)
 
-    test = True
+    test = False
     if test:
         print(get_matchups(league))
         print(get_scoreboard_short(league))
