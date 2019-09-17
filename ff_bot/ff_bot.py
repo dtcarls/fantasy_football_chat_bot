@@ -320,6 +320,7 @@ def bot_main(function):
     elif function=="get_trophies":
         text = get_trophies(league)
     elif function=="get_final":
+        # on Tuesday we need to get the scores of last week
         week = league.get_current_week - 1
         text = "Final " + get_scoreboard_short(league, week=week)
         text = text + "\n\n" + get_trophies(league)
