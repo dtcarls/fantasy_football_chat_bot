@@ -108,9 +108,6 @@ def random_phrase():
     return [random.choice(phrases)]
 
 def get_scoreboard_short(league, week=None):
-    # if a week isn't passed set it to the current week
-    if not week:
-        week = league.current_week
     #Gets current week's scoreboard
     box_scores = league.box_scores(week=week)
     score = ['%s %.2f - %.2f %s' % (i.home_team.team_abbrev, i.home_score,
@@ -120,9 +117,6 @@ def get_scoreboard_short(league, week=None):
     return '\n'.join(text)
 
 def get_projected_scoreboard(league, week=None):
-    # if a week isn't passed set it to the current week
-    if not week:
-        week = league.current_week
     #Gets current week's scoreboard projections
     box_scores = league.box_scores(week=week)
     score = ['%s %.2f - %.2f %s' % (i.home_team.team_abbrev, get_projected_total(i.home_lineup),
@@ -142,9 +136,6 @@ def get_projected_total(lineup):
     return total_projected
 
 def get_matchups(league, week=None):
-    # if a week isn't passed set it to the current week
-    if not week:
-        week = league.current_week
     #Gets current week's Matchups
     matchups = league.box_scores(week=week)
 
@@ -155,9 +146,6 @@ def get_matchups(league, week=None):
     return '\n'.join(text)
 
 def get_close_scores(league, week=None):
-    # if a week isn't passed set it to the current week
-    if not week:
-        week = league.current_week
     #Gets current closest scores (15.999 points or closer)
     matchups = league.box_scores(week=week)
     score = []
@@ -174,7 +162,7 @@ def get_close_scores(league, week=None):
     return '\n'.join(text)
 
 def get_power_rankings(league, week=None):
-    # if a week isn't passed set it to the current week
+    # power rankings requires an integer value, so this grabs the current week for that
     if not week:
         week = league.current_week
     #Gets current week's power rankings
@@ -188,9 +176,6 @@ def get_power_rankings(league, week=None):
     return '\n'.join(text)
 
 def get_trophies(league, week=None):
-    # if a week isn't passed set it to the current week
-    if not week:
-        week = league.current_week
     #Gets trophies for highest score, lowest score, closest score, and biggest win
     matchups = league.box_scores(week=week)
     low_score = 9999
