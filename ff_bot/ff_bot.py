@@ -107,18 +107,18 @@ def random_phrase():
                'Sigh']
     return [random.choice(phrases)]
 
-def get_scoreboard_short(league):
+def get_scoreboard_short(league, week=None):
     #Gets current week's scoreboard
-    box_scores = league.box_scores()
+    box_scores = league.box_scores(week=week)
     score = ['%s %.2f - %.2f %s' % (i.home_team.team_abbrev, i.home_score,
              i.away_score, i.away_team.team_abbrev) for i in box_scores
              if i.away_team]
     text = ['Score Update'] + score
     return '\n'.join(text)
 
-def get_projected_scoreboard(league):
+def get_projected_scoreboard(league, week=None):
     #Gets current week's scoreboard projections
-    box_scores = league.box_scores()
+    box_scores = league.box_scores(week=week)
     score = ['%s %.2f - %.2f %s' % (i.home_team.team_abbrev, get_projected_total(i.home_lineup),
                                     get_projected_total(i.away_lineup), i.away_team.team_abbrev) for i in box_scores
              if i.away_team]
@@ -135,9 +135,9 @@ def get_projected_total(lineup):
                 total_projected += i.projected_points
     return total_projected
 
-def get_matchups(league):
+def get_matchups(league, week=None):
     #Gets current week's Matchups
-    matchups = league.box_scores()
+    matchups = league.box_scores(week=week)
 
     score = ['%s(%s-%s) vs %s(%s-%s)' % (i.home_team.team_name, i.home_team.wins, i.home_team.losses,
              i.away_team.team_name, i.away_team.wins, i.away_team.losses) for i in matchups
@@ -145,9 +145,9 @@ def get_matchups(league):
     text = ['Matchups'] + score + random_phrase()
     return '\n'.join(text)
 
-def get_close_scores(league):
+def get_close_scores(league, week=None):
     #Gets current closest scores (15.999 points or closer)
-    matchups = league.box_scores()
+    matchups = league.box_scores(week=week)
     score = []
 
     for i in matchups:
@@ -161,20 +161,23 @@ def get_close_scores(league):
     text = ['Close Scores'] + score
     return '\n'.join(text)
 
-def get_power_rankings(league):
+def get_power_rankings(league, week=None):
+    # power rankings requires an integer value, so this grabs the current week for that
+    if not week:
+        week = league.current_week
     #Gets current week's power rankings
     #Using 2 step dominance, as well as a combination of points scored and margin of victory.
     #It's weighted 80/15/5 respectively
-    power_rankings = league.power_rankings(week=-1)
+    power_rankings = league.power_rankings(week=week)
 
     score = ['%s - %s' % (i[0], i[1].team_name) for i in power_rankings
              if i]
     text = ['Power Rankings'] + score
     return '\n'.join(text)
 
-def get_trophies(league):
+def get_trophies(league, week=None):
     #Gets trophies for highest score, lowest score, closest score, and biggest win
-    matchups = league.box_scores()
+    matchups = league.box_scores(week=week)
     low_score = 9999
     low_team_name = ''
     high_score = -1
@@ -277,7 +280,7 @@ def bot_main(function):
         print(get_projected_scoreboard(league))
         print(get_close_scores(league))
         print(get_power_rankings(league))
-        print(get_trophies(league))
+        print(get_scoreboard_short(league))
         function="get_final"
         bot.send_message("Testing")
         slack_bot.send_message("Testing")
@@ -286,10 +289,10 @@ def bot_main(function):
     text = ''
     if function=="get_matchups":
         text = get_matchups(league)
-        text = text + "\n" + get_projected_scoreboard(league)
+        text = text + "\n\n" + get_projected_scoreboard(league)
     elif function=="get_scoreboard_short":
         text = get_scoreboard_short(league)
-        text = text + "\n" + get_projected_scoreboard(league)
+        text = text + "\n\n" + get_projected_scoreboard(league)
     elif function=="get_projected_scoreboard":
         text = get_projected_scoreboard(league)
     elif function=="get_close_scores":
@@ -299,8 +302,10 @@ def bot_main(function):
     elif function=="get_trophies":
         text = get_trophies(league)
     elif function=="get_final":
-        text = "Final " + get_scoreboard_short(league)
-        text = text + "\n\n" + get_trophies(league)
+        # on Tuesday we need to get the scores of last week
+        week = league.current_week - 1
+        text = "Final " + get_scoreboard_short(league, week=week)
+        text = text + "\n\n" + get_trophies(league, week=week)
     elif function=="init":
         try:
             text = os.environ["INIT_MSG"]
@@ -314,6 +319,10 @@ def bot_main(function):
         bot.send_message(text)
         slack_bot.send_message(text)
         discord_bot.send_message(text)
+
+    if test:
+        #print "get_final" function
+        print(text)
 
 
 if __name__ == '__main__':
