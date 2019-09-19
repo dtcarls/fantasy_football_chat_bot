@@ -280,10 +280,7 @@ def bot_main(function):
         print(get_projected_scoreboard(league))
         print(get_close_scores(league))
         print(get_power_rankings(league))
-        print(get_trophies(league))
-        # get last weeks scores
-        week = league.current_week - 1
-        print(get_scoreboard_short(league, week=week))
+        print(get_scoreboard_short(league))
         function="get_final"
         bot.send_message("Testing")
         slack_bot.send_message("Testing")
@@ -292,10 +289,10 @@ def bot_main(function):
     text = ''
     if function=="get_matchups":
         text = get_matchups(league)
-        text = text + "\n" + get_projected_scoreboard(league)
+        text = text + "\n\n" + get_projected_scoreboard(league)
     elif function=="get_scoreboard_short":
         text = get_scoreboard_short(league)
-        text = text + "\n" + get_projected_scoreboard(league)
+        text = text + "\n\n" + get_projected_scoreboard(league)
     elif function=="get_projected_scoreboard":
         text = get_projected_scoreboard(league)
     elif function=="get_close_scores":
@@ -322,6 +319,10 @@ def bot_main(function):
         bot.send_message(text)
         slack_bot.send_message(text)
         discord_bot.send_message(text)
+
+    if test:
+        #print "get_final" function
+        print(text)
 
 
 if __name__ == '__main__':
