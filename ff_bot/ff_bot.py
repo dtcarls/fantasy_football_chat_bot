@@ -134,6 +134,12 @@ def get_projected_total(lineup):
             else:
                 total_projected += i.projected_points
     return total_projected
+    
+def all_played(lineup):
+    for i in lineup:
+        if i.slot_position != 'BE' and i.game_played < 100:
+            return False
+    return True
 
 def get_matchups(league, week=None):
     #Gets current week's Matchups
@@ -153,11 +159,11 @@ def get_close_scores(league, week=None):
     for i in matchups:
         if i.away_team:
             diffScore = i.away_score - i.home_score
-            if -16 < diffScore < 16:
+            if -16 < diffScore < 16 and all_played(i.home_lineup) and all_played(i.away_lineup):
                 score += ['%s %.2f - %.2f %s' % (i.home_team.team_abbrev, i.home_score,
                         i.away_score, i.away_team.team_abbrev)]
     if not score:
-        score = ['None']
+        return('')
     text = ['Close Scores'] + score
     return '\n'.join(text)
 
