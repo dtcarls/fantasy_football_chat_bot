@@ -159,7 +159,7 @@ def get_close_scores(league, week=None):
     for i in matchups:
         if i.away_team:
             diffScore = i.away_score - i.home_score
-            if -16 < diffScore < 16 and all_played(i.home_lineup) and all_played(i.away_lineup):
+            if ( -16 < diffScore < 0 and not all_played(i.away_lineup)) or (0 < diffScore < 16 and not all_played(i.home_lineup)):
                 score += ['%s %.2f - %.2f %s' % (i.home_team.team_abbrev, i.home_score,
                         i.away_score, i.away_team.team_abbrev)]
     if not score:
