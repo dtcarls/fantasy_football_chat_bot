@@ -6,3 +6,8 @@ build/
 dist/
 venv/
 env/
+Pipfile
+local.settings.json
+.venv
+.python_packages
+fantasy_football_chat_bot.zip
