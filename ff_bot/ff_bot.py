@@ -277,7 +277,7 @@ def bot_main(function):
     if swid == '{1}' and espn_s2 == '1':
         league = League(league_id, year)
     else:
-        league = League(league_id, year, espn_s2, swid)
+        league = League(league_id, year, espn_s2=espn_s2, swid=swid)
 
     test = False
     if test:
