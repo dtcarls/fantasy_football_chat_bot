@@ -129,11 +129,17 @@ def get_projected_total(lineup):
     total_projected = 0
     for i in lineup:
         if i.slot_position != 'BE':
-            if i.points != 0:
+            if i.points != 0 or i.game_played > 0:
                 total_projected += i.points
             else:
                 total_projected += i.projected_points
     return total_projected
+    
+def all_played(lineup):
+    for i in lineup:
+        if i.slot_position != 'BE' and i.game_played < 100:
+            return False
+    return True
 
 def get_matchups(league, week=None):
     #Gets current week's Matchups
@@ -153,11 +159,11 @@ def get_close_scores(league, week=None):
     for i in matchups:
         if i.away_team:
             diffScore = i.away_score - i.home_score
-            if -16 < diffScore < 16:
+            if ( -16 < diffScore <= 0 and not all_played(i.away_lineup)) or (0 <= diffScore < 16 and not all_played(i.home_lineup)):
                 score += ['%s %.2f - %.2f %s' % (i.home_team.team_abbrev, i.home_score,
                         i.away_score, i.away_team.team_abbrev)]
     if not score:
-        score = ['None']
+        return('')
     text = ['Close Scores'] + score
     return '\n'.join(text)
 
@@ -271,7 +277,7 @@ def bot_main(function):
     if swid == '{1}' and espn_s2 == '1':
         league = League(league_id, year)
     else:
-        league = League(league_id, year, espn_s2, swid)
+        league = League(league_id, year, espn_s2=espn_s2, swid=swid)
 
     test = False
     if test:
