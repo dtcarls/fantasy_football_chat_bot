@@ -208,7 +208,8 @@ def get_trophies(league, week=None):
         if i.away_score < low_score:
             low_score = i.away_score
             low_team_name = i.away_team.team_name
-        if abs(i.away_score - i.home_score) < closest_score:
+        if i.away_score - i.home_score != 0 and \
+            abs(i.away_score - i.home_score) < closest_score:
             closest_score = abs(i.away_score - i.home_score)
             if i.away_score - i.home_score < 0:
                 close_winner = i.home_team.team_name
