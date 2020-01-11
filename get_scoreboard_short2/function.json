@@ -6,7 +6,7 @@
       "name": "getScoreboardShort2",
       "type": "timerTrigger",
       "direction": "in",
-      "schedule": "0 0 13,17 * * sun"
+      "schedule": "0 59 20,23 * * sun"
     }
   ]
 }

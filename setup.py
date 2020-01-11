@@ -9,19 +9,19 @@ setup(
 
     version='0.2.0',
 
-    description='ESPN fantasy football GroupMe Bot',
+    description='ESPN fantasy football chat Bot',
 
     author='Dean Carlson',
 
     author_email='deantcarlson@gmail.com',
 
-    install_requires=['requests>=2.0.0,<3.0.0', 'ff_espn_api>=1.1.1', 'apscheduler>3.0.0'],
+    install_requires=['requests>=2.0.0,<3.0.0', 'ff_espn_api==1.1.9'],
 
     test_suite='nose.collector',
 
     tests_require=['nose', 'requests_mock'],
 
-    url='https://github.com/dtcarls/ff_bot',
+    url='https://github.com/dtcarls/fantasy_football_chat_bot',
 
     classifiers=[
         'Natural Language :: English',

@@ -1,9 +1,9 @@
 {
-    "azureFunctions.deploySubpath": "fantasy_football_chat_bot.zip",
+    "azureFunctions.deploySubpath": ".",
+    "azureFunctions.scmDoBuildDuringDeployment": true,
     "azureFunctions.pythonVenv": ".venv",
     "azureFunctions.projectLanguage": "Python",
     "azureFunctions.projectRuntime": "~2",
-    "debug.internalConsoleOptions": "neverOpen",
-    "azureFunctions.preDeployTask": "func: pack",
-    "python.pythonPath": "c:\\Users\\mistadde\\personal-source\\fantasy_football_chat_bot\\.venv\\Scripts\\python.exe"
+    "azureFunctions.preDeployTask": "func: pack --build-native-deps",
+    "python.pythonPath": ".venv/bin/python"
 }

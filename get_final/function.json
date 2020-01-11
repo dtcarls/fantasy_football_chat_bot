@@ -6,7 +6,7 @@
       "name": "getFinal",
       "type": "timerTrigger",
       "direction": "in",
-      "schedule": "0 30 7 * * tue"
+      "schedule": "0 30 12 * * tue"
     }
   ]
 }

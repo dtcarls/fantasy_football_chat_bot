@@ -6,7 +6,7 @@
       "name": "getCloseScores",
       "type": "timerTrigger",
       "direction": "in",
-      "schedule": "0 30 18 * * mon"
+      "schedule": "0 30 23 * * mon"
     }
   ]
 }

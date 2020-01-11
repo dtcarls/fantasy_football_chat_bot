@@ -2,4 +2,5 @@
 .vscode
 local.settings.json
 test
+venv
 .venv

@@ -11,3 +11,5 @@ local.settings.json
 .venv
 .python_packages
 fantasy_football_chat_bot.zip
+.telemetry
+.DS_Store

@@ -7,5 +7,5 @@ It appears you cannot pass a static variable to the function
 method, so this shim is an easy solution
 """
 
-def main(get_matchups: func.TimerRequest) -> None:
+def main(getMatchups: func.TimerRequest) -> None:
     ff_bot.bot_main("get_matchups")

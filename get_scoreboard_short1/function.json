@@ -6,7 +6,7 @@
       "name": "getScoreboardShort1",
       "type": "timerTrigger",
       "direction": "in",
-      "schedule": "0 30 7 * * fri,mon"
+      "schedule": "0 30 12 * * fri,mon"
     }
   ]
 }

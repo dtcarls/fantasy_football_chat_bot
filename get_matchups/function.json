@@ -6,7 +6,7 @@
       "name": "getMatchups",
       "type": "timerTrigger",
       "direction": "in",
-      "schedule": "0 30 12 * * thu"
+      "schedule": "0 30 0 * * fri"
     }
   ]
 }

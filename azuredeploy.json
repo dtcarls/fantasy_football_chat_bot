@@ -5,7 +5,7 @@
       "appName": {
         "type": "string",
         "metadata": {
-          "description": "The name of the function app that you wish to create."
+          "description": "Fantasy Sports Chat Bot."
         }
       },
       "location": {
@@ -19,8 +19,19 @@
         "type": "string",
         "metadata": {
           "description": "This is your Webhook URL from the Slack App page (REQUIRED IF USING SLACK)"
-        },
-        "minLength": 10
+        }
+      },
+      "DISCORD_WEBHOOK_URL": {
+        "type": "string",
+        "metadata": {
+          "description": "This is your Webhook URL from the Discord (REQUIRED IF USING DISCORD)"
+        }
+      },
+      "BOT_ID": {
+        "type": "string",
+        "metadata": {
+          "description": "This is your GroupMe Bot ID (REQUIRED IF USING GROUPME)"
+        }
       },
       "LEAGUE_ID": {
         "type": "string",
@@ -117,6 +128,14 @@
                 "value": "[parameters('SLACK_WEBHOOK_URL')]"
               },
               {
+                "name": "DISCORD_WEBHOOK_URL",
+                "value": "[parameters('DISCORD_WEBHOOK_URL')]"
+              },
+              {
+                "name": "BOT_ID",
+                "value": "[parameters('BOT_ID')]"
+              },
+              {
                 "name": "LEAGUE_ID",
                 "value": "[parameters('LEAGUE_ID')]"
               },
@@ -149,8 +168,8 @@
               "[resourceId('Microsoft.Web/Sites', variables('functionAppName'))]"
             ],
             "properties": {
-              "RepoUrl": "https://github.com/mikaelweave/fantasy_football_chat_bot.git",
-              "branch": "master",
+              "RepoUrl": "https://github.com/dtcarls/fantasy_football_chat_bot.git",
+              "branch": "azure-serverless",
               "publishRunbook": true,
               "IsManualIntegration": true
             }
