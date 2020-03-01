@@ -1,9 +1,9 @@
 from setuptools import setup
 
 setup(
-    name='ff_bot',
+    name='fantasy_football_bot',
 
-    packages=['ff_bot'],
+    packages=['fantasy_football_bot'],
 
     include_package_data=True,
 
@@ -15,7 +15,7 @@ setup(
 
     author_email='deantcarlson@gmail.com',
 
-    install_requires=['requests>=2.0.0,<3.0.0', 'ff_espn_api==1.1.9'],
+    install_requires=['requests>=2.0.0,<3.0.0', 'ff_espn_api>=1.1.9'],
 
     test_suite='nose.collector',
 

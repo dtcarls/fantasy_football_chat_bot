@@ -1,11 +1,7 @@
 import unittest
-
-
 import requests_mock
 
-
-from ff_bot.ff_bot import (DiscordBot, DiscordException, )
-
+from fantasy_football_bot.fantasy_football_bot import (DiscordBot, DiscordException, )
 
 class DiscordTestCase(unittest.TestCase):
     '''Test DiscordBot class'''

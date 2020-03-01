@@ -1,1 +1,1 @@
-worker: python3 ff_bot/ff_bot.py
+worker: python3 fantasy_football_bot/fantasy_football_bot.py

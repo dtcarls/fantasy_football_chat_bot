@@ -1,5 +1,5 @@
 import azure.functions as func
-from ..ff_bot import ff_bot
+from ..fantasy_football_bot import fantasy_football_bot
 
 """
 This file is a wrapper to allow Azure Functions to call bot_main
@@ -8,4 +8,4 @@ method, so this shim is an easy solution
 """
 
 def main(getScoreboardShort2: func.TimerRequest) -> None:
-    ff_bot.bot_main("get_scoreboard_short")
+    fantasy_football_bot.bot_main("get_scoreboard_short")

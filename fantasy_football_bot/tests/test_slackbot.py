@@ -1,11 +1,7 @@
 import unittest
-
-
 import requests_mock
 
-
-from ff_bot.ff_bot import (SlackBot, SlackException, )
-
+from fantasy_football_bot.fantasy_football_bot import (SlackBot, SlackException, )
 
 class SlackTestCase(unittest.TestCase):
     '''Test SlackBot class'''

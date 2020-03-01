@@ -10,8 +10,8 @@
     "chat bot",
     "ff"
   ],
-  "website": "https://github.com/dtcarls/ff_bot/",
-  "repository": "https://github.com/dtcarls/ff_bot/",
+  "website": "https://github.com/dtcarls/fantasy_football_bot/",
+  "repository": "https://github.com/dtcarls/fantasy_football_bot/",
   "env": {
     "BOT_ID": {
       "description": "GroupMe Bot ID",

@@ -3,7 +3,7 @@
     "azureFunctions.scmDoBuildDuringDeployment": true,
     "azureFunctions.pythonVenv": ".venv",
     "azureFunctions.projectLanguage": "Python",
-    "azureFunctions.projectRuntime": "~2",
+    "azureFunctions.projectRuntime": "~3",
     "azureFunctions.preDeployTask": "func: pack --build-native-deps",
     "python.pythonPath": ".venv/bin/python"
 }
