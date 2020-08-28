@@ -272,21 +272,14 @@ def bot_main(function):
     except KeyError:
         espn_s2 = '1'
 
-    try:
-        username = os.environ["ESPN_USERNAME"]
-    except KeyError:
-        username = "-1"
-    
-    try:
-        password = os.environ["ESPN_PASSWORD"]
-    except KeyError:
-        password = "-1"
+    username = os.environ.get("ESPN_USERNAME")
+    password = os.environ.get("ESPN_PASSWORD")
 
     bot = GroupMeBot(bot_id)
     slack_bot = SlackBot(slack_webhook_url)
     discord_bot = DiscordBot(discord_webhook_url)
 
-    if username != "-1" and password != "-1":
+    if username and password:
         league = League(league_id=league_id, year=year, username=username, password=password)
     elif swid == '{1}' and espn_s2 == '1':
         league = League(league_id=league_id, year=year)
