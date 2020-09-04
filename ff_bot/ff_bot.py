@@ -286,8 +286,8 @@ def bot_main(function):
     slack_bot = SlackBot(slack_webhook_url)
     discord_bot = DiscordBot(discord_webhook_url)
 
-    if username and password:
-        league = League(league_id=league_id, year=year, username=username, password=password)
+    if espn_username and espn_password:
+        league = League(league_id=league_id, year=year, username=espn_username, password=espn_password)
     elif swid == '{1}' and espn_s2 == '1':
         league = League(league_id=league_id, year=year)
     else:
