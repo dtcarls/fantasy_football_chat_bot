@@ -225,6 +225,8 @@ python3 setup.py install
 - LEAGUE_YEAR: ESPN League year to look at (2019 by default)
 - TIMEZONE: The timezone that the messages will look to send in. (America/New_York by default)
 - INIT_MSG: The message that the bot will say when it is started (“Hi” by default, can be blank for no message)
+- ESPN_USERNAME: Used for private leagues. See [Private Leagues Section](#private-leagues) for documentation
+- ESPN_PASSWORD: Used for private leagues. See [Private Leagues Section](#private-leagues) for documentation
 - ESPN_S2: Used for private leagues. See [Private Leagues Section](#private-leagues) for documentation
 - SWID: Used for private leagues. See [Private Leagues Section](#private-leagues) for documentation
 
