@@ -154,8 +154,8 @@ You're done! You now have a fully featured GroupMe/Slack/Discord chat bot for ES
 Unfortunately to do auto deploys of the latest version you need admin access to the repository on git. You can check for updates on the github page (https://github.com/dtcarls/ff_bot/commits/master) and click the deploy button again; however, this will deploy a new instance and the variables will need to be edited again.
 
 #### Private Leagues
-For private league you will need to get your swid and espn_s2.  
-You can find these two values after logging into your espn fantasy football account on espn's website.  
+For private league you will need your username and password or your swid and espn_s2.  
+You can find swid and espn_s2 values after logging into your espn fantasy football account on espn's website.  
 (Chrome Browser)   
 Right click anywhere on the website and click inspect option.  
 From there click Application on the top bar. 
@@ -222,7 +222,9 @@ python3 setup.py install
 - END_DATE: This is when the bot will stop paying attention and stop sending messages to your chat. (2019-12-30 by default)
 - LEAGUE_YEAR: ESPN League year to look at (2019 by default)
 - TIMEZONE: The timezone that the messages will look to send in. (America/New_York by default)
-- INIT_MSG: The message that the bot will say when it is started (“Hi” by default, can be blank for no message)
+- INIT_MSG: The message that the bot will say when it is started (“Hi” by default, can be blank for no message)  
+- ESPN_USERNAME: Used for private leagues. See [Private Leagues Section](#private-leagues) for documentation
+- ESPN_PASSWORD: Used for private leagues. See [Private Leagues Section](#private-leagues) for documentation
 - ESPN_S2: Used for private leagues. See [Private Leagues Section](#private-leagues) for documentation
 - SWID: Used for private leagues. See [Private Leagues Section](#private-leagues) for documentation
 

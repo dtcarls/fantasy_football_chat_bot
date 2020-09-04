@@ -3,7 +3,7 @@ import json
 import os
 import random
 from apscheduler.schedulers.blocking import BlockingScheduler
-from ff_espn_api import League
+from espn_api.football import League
 
 class GroupMeException(Exception):
     pass
@@ -255,7 +255,7 @@ def bot_main(function):
     try:
         year = int(os.environ["LEAGUE_YEAR"])
     except KeyError:
-        year=2019
+        year=2020
 
     try:
         swid = os.environ["SWID"]
@@ -272,13 +272,19 @@ def bot_main(function):
     except KeyError:
         espn_s2 = '1'
 
+    username = os.environ.get("ESPN_USERNAME")
+    password = os.environ.get("ESPN_PASSWORD")
+
     bot = GroupMeBot(bot_id)
     slack_bot = SlackBot(slack_webhook_url)
     discord_bot = DiscordBot(discord_webhook_url)
-    if swid == '{1}' and espn_s2 == '1':
-        league = League(league_id, year)
+
+    if username and password:
+        league = League(league_id=league_id, year=year, username=username, password=password)
+    elif swid == '{1}' and espn_s2 == '1':
+        league = League(league_id=league_id, year=year)
     else:
-        league = League(league_id, year, espn_s2=espn_s2, swid=swid)
+        league = League(league_id=league_id, year=year, espn_s2=espn_s2, swid=swid)
 
     test = False
     if test:
