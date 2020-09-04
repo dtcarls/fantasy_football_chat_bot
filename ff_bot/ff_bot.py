@@ -272,6 +272,16 @@ def bot_main(function):
     except KeyError:
         espn_s2 = '1'
 
+    try:
+        espn_username = os.environ["ESPN_USERNAME"]
+    except KeyError:
+        espn_username = '1'
+
+    try:
+        espn_password = os.environ["ESPN_PASSWORD"]
+    except KeyError:
+        espn_password = '1'
+
     bot = GroupMeBot(bot_id)
     slack_bot = SlackBot(slack_webhook_url)
     discord_bot = DiscordBot(discord_webhook_url)
