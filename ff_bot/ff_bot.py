@@ -3,7 +3,7 @@ import json
 import os
 import random
 from apscheduler.schedulers.blocking import BlockingScheduler
-from ff_espn_api import League
+from espn_api.football import League
 
 class GroupMeException(Exception):
     pass
@@ -134,7 +134,7 @@ def get_projected_total(lineup):
             else:
                 total_projected += i.projected_points
     return total_projected
-    
+
 def all_played(lineup):
     for i in lineup:
         if i.slot_position != 'BE' and i.game_played < 100:

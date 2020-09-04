@@ -10,8 +10,8 @@
     "chat bot",
     "ff"
   ],
-  "website": "https://github.com/dtcarls/ff_bot/",
-  "repository": "https://github.com/dtcarls/ff_bot/",
+  "website": "https://github.com/dtcarls/fantasy_football_chat_bot/",
+  "repository": "https://github.com/dtcarls/fantasy_football_chat_bot/",
   "env": {
     "BOT_ID": {
       "description": "GroupMe Bot ID",
@@ -31,7 +31,7 @@
     },
     "LEAGUE_YEAR": {
       "description": "ESPN League Year",
-      "value": "2019"
+      "value": "2020"
     },
     "TIMEZONE": {
       "description": "League timezone for sending messages",
@@ -39,15 +39,15 @@
     },
     "START_DATE": {
       "description": "Season Start Date",
-      "value": "2019-09-04"
+      "value": "2020-09-10"
     },
     "END_DATE": {
       "description": "Season End Date",
-      "value": "2019-12-30"
+      "value": "2020-12-30"
     },
     "INIT_MSG": {
       "description": "Bot Init Message",
-      "value": "Hi"
+      "value": "Successfully installed https://github.com/dtcarls/fantasy_football_chat_bot you can now remove this init_msg"
     }
   }
 }
