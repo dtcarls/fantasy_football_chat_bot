@@ -144,6 +144,8 @@ Note: App will restart when you change any variable so your chat room may be sem
 - INIT_MSG: The message that the bot will say when it is started (“Hi” by default, can be blank for no message)
 - ESPN_S2: Used for private leagues. See [Private Leagues Section](#private-leagues) for documentation
 - SWID: Used for private leagues. See [Private Leagues Section](#private-leagues) for documentation
+- ESPN_USERNAME: Used for private leagues. See [Private Leagues Section](#private-leagues) for documentation **Experimental, may not work**
+- ESPN_PASSWORD: Used for private leagues. See [Private Leagues Section](#private-leagues) for documentation **Experimental, may not work**
 
 After you have setup your variables you will need to turn it on. Navigate to the "Resources" tab of your Heroku app Dashboard.
 You should see something like below. Click the pencil on the right and toggle the buton so it is blue like depicted and click "Confirm."
@@ -162,7 +164,7 @@ From there click Application on the top bar.
 On the left under Storage section click Cookies then http://fantasy.espn.com.
 From there you should be able to find your swid and espn_s2 variables and values.
 
-There is a new option to use a username and password for espn to access private leagues.
+There is a new **Experimental (may not work)** option to use a username and password for espn to access private leagues instead of having to use swid and s2.
 
 ## Troubleshooting / FAQ
 
@@ -225,10 +227,10 @@ python3 setup.py install
 - LEAGUE_YEAR: ESPN League year to look at (2019 by default)
 - TIMEZONE: The timezone that the messages will look to send in. (America/New_York by default)
 - INIT_MSG: The message that the bot will say when it is started (“Hi” by default, can be blank for no message)
-- ESPN_USERNAME: Used for private leagues. See [Private Leagues Section](#private-leagues) for documentation
-- ESPN_PASSWORD: Used for private leagues. See [Private Leagues Section](#private-leagues) for documentation
 - ESPN_S2: Used for private leagues. See [Private Leagues Section](#private-leagues) for documentation
 - SWID: Used for private leagues. See [Private Leagues Section](#private-leagues) for documentation
+- ESPN_USERNAME: Used for private leagues. See [Private Leagues Section](#private-leagues) for documentation **Experimental, may not work**
+- ESPN_PASSWORD: Used for private leagues. See [Private Leagues Section](#private-leagues) for documentation **Experimental, may not work**
 
 ### Running with Docker
 
