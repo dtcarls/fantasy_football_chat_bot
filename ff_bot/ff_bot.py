@@ -134,7 +134,7 @@ def get_projected_total(lineup):
             else:
                 total_projected += i.projected_points
     return total_projected
-    
+
 def all_played(lineup):
     for i in lineup:
         if i.slot_position != 'BE' and i.game_played < 100:
@@ -272,15 +272,22 @@ def bot_main(function):
     except KeyError:
         espn_s2 = '1'
 
-    username = os.environ.get("ESPN_USERNAME")
-    password = os.environ.get("ESPN_PASSWORD")
+    try:
+        espn_username = os.environ["ESPN_USERNAME"]
+    except KeyError:
+        espn_username = '1'
+
+    try:
+        espn_password = os.environ["ESPN_PASSWORD"]
+    except KeyError:
+        espn_password = '1'
 
     bot = GroupMeBot(bot_id)
     slack_bot = SlackBot(slack_webhook_url)
     discord_bot = DiscordBot(discord_webhook_url)
 
-    if username and password:
-        league = League(league_id=league_id, year=year, username=username, password=password)
+    if espn_username and espn_password:
+        league = League(league_id=league_id, year=year, username=espn_username, password=espn_password)
     elif swid == '{1}' and espn_s2 == '1':
         league = League(league_id=league_id, year=year)
     else:
