@@ -144,8 +144,8 @@ Note: App will restart when you change any variable so your chat room may be sem
 - INIT_MSG: The message that the bot will say when it is started (“Hi” by default, can be blank for no message)
 - ESPN_S2: Used for private leagues. See [Private Leagues Section](#private-leagues) for documentation
 - SWID: Used for private leagues. See [Private Leagues Section](#private-leagues) for documentation
-- ESPN_USERNAME: Used for private leagues. See [Private Leagues Section](#private-leagues) for documentation **Experimental, may not work**
-- ESPN_PASSWORD: Used for private leagues. See [Private Leagues Section](#private-leagues) for documentation **Experimental, may not work**
+- ESPN_USERNAME: Used for private leagues. See [Private Leagues Section](#private-leagues) for documentation **Experimental, currently not working**
+- ESPN_PASSWORD: Used for private leagues. See [Private Leagues Section](#private-leagues) for documentation **Experimental, currently not working**
 
 After you have setup your variables you will need to turn it on. Navigate to the "Resources" tab of your Heroku app Dashboard.
 You should see something like below. Click the pencil on the right and toggle the buton so it is blue like depicted and click "Confirm."
@@ -229,8 +229,8 @@ python3 setup.py install
 - INIT_MSG: The message that the bot will say when it is started (“Hi” by default, can be blank for no message)
 - ESPN_S2: Used for private leagues. See [Private Leagues Section](#private-leagues) for documentation
 - SWID: Used for private leagues. See [Private Leagues Section](#private-leagues) for documentation
-- ESPN_USERNAME: Used for private leagues. See [Private Leagues Section](#private-leagues) for documentation **Experimental, may not work**
-- ESPN_PASSWORD: Used for private leagues. See [Private Leagues Section](#private-leagues) for documentation **Experimental, may not work**
+- ESPN_USERNAME: Used for private leagues. See [Private Leagues Section](#private-leagues) for documentation **Experimental, currently not working**
+- ESPN_PASSWORD: Used for private leagues. See [Private Leagues Section](#private-leagues) for documentation **Experimental, currently not working**
 
 ### Running with Docker
 
