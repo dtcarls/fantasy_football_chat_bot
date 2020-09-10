@@ -349,12 +349,12 @@ if __name__ == '__main__':
     try:
         ff_start_date = os.environ["START_DATE"]
     except KeyError:
-        ff_start_date='2019-09-04'
+        ff_start_date='2020-09-10'
 
     try:
         ff_end_date = os.environ["END_DATE"]
     except KeyError:
-        ff_end_date='2019-12-30'
+        ff_end_date='2020-12-30'
 
     try:
         my_timezone = os.environ["TIMEZONE"]
