@@ -24,6 +24,23 @@ ESPN Fantasy Football information to a GroupMe, Discord or Slack chat room.
 - Matchups - Thu - 19:30 east coast time (Upcoming matchups)
 - Scoreboard - Sun - 16:00, 20:00 east coast time (Current ESPN fantasy scoreboard)
 
+Table of Contents
+=================
+
+  * [Setting up GroupMe, Discord, or Slack, and deploying app in Heroku](#setting-up-groupme-discord-or-slack-and-deploying-app-in-heroku)
+     * [GroupMe Setup](#groupme-setup)
+     * [Slack setup](#slack-setup)
+     * [Discord setup](#discord-setup)
+     * [Heroku setup](#heroku-setup)
+     * [Private Leagues](#private-leagues)
+  * [Troubleshooting / FAQ](#troubleshooting--faq)
+  * [Getting Started for development and testing](#getting-started-for-development-and-testing)
+     * [Installing for development](#installing-for-development)
+     * [Environment Variables](#environment-variables)
+     * [Running with Docker](#running-with-docker)
+     * [Running without Docker](#running-without-docker)
+     * [Running the tests](#running-the-tests)
+
 ## Setting up GroupMe, Discord, or Slack, and deploying app in Heroku
 
 **Do not deploy 2 of the same bot in the same chat. In general, you should let your commissioner do the setup**
