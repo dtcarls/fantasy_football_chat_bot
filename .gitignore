@@ -1,5 +1,6 @@
 *.pyc
 *.egg-info
+.eggs*
 exports.sh
 run*
 build/
@@ -8,3 +9,4 @@ venv/
 .venv/
 env/
 *.zip
+.vscode
