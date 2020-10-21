@@ -174,15 +174,30 @@ def get_power_rankings(league, week=None):
     #Gets current week's power rankings
     #Using 2 step dominance, as well as a combination of points scored and margin of victory.
     #It's weighted 80/15/5 respectively
-    power_rankings = new_power_rankings(league, week=week)
+    power_rankings = league.power_rankings(week=week)
 
     score = ['%s - %s' % (i[0], i[1].team_name) for i in power_rankings
              if i]
     text = ['Power Rankings'] + score
     return '\n'.join(text)
 
-def new_power_rankings(league, week):
-    '''This script gets power rankings, given an already-connected league and a week to look at. Requires espn_api, numpy'''
+
+def get_projected_win_percent(league, week=None):
+    # power rankings requires an integer value, so this grabs the current week for that
+    if not week:
+        week = league.current_week
+    #Gets current week's power rankings
+    #Using 2 step dominance, as well as a combination of points scored and margin of victory.
+    #It's weighted 80/15/5 respectively
+    power_rankings = projected_win_percent(league, week=week)
+
+    score = ['%s - %s' % (i[0], i[1].team_name) for i in power_rankings
+             if i]
+    text = ['Projected Win %'] + score
+    return '\n'.join(text)
+
+def projected_win_percent(league, week):
+    #This script gets power rankings, given an already-connected league and a week to look at. Requires espn_api
 
     #Get what week most recently passed
     lastWeek = league.current_week
@@ -342,13 +357,14 @@ def bot_main(function):
 #    if espn_username and espn_password:
 #        league = League(league_id=league_id, year=year, username=espn_username, password=espn_password)
 
-    test = False
+    test = True
     if test:
         print(get_matchups(league))
         print(get_scoreboard_short(league))
         print(get_projected_scoreboard(league))
         print(get_close_scores(league))
         print(get_power_rankings(league))
+        print(get_projected_win_percent(league))
         print(get_scoreboard_short(league))
         function="get_final"
         bot.send_message("Testing")
@@ -368,6 +384,8 @@ def bot_main(function):
         text = get_close_scores(league)
     elif function=="get_power_rankings":
         text = get_power_rankings(league)
+    elif function=="get_projected_win_percent":
+        text = get_projected_win_percent(league)
     elif function=="get_trophies":
         text = get_trophies(league)
     elif function=="get_final":
@@ -423,6 +441,9 @@ if __name__ == '__main__':
 
     sched.add_job(bot_main, 'cron', ['get_power_rankings'], id='power_rankings',
         day_of_week='tue', hour=18, minute=30, start_date=ff_start_date, end_date=ff_end_date,
+        timezone=my_timezone, replace_existing=True)
+    sched.add_job(bot_main, 'cron', ['get_projected_win_percent'], id='projected_win_percent',
+        day_of_week='tue', hour=18, minute=31, start_date=ff_start_date, end_date=ff_end_date,
         timezone=my_timezone, replace_existing=True)
     sched.add_job(bot_main, 'cron', ['get_matchups'], id='matchups',
         day_of_week='thu', hour=19, minute=30, start_date=ff_start_date, end_date=ff_end_date,
