@@ -214,14 +214,14 @@ def get_expected_win_percent(league, week=None):
     #Gets current week's power rankings
     #Using 2 step dominance, as well as a combination of points scored and margin of victory.
     #It's weighted 80/15/5 respectively
-    power_rankings = projected_win_percent(league, week=week)
+    power_rankings = expected_win_percent(league, week=week)
 
     score = ['%s - %s' % (i[0], i[1].team_name) for i in power_rankings
              if i]
     text = ['Expected Win %'] + score
     return '\n'.join(text)
 
-def projected_win_percent(league, week):
+def expected_win_percent(league, week):
     #This script gets power rankings, given an already-connected league and a week to look at. Requires espn_api
 
     #Get what week most recently passed
@@ -389,7 +389,7 @@ def bot_main(function):
         print(get_projected_scoreboard(league))
         print(get_close_scores(league))
         print(get_power_rankings(league))
-        print(get_projected_win_percent(league))
+        print(get_expected_win_percent(league))
         print(get_scoreboard_short(league))
         print(get_waiver_report(league))
         function="get_final"
@@ -410,8 +410,8 @@ def bot_main(function):
         text = get_close_scores(league)
     elif function=="get_power_rankings":
         text = get_power_rankings(league)
-    elif function=="get_projected_win_percent":
-        text = get_projected_win_percent(league)
+    elif function=="get_expected_win_percent":
+        text = get_expected_win_percent(league)
     elif function=="get_waiver_report":
         text = get_waiver_report(league)
     elif function=="get_trophies":
