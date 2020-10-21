@@ -357,7 +357,7 @@ def bot_main(function):
 #    if espn_username and espn_password:
 #        league = League(league_id=league_id, year=year, username=espn_username, password=espn_password)
 
-    test = True
+    test = False
     if test:
         print(get_matchups(league))
         print(get_scoreboard_short(league))
