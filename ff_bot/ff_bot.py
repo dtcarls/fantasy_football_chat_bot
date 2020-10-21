@@ -2,7 +2,6 @@ import requests
 import json
 import os
 import random
-import numpy as np
 from apscheduler.schedulers.blocking import BlockingScheduler
 from espn_api.football import League
 
@@ -225,7 +224,7 @@ def new_power_rankings(league, week):
             projRecDicts[i][team] = (float(wins) + (0.5*float(ties)))/float(oppCount) #store the team's projected record for that week
 
     for team in powerRankingDict.keys():			#for each team
-        powerRankingDict[team] = np.sum(np.array([projRecDicts[i][team] for i in range(lastWeek)]))/float(lastWeek) #total up the expected wins from each week, divide by the number of weeks
+        powerRankingDict[team] = sum([projRecDicts[i][team] for i in range(lastWeek)])/float(lastWeek) #total up the expected wins from each week, divide by the number of weeks
 
     powerRankingDictSortedTemp = {k: v for k, v in sorted(powerRankingDict.items(), key=lambda item: item[1],reverse=True)} #sort for presentation purposes
     powerRankingDictSorted = {x: ('{:.3f}'.format(powerRankingDictSortedTemp[x])) for x in powerRankingDictSortedTemp.keys()}  #put into a prettier format
