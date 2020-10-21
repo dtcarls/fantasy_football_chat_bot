@@ -167,6 +167,31 @@ def get_close_scores(league, week=None):
     text = ['Close Scores'] + score
     return '\n'.join(text)
 
+def get_waiver_report(league):
+    activities = league.recent_activity(50)
+    score = []
+
+    date = next(activity.date for activity in activities if activity.actions[0][1] == 'WAVIER ADDED')
+
+    for activity in activities:
+        actions = activity.actions
+        if activity.date == date:
+            if len(actions) == 1:
+                if actions[0][1] == 'WAVIER ADDED':
+                    str = ['%s ADDED %s' % (actions[0][0].team_name, actions[0][2].name)]
+                    score += str
+            elif len(actions) > 1:
+                if actions[0][1] == 'WAVIER ADDED' or  actions[1][1] == 'WAVIER ADDED':
+                    if actions[0][1] == 'WAVIER ADDED':
+                        str = ['%s ADDED %s, DROPPED %s' % (actions[0][0].team_name, actions[0][2].name, actions[1][2].name)]
+                    else:
+                        str = ['%s ADDED %s, DROPPED %s' % (actions[0][0].team_name, actions[1][2].name, actions[0][2].name)]
+                    score += str
+
+    score.reverse()
+    text = ['Waiver Report'] + score
+    return '\n'.join(text)
+
 def get_power_rankings(league, week=None):
     # power rankings requires an integer value, so this grabs the current week for that
     if not week:
@@ -182,7 +207,7 @@ def get_power_rankings(league, week=None):
     return '\n'.join(text)
 
 
-def get_projected_win_percent(league, week=None):
+def get_expected_win_percent(league, week=None):
     # power rankings requires an integer value, so this grabs the current week for that
     if not week:
         week = league.current_week
@@ -193,7 +218,7 @@ def get_projected_win_percent(league, week=None):
 
     score = ['%s - %s' % (i[0], i[1].team_name) for i in power_rankings
              if i]
-    text = ['Projected Win %'] + score
+    text = ['Expected Win %'] + score
     return '\n'.join(text)
 
 def projected_win_percent(league, week):
@@ -366,6 +391,7 @@ def bot_main(function):
         print(get_power_rankings(league))
         print(get_projected_win_percent(league))
         print(get_scoreboard_short(league))
+        print(get_waiver_report(league))
         function="get_final"
         bot.send_message("Testing")
         slack_bot.send_message("Testing")
@@ -386,6 +412,8 @@ def bot_main(function):
         text = get_power_rankings(league)
     elif function=="get_projected_win_percent":
         text = get_projected_win_percent(league)
+    elif function=="get_waiver_report":
+        text = get_waiver_report(league)
     elif function=="get_trophies":
         text = get_trophies(league)
     elif function=="get_final":
@@ -442,7 +470,7 @@ if __name__ == '__main__':
     sched.add_job(bot_main, 'cron', ['get_power_rankings'], id='power_rankings',
         day_of_week='tue', hour=18, minute=30, start_date=ff_start_date, end_date=ff_end_date,
         timezone=my_timezone, replace_existing=True)
-    sched.add_job(bot_main, 'cron', ['get_projected_win_percent'], id='projected_win_percent',
+    sched.add_job(bot_main, 'cron', ['get_expected_win_percent'], id='expected_win_percent',
         day_of_week='tue', hour=18, minute=31, start_date=ff_start_date, end_date=ff_end_date,
         timezone=my_timezone, replace_existing=True)
     sched.add_job(bot_main, 'cron', ['get_matchups'], id='matchups',
@@ -459,6 +487,9 @@ if __name__ == '__main__':
         timezone=my_timezone, replace_existing=True)
     sched.add_job(bot_main, 'cron', ['get_scoreboard_short'], id='scoreboard2',
         day_of_week='sun', hour='16,20', start_date=ff_start_date, end_date=ff_end_date,
+        timezone=game_timezone, replace_existing=True)
+    sched.add_job(bot_main, 'cron', ['get_waiver_report'], id='waiver_report',
+        day_of_week='wed', hour=8, start_date=ff_start_date, end_date=ff_end_date,
         timezone=game_timezone, replace_existing=True)
 
     print("Ready!")
