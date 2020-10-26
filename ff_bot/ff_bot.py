@@ -107,6 +107,7 @@ def random_phrase():
                '*heavy sigh*',
                'Space, space, gotta go to space',
                'This is all Max Verstappen\'s fault',
+               'Behold! Corn!',
                'If you\'re reading this, it\'s too late. Get out now.',
                'I for one welcome our new robot overlords']
     return [random.choice(phrases)]
