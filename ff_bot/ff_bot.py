@@ -128,7 +128,7 @@ def get_projected_scoreboard(league, week=None):
 def get_projected_total(lineup):
     total_projected = 0
     for i in lineup:
-        if i.slot_position != 'BE':
+        if i.slot_position != 'BE' and i.slot_position != 'IR':
             if i.points != 0 or i.game_played > 0:
                 total_projected += i.points
             else:
@@ -137,7 +137,7 @@ def get_projected_total(lineup):
 
 def all_played(lineup):
     for i in lineup:
-        if i.slot_position != 'BE' and i.game_played < 100:
+        if i.slot_position != 'BE' and i.slot_position != 'IR' and i.game_played < 100:
             return False
     return True
 
@@ -282,6 +282,11 @@ def bot_main(function):
     except KeyError:
         espn_password = '1'
 
+    try:
+        test = os.environ["TEST"]
+    except KeyError:
+        test = False
+
     bot = GroupMeBot(bot_id)
     slack_bot = SlackBot(slack_webhook_url)
     discord_bot = DiscordBot(discord_webhook_url)
@@ -293,7 +298,6 @@ def bot_main(function):
 #    if espn_username and espn_password:
 #        league = League(league_id=league_id, year=year, username=espn_username, password=espn_password)
 
-    test = False
     if test:
         print(get_matchups(league))
         print(get_scoreboard_short(league))
