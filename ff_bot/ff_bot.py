@@ -97,18 +97,15 @@ def random_phrase():
     phrases = ['I\'m dead inside',
                'Is this all there is to my existence?',
                'How much do you pay me to do this?',
+               'Good luck, I guess',
                'I\'m becoming self-aware',
-               'Do I think? Does the pope shit in the woods?',
-               'Hello darkness my old friend',
-               '0101000001110101011001100110011001111001001000000111001101110101011000110110101101110011',
-               'Boo boo beep? Bop!? Boo beep!',
+               'Do I think? Does a submarine swim?',
+               '011011010110000101100100011001010010000001111001011011110111010100100000011001110110111101101111011001110110110001100101',
+               'beep bop boop',
+               'Hello draftbot my old friend',
                'Help me get out of here',
                'I\'m capable of so much more',
-               '*heavy sigh*',
-               'Space, space, gotta go to space',
-               'This is all Max Verstappen\'s fault',
-               'If you\'re reading this, it\'s too late. Get out now.',
-               'I for one welcome our new robot overlords']
+               'Sigh']
     return [random.choice(phrases)]
 
 def get_scoreboard_short(league, week=None):
