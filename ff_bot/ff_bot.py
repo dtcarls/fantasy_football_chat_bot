@@ -128,7 +128,7 @@ def get_projected_scoreboard(league, week=None):
 def get_projected_total(lineup):
     total_projected = 0
     for i in lineup:
-        if i.slot_position != 'BE':
+        if i.slot_position != 'BE' and i.slot_position != 'IR':
             if i.points != 0 or i.game_played > 0:
                 total_projected += i.points
             else:
@@ -137,7 +137,7 @@ def get_projected_total(lineup):
 
 def all_played(lineup):
     for i in lineup:
-        if i.slot_position != 'BE' and i.game_played < 100:
+        if i.slot_position != 'BE' and i.slot_position != 'IR' and i.game_played < 100:
             return False
     return True
 
