@@ -20,7 +20,8 @@ ESPN Fantasy Football information to a GroupMe, Discord or Slack chat room.
 - Close Scores - Mon - 18:30 east coast time (Games that are within 16 points of eachother to keep an eye on during the Monday night game)
 - Scoreboard - Mon,Tue,Fri - 7:30 local time (Current ESPN fantasy scoreboard)
 - Trophies- Tue - 7:30 local time (High score, low score, biggest win, closest win)
-- Power rankings - Tue -18:30 local time
+- Power rankings - Tue - 18:30 local time
+- Current standings - Tue - 7:30 local time
 - Matchups - Thu - 19:30 east coast time (Upcoming matchups)
 - Scoreboard - Sun - 16:00, 20:00 east coast time (Current ESPN fantasy scoreboard)
 
@@ -159,6 +160,7 @@ Note: App will restart when you change any variable so your chat room may be sem
 - LEAGUE_YEAR: ESPN League year to look at (2020 by default)
 - TIMEZONE: The timezone that the messages will look to send in. (America/New_York by default)
 - INIT_MSG: The message that the bot will say when it is started (“Hi” by default, can be blank for no message)
+- TOP_HALF_SCORING: If set to True, when standings are posted on Wednesday it will also include top half scoring wins
 - ESPN_S2: Used for private leagues. See [Private Leagues Section](#private-leagues) for documentation
 - SWID: Used for private leagues. See [Private Leagues Section](#private-leagues) for documentation
 - ESPN_USERNAME: Used for private leagues. See [Private Leagues Section](#private-leagues) for documentation **Experimental, currently not working**
@@ -244,6 +246,7 @@ python3 setup.py install
 - LEAGUE_YEAR: ESPN League year to look at (2020 by default)
 - TIMEZONE: The timezone that the messages will look to send in. (America/New_York by default)
 - INIT_MSG: The message that the bot will say when it is started (“Hi” by default, can be blank for no message)
+- TOP_HALF_SCORING: If set to True, when standings are posted on Wednesday it will also include top half scoring wins
 - ESPN_S2: Used for private leagues. See [Private Leagues Section](#private-leagues) for documentation
 - SWID: Used for private leagues. See [Private Leagues Section](#private-leagues) for documentation
 - ESPN_USERNAME: Used for private leagues. See [Private Leagues Section](#private-leagues) for documentation **Experimental, currently not working**
