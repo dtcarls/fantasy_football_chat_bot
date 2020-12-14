@@ -153,7 +153,7 @@ def get_matchups(league, week=None):
     score = ['%s(%s-%s) vs %s(%s-%s)' % (i.home_team.team_name, i.home_team.wins, i.home_team.losses,
              i.away_team.team_name, i.away_team.wins, i.away_team.losses) for i in matchups
              if i.away_team]
-    text = ['Matchups '] + score + random_phrase()
+    text = ['Weekly Matchups '] + score + random_phrase()
     return '\n'.join(text)
 
 def get_close_scores(league, week=None):
@@ -169,7 +169,7 @@ def get_close_scores(league, week=None):
                         i.away_score, i.away_team.team_abbrev)]
     if not score:
         return('')
-    text = ['Close Scores'] + score
+    text = ['Close Scores '] + score
     return '\n'.join(text)
 
 def get_waiver_report(league):
@@ -196,9 +196,9 @@ def get_waiver_report(league):
     report.reverse()
 
     if not report:
-        text = ['Waiver Report %s' % date] + ['No waiver transactions today'] + random_phrase()
+        text = ['Waiver Report %s ' % date] + ['No waiver transactions today'] + random_phrase()
     else:
-        text = ['Waiver Report %s' % date] + report + random_phrase()
+        text = ['Waiver Report %s ' % date] + report + random_phrase()
 
     return '\n'.join(text)
 
@@ -218,7 +218,7 @@ def get_power_rankings(league, week=None):
     wins = ['%s - %s' % (i[0], i[1].team_name) for i in win_percent
              if i]
 
-    text = ['Power Rankings'] + ranks + ['Expected Win %'] + wins + random_phrase()
+    text = ['Power Rankings '] + ranks + ['Expected Win % '] + wins + random_phrase()
 
     return '\n'.join(text)
 
@@ -321,7 +321,7 @@ def get_trophies(league, week=None):
     close_score_str = ['%s barely beat %s by a margin of %.2f' % (close_winner, close_loser, closest_score)]
     blowout_str = ['%s blown out by %s by a margin of %.2f' % (blown_out_team_name, ownerer_team_name, biggest_blowout)]
 
-    text = ['Trophies of the week:'] + low_score_str + high_score_str + close_score_str + blowout_str + random_phrase()
+    text = ['Trophies of the week: '] + low_score_str + high_score_str + close_score_str + blowout_str + random_phrase()
     return '\n'.join(text)
 
 def bot_main(function):
