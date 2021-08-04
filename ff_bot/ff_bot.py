@@ -77,7 +77,8 @@ class DiscordBot(object):
 
     def send_message(self, text):
         #Sends a message to the chatroom
-        message = ">>> {0}".format(text)
+        # message = ">>> {0}".format(text)
+        message = ['%s %s' % Sean.user_id, Sean.emote]
         template = {
                     "content":message
                     }
@@ -96,10 +97,14 @@ class DiscordBot(object):
 class Sean(object):
     user_id = "<@173899115799904256>"
     emote = "<:GRIL:872308201847144510>"
+    team_id = 1
 
 class Austin(object):
     user_id = "<@279807741030170624>"
     emote = "<:FF14:872309590056898612>"
+    team_id = 4
+
+owners = [Sean, Austin]
 
 def random_phrase():
     phrases = ['I\'m dead inside',
@@ -132,9 +137,16 @@ def get_scoreboard_short(league, week=None):
 def get_projected_scoreboard(league, week=None):
     #Gets current week's scoreboard projections
     box_scores = league.box_scores(week=week)
-    score = ['%s %.2f - %.2f %s' % (i.home_team.team_abbrev, get_projected_total(i.home_lineup),
-                                    get_projected_total(i.away_lineup), i.away_team.team_abbrev) for i in box_scores
-             if i.away_team]
+    for i in box_scores:
+        for o in owners:
+            if i.away_team.team_id == o.team_id:
+                away_emote = o.emote
+            else if i.home_team.team_id == o.team_id:
+                home_emote = o.emote
+
+        score = ['%s %s %.2f - %.2f %s %s' % (home_emote, i.home_team.team_abbrev, get_projected_total(i.home_lineup),
+                                            get_projected_total(i.away_lineup), i.away_team.team_abbrev, away_emote) if i.away_team]
+
     text = ['**Approximate Projected Scores**'] + score
     return '\n'.join(text)
 
