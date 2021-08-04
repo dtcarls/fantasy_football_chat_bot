@@ -77,7 +77,7 @@ class DiscordBot(object):
 
     def send_message(self, text):
         #Sends a message to the chatroom
-        message = ">>>{0}".format(text)
+        message = ">>> {0}".format(text)
         template = {
                     "content":message
                     }
@@ -92,6 +92,14 @@ class DiscordBot(object):
                 raise DiscordException('WEBHOOK_URL')
 
             return r
+
+class Sean(object):
+    user_id = "<@173899115799904256>"
+    emote = "<:GRIL:872308201847144510>"
+
+class Austin(object):
+    user_id = "<@279807741030170624>"
+    emote = "<:FF14:872309590056898612>"
 
 def random_phrase():
     phrases = ['I\'m dead inside',
