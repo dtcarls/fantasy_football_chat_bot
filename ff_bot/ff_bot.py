@@ -77,7 +77,7 @@ class DiscordBot(object):
 
     def send_message(self, text):
         #Sends a message to the chatroom
-        message = "```{0}```".format(text)
+        message = ">>>{0}".format(text)
         template = {
                     "content":message
                     }
@@ -127,7 +127,7 @@ def get_projected_scoreboard(league, week=None):
     score = ['%s %.2f - %.2f %s' % (i.home_team.team_abbrev, get_projected_total(i.home_lineup),
                                     get_projected_total(i.away_lineup), i.away_team.team_abbrev) for i in box_scores
              if i.away_team]
-    text = ['Approximate Projected Scores'] + score
+    text = ['**Approximate Projected Scores**'] + score
     return '\n'.join(text)
 
 def get_projected_total(lineup):
