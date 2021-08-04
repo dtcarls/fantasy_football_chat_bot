@@ -77,8 +77,7 @@ class DiscordBot(object):
 
     def send_message(self, text):
         #Sends a message to the chatroom
-        # message = ">>> {0}".format(text)
-        message = ['%s %s' % Sean.user_id, Sean.emote]
+        message = ">>> {0} ".format(text)
         template = {
                     "content":message
                     }
@@ -94,17 +93,32 @@ class DiscordBot(object):
 
             return r
 
-class Sean(object):
-    user_id = "<@173899115799904256>"
-    emote = "<:GRIL:872308201847144510>"
-    team_id = 1
+emotes = dict()
+emotes[1] = '<:GRIL:872308201847144510>'
+emotes[2] = ''
+emotes[3] = ''
+emotes[4] = '<:FF14:872309590056898612>'
+emotes[5] = ''
+emotes[6] = ''
+emotes[7] = ''
+emotes[8] = ''
+emotes[9] = ''
+emotes[10] = ''
+emotes[11] = ''
 
-class Austin(object):
-    user_id = "<@279807741030170624>"
-    emote = "<:FF14:872309590056898612>"
-    team_id = 4
-
-owners = [Sean, Austin]
+users = dict()
+users[1] = '<@173899115799904256>'
+users[2] = ''
+users[3] = ''
+users[4] = ''
+# users[4] = '<@279807741030170624>'
+users[5] = ''
+users[6] = ''
+users[7] = ''
+users[8] = ''
+users[9] = ''
+users[10] = ''
+users[11] = ''
 
 def random_phrase():
     phrases = ['I\'m dead inside',
@@ -122,32 +136,26 @@ def random_phrase():
                'This is all Max Verstappen\'s fault',
                'Behold! Corn!',
                'If you\'re reading this, it\'s too late. Get out now.',
-               'I for one welcome our new robot overlords']
-    return [random.choice(phrases)]
+               'I for one welcome our new robot overlords',
+               'What is my purpose?']
+    return ['`' + random.choice(phrases) + '`']
 
 def get_scoreboard_short(league, week=None):
     #Gets current week's scoreboard
     box_scores = league.box_scores(week=week)
-    score = ['%s %.2f - %.2f %s' % (i.home_team.team_abbrev, i.home_score,
-             i.away_score, i.away_team.team_abbrev) for i in box_scores
+    score = ['%s %s %.2f - %.2f %s %s' % (emotes[i.home_team.team_id], i.home_team.team_abbrev, i.home_score,
+             i.away_score, i.away_team.team_abbrev, emotes[i.away_team.team_id]) for i in box_scores
              if i.away_team]
-    text = ['Score Update'] + score
+    text = ['**Score Update** '] + score
     return '\n'.join(text)
 
 def get_projected_scoreboard(league, week=None):
     #Gets current week's scoreboard projections
     box_scores = league.box_scores(week=week)
-    for i in box_scores:
-        for o in owners:
-            if i.away_team.team_id == o.team_id:
-                away_emote = o.emote
-            else if i.home_team.team_id == o.team_id:
-                home_emote = o.emote
-
-        score = ['%s %s %.2f - %.2f %s %s' % (home_emote, i.home_team.team_abbrev, get_projected_total(i.home_lineup),
-                                            get_projected_total(i.away_lineup), i.away_team.team_abbrev, away_emote) if i.away_team]
-
-    text = ['**Approximate Projected Scores**'] + score
+    score = ['%s %s %.2f - %.2f %s %s' % (emotes[i.home_team.team_id], i.home_team.team_abbrev, get_projected_total(i.home_lineup),
+                            get_projected_total(i.away_lineup), i.away_team.team_abbrev, emotes[i.away_team.team_id]) for i in box_scores
+                            if i.away_team]
+    text = ['**Approximate Projected Scores** '] + score
     return '\n'.join(text)
 
 def get_projected_total(lineup):
@@ -166,14 +174,43 @@ def all_played(lineup):
             return False
     return True
 
+def get_inactives(league, week=None):
+    box_scores = league.box_scores(week=week)
+    inactives = [];
+
+    for i in box_scores:
+        for p in i.home_lineup:
+            home_inactive_count = 0
+            if p.slot_position != 'BE' and i.slot_position != 'IR':
+                if p.points <= 0:
+                    home_inactive_count += 1
+
+        if home_inactive_count > 0:
+            inactives += ['%s has %d active player(s) with 0 projected points' % (users[i.home_team.team_id], home_inactive_count)]
+
+        for p in i.away_lineup:
+            away_inactive_count = 0
+            if p.slot_position != 'BE' and i.slot_position != 'IR':
+                if p.points <= 0:
+                    away_inactive_count += 1
+
+        if away_inactive_count > 0:
+            inactives += ['%s has %d active player(s) with 0 projected points' % (users[i.away_team.team_id], away_inactive_count)]
+
+    if not inactives:
+        return('')
+    text = ['**Inactive Player Report** '] + inactives
+    return '\n'.join(text)
+
+
 def get_matchups(league, week=None):
     #Gets current week's Matchups
     matchups = league.box_scores(week=week)
 
-    score = ['%s(%s-%s) vs %s(%s-%s)' % (i.home_team.team_name, i.home_team.wins, i.home_team.losses,
-             i.away_team.team_name, i.away_team.wins, i.away_team.losses) for i in matchups
+    score = ['%s %s(%s-%s) vs %s %s(%s-%s)' % (emotes[i.home_team.team_id], i.home_team.team_name, i.home_team.wins, i.home_team.losses,
+             emotes[i.away_team.team_id], i.away_team.team_name, i.away_team.wins, i.away_team.losses) for i in matchups
              if i.away_team]
-    text = ['Weekly Matchups '] + score + random_phrase()
+    text = ['**Weekly Matchups** '] + score + [' '] + random_phrase()
     return '\n'.join(text)
 
 def get_close_scores(league, week=None):
@@ -185,11 +222,11 @@ def get_close_scores(league, week=None):
         if i.away_team:
             diffScore = i.away_score - i.home_score
             if ( -16 < diffScore <= 0 and not all_played(i.away_lineup)) or (0 <= diffScore < 16 and not all_played(i.home_lineup)):
-                score += ['%s %.2f - %.2f %s' % (i.home_team.team_abbrev, i.home_score,
-                        i.away_score, i.away_team.team_abbrev)]
+                score += ['%s %s %.2f - %.2f %s %s' % (emotes[i.home_team.team_id], i.home_team.team_abbrev, i.home_score,
+                        i.away_score, i.away_team.team_abbrev, emotes[i.away_team.team_id])]
     if not score:
         return('')
-    text = ['Close Scores '] + score
+    text = ['**Close Scores** '] + score
     return '\n'.join(text)
 
 def get_waiver_report(league):
@@ -216,9 +253,9 @@ def get_waiver_report(league):
     report.reverse()
 
     if not report:
-        text = ['Waiver Report %s ' % date] + ['No waiver transactions today'] + random_phrase()
+        text = ['**Waiver Report %s** ' % date] + ['No waiver transactions today'] + [' '] + random_phrase()
     else:
-        text = ['Waiver Report %s ' % date] + report + random_phrase()
+        text = ['**Waiver Report %s** ' % date] + report + [' '] + random_phrase()
 
     return '\n'.join(text)
 
@@ -230,15 +267,24 @@ def get_power_rankings(league, week=None):
     #Using 2 step dominance, as well as a combination of points scored and margin of victory.
     #It's weighted 80/15/5 respectively
     power_rankings = league.power_rankings(week=week)
-    win_percent    = expected_win_percent(league, week=week)
-
 
     ranks = ['%s - %s' % (i[0], i[1].team_name) for i in power_rankings
              if i]
+
+    text = ['**Power Rankings** '] + ranks
+
+    return '\n'.join(text)
+
+def get_expected_win(league, week=None):
+    if not week:
+        week = league.current_week
+
+    win_percent = expected_win_percent(league, week=week)
+
     wins = ['%s - %s' % (i[0], i[1].team_name) for i in win_percent
              if i]
 
-    text = ['Power Rankings '] + ranks + ['Expected Win % '] + wins + random_phrase()
+    text = ['**Expected Win %** '] + wins + [' '] + random_phrase()
 
     return '\n'.join(text)
 
@@ -296,52 +342,78 @@ def get_trophies(league, week=None):
     matchups = league.box_scores(week=week)
     low_score = 9999
     low_team_name = ''
+    low_team_emote = ''
     high_score = -1
     high_team_name = ''
+    high_team_emote = ''
     closest_score = 9999
     close_winner = ''
+    close_winner_emote = ''
     close_loser = ''
+    close_loser_emote = ''
     biggest_blowout = -1
     blown_out_team_name = ''
+    blown_out_emote = ''
     ownerer_team_name = ''
+    ownerer_emote = ''
 
     for i in matchups:
         if i.home_score > high_score:
             high_score = i.home_score
             high_team_name = i.home_team.team_name
+            high_team_emote = emotes[i.home_team.team_id]
         if i.home_score < low_score:
             low_score = i.home_score
             low_team_name = i.home_team.team_name
+            low_team_emote = emotes[i.home_team.team_id]
         if i.away_score > high_score:
             high_score = i.away_score
             high_team_name = i.away_team.team_name
+            high_team_name = emotes[i.away_team.team_id]
         if i.away_score < low_score:
             low_score = i.away_score
             low_team_name = i.away_team.team_name
+            low_team_emote = emotes[i.away_team.team_id]
         if i.away_score - i.home_score != 0 and \
             abs(i.away_score - i.home_score) < closest_score:
             closest_score = abs(i.away_score - i.home_score)
             if i.away_score - i.home_score < 0:
                 close_winner = i.home_team.team_name
+                close_winner_emote = emotes[i.home_team.team_id]
                 close_loser = i.away_team.team_name
+                close_loser_emote = emotes[i.away_team.team_id]
             else:
                 close_winner = i.away_team.team_name
+                close_winner_emote = emotes[i.away_team.team_id]
                 close_loser = i.home_team.team_name
+                close_loser_emote = emotes[i.home_team.team_id]
         if abs(i.away_score - i.home_score) > biggest_blowout:
             biggest_blowout = abs(i.away_score - i.home_score)
             if i.away_score - i.home_score < 0:
                 ownerer_team_name = i.home_team.team_name
+                ownerer_emote = emotes[i.home_team.team_id]
                 blown_out_team_name = i.away_team.team_name
+                blown_out_emote = emotes[i.away_team.team_id]
             else:
                 ownerer_team_name = i.away_team.team_name
+                ownerer_emote = emotes[i.away_team.team_id]
                 blown_out_team_name = i.home_team.team_name
+                blown_out_emote = emotes[i.home_team.team_id]
 
-    low_score_str = ['Low score: %s with %.2f points' % (low_team_name, low_score)]
-    high_score_str = ['High score: %s with %.2f points' % (high_team_name, high_score)]
-    close_score_str = ['%s barely beat %s by a margin of %.2f' % (close_winner, close_loser, closest_score)]
-    blowout_str = ['%s blown out by %s by a margin of %.2f' % (blown_out_team_name, ownerer_team_name, biggest_blowout)]
+    low_score_str = ['Low score: %s **%s** with %.2f points' % (low_team_emote, low_team_name, low_score)]
+    high_score_str = ['High score: %s **%s** with %.2f points' % (high_team_emote, high_team_name, high_score)]
+    close_score_str = ['%s **%s** barely beat %s **%s** by a margin of %.2f' % (close_winner_emote, close_winner, close_loser_emote, close_loser, closest_score)]
+    blowout_str = ['%s **%s** blown out by %s **%s** by a margin of %.2f' % (blown_out_emote, blown_out_team_name, ownerer_emote, ownerer_team_name, biggest_blowout)]
 
-    text = ['Trophies of the week: '] + low_score_str + high_score_str + close_score_str + blowout_str + random_phrase()
+    text = ['**Trophies of the week:** '] + low_score_str + high_score_str + close_score_str + blowout_str + [' '] + random_phrase()
+    return '\n'.join(text)
+
+def test_emotes(league):
+    message = []
+    for t in league.teams:
+        message += ['%s %s %s' % (t.team_name, users[t.team_id], emotes[t.team_id])]
+
+    text = ['**Team Emotes**'] + message + [' '] + random_phrase()
     return '\n'.join(text)
 
 def bot_main(function):
@@ -409,22 +481,26 @@ def bot_main(function):
 #        league = League(league_id=league_id, year=year, username=espn_username, password=espn_password)
 
     if test:
-        print(get_matchups(league))
-        print(get_scoreboard_short(league))
-        print(get_projected_scoreboard(league))
-        print(get_close_scores(league))
-        print(get_power_rankings(league))
-        print(get_scoreboard_short(league))
-        print(get_waiver_report(league))
-        function="get_final"
+        # print(get_matchups(league))
+        # print(get_scoreboard_short(league))
+        # print(get_projected_scoreboard(league))
+        # print(get_close_scores(league))
+        # print(get_power_rankings(league))
+        # print(get_scoreboard_short(league))
+        # print(get_waiver_report(league))
+        # function="get_final"
         # bot.send_message("Testing")
         # slack_bot.send_message("Testing")
+        print(test_emotes(league))
+        # discord_bot.send_message(test_emotes(league))
         # discord_bot.send_message("Testing")
 
     text = ''
     if function=="get_matchups":
         text = get_matchups(league)
         text = text + "\n\n" + get_projected_scoreboard(league)
+    elif function=="get_inactives":
+        text = get_inactives(league)
     elif function=="get_scoreboard_short":
         text = get_scoreboard_short(league)
         text = text + "\n\n" + get_projected_scoreboard(league)
@@ -434,6 +510,8 @@ def bot_main(function):
         text = get_close_scores(league)
     elif function=="get_power_rankings":
         text = get_power_rankings(league)
+    elif function=="get_expected_win":
+        text = get_expected_win(league)
     elif function=="get_waiver_report":
         text = get_waiver_report(league)
     elif function=="get_trophies":
@@ -441,7 +519,7 @@ def bot_main(function):
     elif function=="get_final":
         # on Tuesday we need to get the scores of last week
         week = league.current_week - 1
-        text = "Final " + get_scoreboard_short(league, week=week)
+        text = "__Final__ " + get_scoreboard_short(league, week=week)
         text = text + "\n\n" + get_trophies(league, week=week)
     elif function=="init":
         try:
@@ -493,8 +571,14 @@ if __name__ == '__main__':
     sched.add_job(bot_main, 'cron', ['get_power_rankings'], id='power_rankings',
         day_of_week='tue', hour=18, minute=30, start_date=ff_start_date, end_date=ff_end_date,
         timezone=my_timezone, replace_existing=True)
+    sched.add_job(bot_main, 'cron', ['get_expected_win'], id='expected_win',
+        day_of_week='tue', hour=18, minute=30, second=15, start_date=ff_start_date, end_date=ff_end_date,
+        timezone=my_timezone, replace_existing=True)
     sched.add_job(bot_main, 'cron', ['get_matchups'], id='matchups',
-        day_of_week='thu', hour=19, minute=30, start_date=ff_start_date, end_date=ff_end_date,
+        day_of_week='thu', hour=18, minute=30, start_date=ff_start_date, end_date=ff_end_date,
+        timezone=game_timezone, replace_existing=True)
+    sched.add_job(bot_main, 'cron', ['get_inactives'], id='inactives',
+        day_of_week='thu', hour=18, minute=35, start_date=ff_start_date, end_date=ff_end_date,
         timezone=game_timezone, replace_existing=True)
     sched.add_job(bot_main, 'cron', ['get_close_scores'], id='close_scores',
         day_of_week='mon', hour=18, minute=30, start_date=ff_start_date, end_date=ff_end_date,

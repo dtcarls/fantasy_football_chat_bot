@@ -15,7 +15,7 @@ setup(
 
     author_email='deantcarlson@gmail.com',
 
-    install_requires=['requests>=2.0.0,<3.0.0', 'espn_api>=0.9.0', 'apscheduler>3.0.0', 'datetime'],
+    install_requires=['requests>=2.0.0,<3.0.0', 'espn_api>=0.16.1', 'apscheduler>3.0.0', 'datetime'],
 
     test_suite='nose.collector',
 
