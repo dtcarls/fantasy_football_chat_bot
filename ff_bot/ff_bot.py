@@ -95,7 +95,7 @@ class DiscordBot(object):
 
 emotes = dict()
 emotes[1] = '<:AFCR:876907214688895066>'
-emotes[2] = '<:ARJN:877209001090252831>
+emotes[2] = '<:ARJN:877209001090252831>'
 emotes[3] = ''
 emotes[4] = '<:FF14:872309590056898612>'
 emotes[5] = '<:WLD:877209013329219584>'
