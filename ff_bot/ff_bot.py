@@ -94,17 +94,17 @@ class DiscordBot(object):
             return r
 
 emotes = dict()
-emotes[1] = '<:GRIL:872308201847144510>'
-emotes[2] = ''
+emotes[1] = '<:AFCR:876907214688895066>'
+emotes[2] = '<:ARJN:877209001090252831>
 emotes[3] = ''
 emotes[4] = '<:FF14:872309590056898612>'
-emotes[5] = ''
-emotes[6] = ''
-emotes[7] = ''
-emotes[8] = ''
-emotes[9] = ''
-emotes[10] = ''
-emotes[11] = ''
+emotes[5] = '<:WLD:877209013329219584>'
+emotes[6] = '<:JPB:876907098435387443>'
+emotes[7] = '<:ZERO:876682748633419776>'
+emotes[8] = '<:LTD:877206961240809502>'
+emotes[9] = '<:FTTs:877202795839774800>'
+emotes[10] = '<:Boog:877208445999271966>'
+emotes[11] = '<:Chef:877205066984095764>'
 
 users = dict()
 users[1] = '<@173899115799904256>'
