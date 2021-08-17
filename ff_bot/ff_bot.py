@@ -490,8 +490,8 @@ def bot_main(function):
         # function="get_final"
         # bot.send_message("Testing")
         # slack_bot.send_message("Testing")
-        print(test_emotes(league))
-        # discord_bot.send_message(test_emotes(league))
+        # print(test_emotes(league))
+        discord_bot.send_message(test_emotes(league))
         # discord_bot.send_message("Testing")
 
     text = ''
