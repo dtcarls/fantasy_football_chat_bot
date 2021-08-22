@@ -31,7 +31,7 @@
     },
     "LEAGUE_YEAR": {
       "description": "ESPN League Year",
-      "value": "2020"
+      "value": "2021"
     },
     "TIMEZONE": {
       "description": "League timezone for sending messages",
@@ -39,11 +39,11 @@
     },
     "START_DATE": {
       "description": "Season Start Date",
-      "value": "2020-09-10"
+      "value": "2021-09-09"
     },
     "END_DATE": {
       "description": "Season End Date",
-      "value": "2020-12-30"
+      "value": "2022-01-04"
     },
     "INIT_MSG": {
       "description": "Bot Init Message",

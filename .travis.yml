@@ -2,18 +2,16 @@ sudo: required
 
 language: python
 python:
-  - "3.4"
-  - "3.5"
-  - "3.6"
-  - "3.7"
+  - "3.8"
+  - "3.9"
 
 services:
   - docker
 
 install:
-  - pip install -r requirements.txt
+  - pip3 install -r requirements.txt
 
-script: 
+script:
   - docker build -t test_build .
   - docker run test_build python3 /usr/src/ff_bot/setup.py test
 
