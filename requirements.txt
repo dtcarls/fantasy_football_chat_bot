@@ -1,4 +1,9 @@
 flake8==3.3.0
 apscheduler>=3.3.0
 requests>=2.0.0,<3.0.0
+#Hack for heroku and espn_api
+#numpy needed to be installed before pandas
+numpy
+pandas
+#end hack
 espn_api>=0.17.0
