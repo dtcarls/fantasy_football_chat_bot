@@ -1,13 +1,17 @@
 [![Build Status](https://travis-ci.org/dtcarls/fantasy_football_chat_bot.svg?branch=master)](https://travis-ci.org/dtcarls/fantasy_football_chat_bot)
-[![Come join the chat](https://badges.gitter.im/dtcarls/Lobby.svg)](https://gitter.im/dtcarls/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/d8506396005d48d1a52dee114f2c05ae)](https://www.codacy.com/app/dtcarls/ff_bot?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=dtcarls/ff_bot&amp;utm_campaign=Badge_Grade)
+
+For troubleshooting, join the discord!
+
+![Discord Banner 2](https://discordapp.com/api/guilds/878995504225218620/widget.png?style=banner2)
 
 Like the bot? Star the repository and consider making a donation to buy me a coffee
 ------
+* PayPal:
 [![paypal](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=ZDLFECJVGG6RG&currency_code=USD&source=url)
-* BTC: 3C8SEcDh52iDSYQY55kwELrNWoQRMkXLCR
-* ETH: 0xA098c4e8CC1c12422d5B34d6454133190CDdCAC3
-* LTC: MHx74YbrHE592ePBbdQ4cL9ZQC15xaAjtM
+* BTC: bc1q3wxm269mdmwdqjqkxgt7s5zp8ah05dexdua0zv
+* ETH: 0x8c096710e3621fe5f8E384efBd17D8E3E798Dc0c
+* DOGE: D6n2g2KGdqEwR4MhhT7uAdvZFaTwqwd6rS
 
 # ESPN Fantasy Football GroupMe Slack and Discord Chat Bot
 
@@ -47,6 +51,8 @@ Table of Contents
 **Do not deploy 2 of the same bot in the same chat. In general, you should let your commissioner do the setup**
 
 ### GroupMe Setup
+<details>
+  <summary>Click to expand!</summary>
 
 Go to www.groupme.com and sign up or login
 
@@ -74,8 +80,11 @@ This page is important as you will need the "Bot ID" on this page.You can also s
 Side note: If you use the bot id depicted in the page you will spam an empty chat room so not worth the effort
 
 ![](https://i.imgur.com/k65EZFJ.png)
+</details>
 
 ### Slack setup
+<details>
+  <summary>Click to expand!</summary>
 
 Go to https://slack.com/signin and sign in to the workspace the bot will be in
 
@@ -103,8 +112,11 @@ select Authorize.
 This page is important as you will need the "Webhook URL" on this page.
 
 ![](https://i.imgur.com/mmzhDS0.png)
+</details>
 
 ### Discord setup
+ <details>
+  <summary>Click to expand!</summary>
 
 Log into or create a discord account
 
@@ -125,8 +137,12 @@ Create a webhook, give it a name and pick which channel to receive messages in
 Save the "Webhook URL" on this page
 
 ![](https://i.imgur.com/U4MKZSY.png)
+</details>
 
 ### Heroku setup
+
+<details>
+  <summary>Click to expand!</summary>
 
 Heroku is what we will be using to host the chat bot (for free)
 
@@ -173,8 +189,13 @@ You should see something like below. Click the pencil on the right and toggle th
 You're done! You now have a fully featured GroupMe/Slack/Discord chat bot for ESPN leagues! If you have an INIT_MSG you will see it exclaimed in your GroupMe, Discord, or Slack chat room.
 
 Unfortunately to do auto deploys of the latest version you need admin access to the repository on git. You can check for updates on the github page (https://github.com/dtcarls/ff_bot/commits/master) and click the deploy button again; however, this will deploy a new instance and the variables will need to be edited again.
+</details>
 
 #### Private Leagues
+
+<details>
+  <summary>Click to expand!</summary>
+
 For private league you will need to get your swid and espn_s2.
 You can find these two values after logging into your espn fantasy football account on espn's website.
 (Chrome Browser)
@@ -185,7 +206,12 @@ From there you should be able to find your swid and espn_s2 variables and values
 
 There is a new **Experimental (may not work)** option to use a username and password for espn to access private leagues instead of having to use swid and s2.
 
+</details>
+
 ## Troubleshooting / FAQ
+
+<details>
+  <summary>Click to expand!</summary>
 
 **League must be full.**
 
@@ -209,8 +235,12 @@ Specify your variable https://en.wikipedia.org/wiki/List_of_tz_database_time_zon
 
 Is there a version of this for Messenger/WhatsApp/[insert other chat]?
 No, but I am open to pull requests implementing their API for additional cross platform support.
+</details>
 
 ## Getting Started for development and testing
+
+<details>
+  <summary>Click to expand!</summary>
 
 These instructions will get you a copy of the project up and running
 on your local machine for development and testing purposes.
@@ -290,3 +320,4 @@ you can run these tests by changing the directory to the `ff_bot` directory and 
 ```python3
 python3 setup.py test
 ```
+</details>
