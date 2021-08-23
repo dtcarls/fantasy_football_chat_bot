@@ -92,7 +92,7 @@ class DiscordBot(object):
 
             return r
 
-def random_phrase():
+def get_random_phrase():
     phrases = ['I\'m dead inside',
                'Is this all there is to my existence?',
                'How much do you pay me to do this?',
@@ -184,14 +184,17 @@ def all_played(lineup):
             return False
     return True
 
-def get_matchups(league, week=None):
+def get_matchups(league, random_phrase, week=None):
     #Gets current week's Matchups
     matchups = league.box_scores(week=week)
 
     score = ['%s(%s-%s) vs %s(%s-%s)' % (i.home_team.team_name, i.home_team.wins, i.home_team.losses,
              i.away_team.team_name, i.away_team.wins, i.away_team.losses) for i in matchups
              if i.away_team]
-    text = ['Matchups'] + score + random_phrase()
+
+    text = ['Matchups'] + score
+    if random_phrase:
+        text = text + get_random_phrase()
     return '\n'.join(text)
 
 def get_close_scores(league, week=None):
@@ -293,12 +296,20 @@ def bot_main(function):
     except KeyError:
         discord_webhook_url = 1
 
+    if (len(str(bot_id)) <= 1 and
+        len(str(slack_webhook_url)) <= 1 and
+        len(str(discord_webhook_url)) <= 1):
+        #Ensure that there's info for at least one messaging platform,
+        #use length of str in case of blank but non null env variable
+        raise Exception("No messaging platform info provided. Be sure one of BOT_ID,\
+                        SLACK_WEBHOOK_URL, or DISCORD_WEBHOOK_URL env variables are set")
+
     league_id = os.environ["LEAGUE_ID"]
 
     try:
         year = int(os.environ["LEAGUE_YEAR"])
     except KeyError:
-        year=2020
+        year=2021
 
     try:
         swid = os.environ["SWID"]
@@ -335,6 +346,11 @@ def bot_main(function):
     except KeyError:
         top_half_scoring = False
 
+    try:
+        random_phrase = os.environ["RANDOM_PHRASE"]
+    except KeyError:
+        random_phrase = False
+
     bot = GroupMeBot(bot_id)
     slack_bot = SlackBot(slack_webhook_url)
     discord_bot = DiscordBot(discord_webhook_url)
@@ -347,7 +363,7 @@ def bot_main(function):
 #        league = League(league_id=league_id, year=year, username=espn_username, password=espn_password)
 
     if test:
-        print(get_matchups(league))
+        print(get_matchups(league,random_phrase))
         print(get_scoreboard_short(league))
         print(get_projected_scoreboard(league))
         print(get_close_scores(league))
@@ -361,7 +377,7 @@ def bot_main(function):
 
     text = ''
     if function=="get_matchups":
-        text = get_matchups(league)
+        text = get_matchups(league,random_phrase)
         text = text + "\n\n" + get_projected_scoreboard(league)
     elif function=="get_scoreboard_short":
         text = get_scoreboard_short(league)
