@@ -141,9 +141,6 @@ Save the "Webhook URL" on this page
 
 ### Heroku setup
 
-<details>
-  <summary>Click to expand!</summary>
-
 Heroku is what we will be using to host the chat bot (for free)
 
 **You should not need to enter credit card information for this hosting service for our needs.**
@@ -190,7 +187,6 @@ You should see something like below. Click the pencil on the right and toggle th
 You're done! You now have a fully featured GroupMe/Slack/Discord chat bot for ESPN leagues! If you have an INIT_MSG you will see it exclaimed in your GroupMe, Discord, or Slack chat room.
 
 Unfortunately to do auto deploys of the latest version you need admin access to the repository on git. You can check for updates on the github page (https://github.com/dtcarls/ff_bot/commits/master) and click the deploy button again; however, this will deploy a new instance and the variables will need to be edited again.
-</details>
 
 #### Private Leagues
 
