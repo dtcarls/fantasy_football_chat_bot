@@ -3,7 +3,7 @@
 
 For troubleshooting, join the discord!
 
-![Discord Banner 2](https://discordapp.com/api/guilds/878995504225218620/widget.png?style=banner2)
+[![Discord Banner 2](https://discordapp.com/api/guilds/878995504225218620/widget.png?style=banner2)](https://discord.gg/bkShnqTTP8)
 
 Like the bot? Star the repository and consider making a donation to buy me a coffee
 ------
