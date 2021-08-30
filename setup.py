@@ -9,13 +9,13 @@ setup(
 
     version='0.3.0',
 
-    description='ESPN fantasy football GroupMe Bot',
+    description='ESPN fantasy football Chat Bot',
 
     author='Dean Carlson',
 
     author_email='deantcarlson@gmail.com',
 
-    install_requires=['requests>=2.0.0,<3.0.0', 'espn_api>=0.8.2', 'apscheduler>3.0.0', 'datetime'],
+    install_requires=['requests>=2.0.0,<3.0.0', 'espn_api>=0.18.0', 'apscheduler>3.0.0', 'datetime'],
 
     test_suite='nose.collector',
 
