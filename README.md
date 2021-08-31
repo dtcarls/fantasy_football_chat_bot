@@ -5,18 +5,21 @@ For troubleshooting, join the discord!
 
 [![Discord Banner 2](https://discordapp.com/api/guilds/878995504225218620/widget.png?style=banner2)](https://discord.gg/bkShnqTTP8)
 
-Like the bot? Star the repository and consider making a donation to buy me a coffee
-------
-* PayPal:
-[![paypal](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=ZDLFECJVGG6RG&currency_code=USD&source=url)
-* BTC: bc1q3wxm269mdmwdqjqkxgt7s5zp8ah05dexdua0zv
-* ETH: 0x8c096710e3621fe5f8E384efBd17D8E3E798Dc0c
-* DOGE: D6n2g2KGdqEwR4MhhT7uAdvZFaTwqwd6rS
-
 # ESPN Fantasy Football GroupMe Slack and Discord Chat Bot
 
-This package creates a docker container that runs a GroupMe, Discord, or Slack chat bot to send
-ESPN Fantasy Football information to a GroupMe, Discord or Slack chat room.
+This package creates a docker container that runs a GroupMe, Discord, or Slack chat bot to send ESPN Fantasy Football information to a GroupMe, Discord or Slack chat room.
+
+Main code forked from https://github.com/dtcarls/fantasy_football_chat_bot
+
+**What are the differences from the main repo?**
+
+- Adds an extra method of determining team dominance, Expected Win Percentange, which calculates how many games a given team could have won each week
+- Adds a Waiver Report that provides a quick overview of the adds and drops that have taken place on waiver days
+- Adds an optional Inactive Player Report, which pings a user if they have a player on their active squad with a projected score of 0 (requires stored array of User IDs)
+- Adds an extra possible Envrionmental Variable, TUES_SCHED, which can be activated if a game is delayed until Tuesday for COVID-19, and moves all scheduled jobs up a day
+- Custom formatting changes
+- Custom forks and changes for my two leagues
+
 
 **What does this do?**
 
@@ -25,9 +28,12 @@ ESPN Fantasy Football information to a GroupMe, Discord or Slack chat room.
 - Scoreboard - Mon,Tue,Fri - 7:30 local time (Current ESPN fantasy scoreboard)
 - Trophies- Tue - 7:30 local time (High score, low score, biggest win, closest win)
 - Power rankings - Tue - 18:30 local time
-- Current standings - Tue - 7:30 local time
+- Expected win percentage - Tue - 18:30 local time
+- Current standings - Tue - 18:30 local time
 - Matchups - Thu - 19:30 east coast time (Upcoming matchups)
 - Scoreboard - Sun - 16:00, 20:00 east coast time (Current ESPN fantasy scoreboard)
+- Waiver report - Wed - 8:00 local time
+- Inactive player report - Thu - 19:35 east coast time
 
 Table of Contents
 =================
