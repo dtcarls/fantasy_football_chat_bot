@@ -592,49 +592,92 @@ if __name__ == '__main__':
     except KeyError:
         my_timezone='America/New_York'
 
+    try:
+        tues_sched = os.environ["TUES_SCHED"]
+    except KeyError:
+        tues_sched = '0'
+
     game_timezone='America/New_York'
     bot_main("init")
     sched = BlockingScheduler(job_defaults={'misfire_grace_time': 15*60})
 
-    #power rankings:                     tuesday evening at 6:30pm local time.
+    #regular schedule:
+    #game day score update:              sunday at 4pm, 8pm east coast time.
     #matchups:                           thursday evening at 7:30pm east coast time.
-    #close scores (within 15.99 points): monday evening at 6:30pm east coast time.
-    #trophies:                           tuesday morning at 7:30am local time.
-    #standings:                          wednesday morning at 7:30am local time.
-    #score update:                       friday, monday, and tuesday morning at 7:30am local time.
-    #score update:                       sunday at 4pm, 8pm east coast time.
-    #waiver report:                      wednesday morning at 8am local time.
-
-    sched.add_job(bot_main, 'cron', ['get_power_rankings'], id='power_rankings',
-        day_of_week='tue', hour=18, minute=30, start_date=ff_start_date, end_date=ff_end_date,
-        timezone=my_timezone, replace_existing=True)
-    sched.add_job(bot_main, 'cron', ['get_expected_win'], id='expected_win',
-        day_of_week='tue', hour=18, minute=30, second=15, start_date=ff_start_date, end_date=ff_end_date,
-        timezone=my_timezone, replace_existing=True)
+    #inactives:                          thursday evening at 7:35pm east coast time.
+    sched.add_job(bot_main, 'cron', ['get_scoreboard_short'], id='scoreboard2',
+        day_of_week='sun', hour='16,20', start_date=ff_start_date, end_date=ff_end_date,
+        timezone=game_timezone, replace_existing=True)
     sched.add_job(bot_main, 'cron', ['get_matchups'], id='matchups',
         day_of_week='thu', hour=18, minute=30, start_date=ff_start_date, end_date=ff_end_date,
         timezone=game_timezone, replace_existing=True)
     sched.add_job(bot_main, 'cron', ['get_inactives'], id='inactives',
         day_of_week='thu', hour=18, minute=35, start_date=ff_start_date, end_date=ff_end_date,
         timezone=game_timezone, replace_existing=True)
-    sched.add_job(bot_main, 'cron', ['get_close_scores'], id='close_scores',
-        day_of_week='mon', hour=18, minute=30, start_date=ff_start_date, end_date=ff_end_date,
-        timezone=game_timezone, replace_existing=True)
-    sched.add_job(bot_main, 'cron', ['get_final'], id='final',
-        day_of_week='tue', hour=7, minute=30, start_date=ff_start_date, end_date=ff_end_date,
-        timezone=my_timezone, replace_existing=True)
-    sched.add_job(bot_main, 'cron', ['get_standings'], id='standings',
-        day_of_week='wed', hour=7, minute=30, start_date=ff_start_date, end_date=ff_end_date,
-        timezone=my_timezone, replace_existing=True)
-    sched.add_job(bot_main, 'cron', ['get_scoreboard_short'], id='scoreboard1',
-        day_of_week='fri,mon', hour=7, minute=30, start_date=ff_start_date, end_date=ff_end_date,
-        timezone=my_timezone, replace_existing=True)
-    sched.add_job(bot_main, 'cron', ['get_scoreboard_short'], id='scoreboard2',
-        day_of_week='sun', hour='16,20', start_date=ff_start_date, end_date=ff_end_date,
-        timezone=game_timezone, replace_existing=True)
-    sched.add_job(bot_main, 'cron', ['get_waiver_report'], id='waiver_report',
-        day_of_week='wed', hour=8, start_date=ff_start_date, end_date=ff_end_date,
-        timezone=game_timezone, replace_existing=True)
 
-    print("Ready!")
+    #schedule without a COVID delay:
+    #score update:                       friday and monday morning at 7:30am local time.
+    #close scores (within 15.99 points): monday evening at 6:30pm east coast time.
+    #final scores and trophies:          tuesday morning at 7:30am local time.
+    #standings:                          tuesday evening at 6:30pm local time.
+    #power rankings:                     tuesday evening at 6:30:10pm local time.
+    #expected win:                       tuesday evening at 6:30:20pm local time.
+    #waiver report:                      wednesday morning at 8am local time.
+    print(tues_sched)
+    if tues_sched=='0':
+        ready_text = "Ready! Regular schedule set."
+        sched.add_job(bot_main, 'cron', ['get_scoreboard_short'], id='scoreboard1',
+            day_of_week='fri,mon', hour=7, minute=30, start_date=ff_start_date, end_date=ff_end_date,
+            timezone=my_timezone, replace_existing=True)
+        sched.add_job(bot_main, 'cron', ['get_close_scores'], id='close_scores',
+            day_of_week='mon', hour=18, minute=30, start_date=ff_start_date, end_date=ff_end_date,
+            timezone=game_timezone, replace_existing=True)
+        sched.add_job(bot_main, 'cron', ['get_final'], id='final',
+            day_of_week='tue', hour=7, minute=30, start_date=ff_start_date, end_date=ff_end_date,
+            timezone=my_timezone, replace_existing=True)
+        sched.add_job(bot_main, 'cron', ['get_standings'], id='standings',
+            day_of_week='tue', hour=18, minute=30, start_date=ff_start_date, end_date=ff_end_date,
+            timezone=my_timezone, replace_existing=True)
+        sched.add_job(bot_main, 'cron', ['get_power_rankings'], id='power_rankings',
+            day_of_week='tue', hour=18, minute=30, second=10, start_date=ff_start_date, end_date=ff_end_date,
+            timezone=my_timezone, replace_existing=True)
+        sched.add_job(bot_main, 'cron', ['get_expected_win'], id='expected_win',
+            day_of_week='tue', hour=18, minute=30, second=15, start_date=ff_start_date, end_date=ff_end_date,
+            timezone=my_timezone, replace_existing=True)
+        sched.add_job(bot_main, 'cron', ['get_waiver_report'], id='waiver_report',
+            day_of_week='wed', hour=8, start_date=ff_start_date, end_date=ff_end_date,
+            timezone=game_timezone, replace_existing=True)
+
+    #schedule with a COVID delay to tuesday:
+    #extra score update:                 tuesday morning at 7:30am local time.
+    #final scores and trophies:          wednesday morning at 7:30am local time.
+    #standings:                          wednesday evening at 6:30pm local time.
+    #power rankings:                     wednesday evening at 6:30:10pm local time.
+    #expected win:                       wednesday evening at 6:30:20pm local time.
+    #waiver report:                      thursday morning at 8am local time.
+    else:
+        ready_text = "Ready! Tuesday schedule set."
+        sched.add_job(bot_main, 'cron', ['get_scoreboard_short'], id='scoreboard1',
+            day_of_week='fri,mon,tue', hour=7, minute=30, start_date=ff_start_date, end_date=ff_end_date,
+            timezone=my_timezone, replace_existing=True)
+        sched.add_job(bot_main, 'cron', ['get_close_scores'], id='close_scores',
+            day_of_week='mon,tue', hour=18, minute=30, start_date=ff_start_date, end_date=ff_end_date,
+            timezone=game_timezone, replace_existing=True)
+        sched.add_job(bot_main, 'cron', ['get_final'], id='final',
+            day_of_week='wed', hour=7, minute=30, start_date=ff_start_date, end_date=ff_end_date,
+            timezone=my_timezone, replace_existing=True)
+        sched.add_job(bot_main, 'cron', ['get_standings'], id='standings',
+            day_of_week='wed', hour=18, minute=30, start_date=ff_start_date, end_date=ff_end_date,
+            timezone=my_timezone, replace_existing=True)
+        sched.add_job(bot_main, 'cron', ['get_power_rankings'], id='power_rankings',
+            day_of_week='wed', hour=18, minute=30, second=10, start_date=ff_start_date, end_date=ff_end_date,
+            timezone=my_timezone, replace_existing=True)
+        sched.add_job(bot_main, 'cron', ['get_expected_win'], id='expected_win',
+            day_of_week='wed', hour=18, minute=30, second=15, start_date=ff_start_date, end_date=ff_end_date,
+            timezone=my_timezone, replace_existing=True)
+        sched.add_job(bot_main, 'cron', ['get_waiver_report'], id='waiver_report',
+            day_of_week='thu', hour=8, start_date=ff_start_date, end_date=ff_end_date,
+            timezone=game_timezone, replace_existing=True)
+
+    print(ready_text)
     sched.start()
