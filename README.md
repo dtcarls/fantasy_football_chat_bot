@@ -15,7 +15,8 @@ Main code forked from https://github.com/dtcarls/fantasy_football_chat_bot
 
 - Adds an extra method of determining team dominance, Expected Win Percentange, which calculates how many games a given team could have won each week
 - Adds a Waiver Report that provides a quick overview of the adds and drops that have taken place on waiver days
-- Adds an optional Inactive Player Report, which pings a user if they have a player on their active squad with a projected score of 0 (requires stored array of User IDs)
+- Adds a Heads Up Report, which lets players know if they have any players that they might not want to start
+- Adds an Inactive Report, which lets players know when they have players that are designated Out, or would otherwise score them 0 points, which can be modified to ping players when provided an array of user IDs
 - Adds an extra possible Envrionmental Variable, TUES_SCHED, which can be activated if a game is delayed until Tuesday for COVID-19, and moves all scheduled jobs up a day
 - Custom formatting changes
 - Custom forks and changes for my two leagues
@@ -24,16 +25,17 @@ Main code forked from https://github.com/dtcarls/fantasy_football_chat_bot
 **What does this do?**
 
 - Sends out the following messages on this schedule:
-- Close Scores - Mon - 18:30 east coast time (Games that are within 16 points of eachother to keep an eye on during the Monday night game)
+- Scoreboard - Sun - 16:00, 20:00 east coast time (Current ESPN fantasy scoreboard)
 - Scoreboard - Mon,Tue,Fri - 7:30 local time (Current ESPN fantasy scoreboard)
-- Trophies- Tue - 7:30 local time (High score, low score, biggest win, closest win)
+- Close Scores - Mon - 18:30 east coast time (Games that are within 16 points of eachother to keep an eye on during the Monday night game)
+- Final scores and Trophies- Tue - 7:30 local time (High score, low score, biggest win, closest win)
+- Current standings - Tue - 18:30 local time
 - Power rankings - Tue - 18:30 local time
 - Expected win percentage - Tue - 18:30 local time
-- Current standings - Tue - 18:30 local time
-- Matchups - Thu - 19:30 east coast time (Upcoming matchups)
-- Scoreboard - Sun - 16:00, 20:00 east coast time (Current ESPN fantasy scoreboard)
 - Waiver report - Wed - 8:00 local time
-- Inactive player report - Thu - 19:35 east coast time
+- Heads up report - Wed - 16:30 local time
+- Matchups - Thu - 18:30 east coast time (Upcoming matchups)
+- Inactive player report - Sat - 20:00 east coast time
 
 Table of Contents
 =================
