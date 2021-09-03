@@ -23,9 +23,9 @@ ESPN Fantasy Football information to a GroupMe, Discord or Slack chat room.
 - Sends out the following messages on this schedule:
 - Close Scores - Mon - 18:30 east coast time (Games that are within 16 points of eachother to keep an eye on during the Monday night game)
 - Scoreboard - Mon,Tue,Fri - 7:30 local time (Current ESPN fantasy scoreboard)
-- Trophies- Tue - 7:30 local time (High score, low score, biggest win, closest win)
+- Trophies - Tue - 7:30 local time (High score, low score, biggest win, closest win)
 - Power rankings - Tue - 18:30 local time
-- Current standings - Tue - 7:30 local time
+- Current standings - Wed - 7:30 local time
 - Matchups - Thu - 19:30 east coast time (Upcoming matchups)
 - Scoreboard - Sun - 16:00, 20:00 east coast time (Current ESPN fantasy scoreboard)
 
@@ -149,12 +149,13 @@ You **may** run out of free hours without a credit card linked. If you decide to
 Go to https://id.heroku.com/login and sign up or login
 
 
-**!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!**
+:warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning:
 
-**Click this handy button:**
+:rotating_light:**Click this purple button to automatically deploy the code:**:rotating_light:
+
 [![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
 
-**!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!**
+:warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning:
 
 Go to your dashboard (https://dashboard.heroku.com/apps)
 Now you will need to setup your environment variables so that it works for your league. Click Settings at your dashboard. Then click "Reveal Config Vars" button and you will see something like this.
