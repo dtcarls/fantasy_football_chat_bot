@@ -14,10 +14,12 @@ Main code forked from https://github.com/dtcarls/fantasy_football_chat_bot
 **What are the differences from the main repo?**
 
 - Adds an extra method of determining team dominance, Expected Win Percentange, which calculates how many games a given team could have won each week
-- Adds a Waiver Report that provides a quick overview of the adds and drops that have taken place on waiver days
+- Adds a Waiver Report that provides a quick overview of the adds and drops that have taken place on waiver days *[ESPN_S2 and SWID variables are REQUIRED for this functionality]*
 - Adds a Heads Up Report, which lets players know if they have any players that they might not want to start
-- Adds an Inactive Report, which lets players know when they have players that are designated Out, or would otherwise score them 0 points, which can be modified to ping players when provided an array of user IDs
-- Adds an extra possible Envrionmental Variable, TUES_SCHED, which can be activated if a game is delayed until Tuesday for COVID-19, and moves all scheduled jobs up a day
+- Adds an Inactive Report, which lets players know when they have players that are designated Out, or would otherwise score them 0 points
+- Adds an extra possible Environmental Variable, TUES_SCHED, which can be activated if a game is delayed until Tuesday for COVID-19, and moves all scheduled jobs up a day
+- Adds extra places for the fun random phrases
+- When provided in the Environmental Variables USERS and EMOTES, bot will display them in the scheduled updates
 - Custom formatting changes
 - Custom forks and changes for my two leagues
 
@@ -27,7 +29,7 @@ Main code forked from https://github.com/dtcarls/fantasy_football_chat_bot
 - Sends out the following messages on this schedule:
 - Scoreboard - Sun - 16:00, 20:00 east coast time (Current ESPN fantasy scoreboard)
 - Scoreboard - Mon,Tue,Fri - 7:30 local time (Current ESPN fantasy scoreboard)
-- Close Scores - Mon - 18:30 east coast time (Games that are within 16 points of eachother to keep an eye on during the Monday night game)
+- Close Scores - Sun,Mon - 18:30 east coast time (Games that are within 16 points of eachother to keep an eye on during the Monday night game)
 - Final scores and Trophies- Tue - 7:30 local time (High score, low score, biggest win, closest win)
 - Current standings - Tue - 18:30 local time
 - Power rankings - Tue - 18:30 local time
@@ -182,7 +184,7 @@ Note: App will restart when you change any variable so your chat room may be sem
 - TIMEZONE: The timezone that the messages will look to send in. (America/New_York by default)
 - INIT_MSG: The message that the bot will say when it is started (“Hi” by default, can be blank for no message)
 - TOP_HALF_SCORING: If set to True, when standings are posted on Wednesday it will also include top half scoring wins
-- RANDOM_PHRASE: If set to True, when matchups are posted on Tuesday it will also include a random phrase
+- RANDOM_PHRASE: If set to 1, when matchups, heads up report, inactive report, waiver report, and final scores are posted, will include a random phrase from a list
 - ESPN_S2: Used for private leagues. See [Private Leagues Section](#private-leagues) for documentation
 - SWID: Used for private leagues. See [Private Leagues Section](#private-leagues) for documentation
 - ESPN_USERNAME: Used for private leagues. See [Private Leagues Section](#private-leagues) for documentation **Experimental, currently not working**
@@ -195,6 +197,21 @@ You should see something like below. Click the pencil on the right and toggle th
 You're done! You now have a fully featured GroupMe/Slack/Discord chat bot for ESPN leagues! If you have an INIT_MSG you will see it exclaimed in your GroupMe, Discord, or Slack chat room.
 
 Unfortunately to do auto deploys of the latest version you need admin access to the repository on git. You can check for updates on the github page (https://github.com/dtcarls/ff_bot/commits/master) and click the deploy button again; however, this will deploy a new instance and the variables will need to be edited again.
+
+### User and Emote IDs
+
+If you're using Discord and would like to go to the effort, you can provide lists of your Discord user and emote IDs in the Environment Variables.
+
+- USERS: List of Discord user IDs, comma separated, in the format of \<@[-ID 1 HERE-]\>,\<@[-ID 2 HERE-]\>,etc.
+- EMOTES: List of Discord emote IDs, comma separated, in the format of \<:[-Emote shortcut-]:[-Emote ID-]\>,\<:[-Emote shortcut-]:[-Emote ID-]\>,etc.
+
+Replace the [ ] and the content within with the IDs.
+
+To get IDs, first enable Developer Mode in Discord's Advanced settings.
+
+For Users, just right click the user in the server list and select "Copy ID".
+
+Emotes MUST be from the server-specific list. To get the ID, say '\:[-Emote shortcut-]:' in any text channel and copy the text that appears.
 
 #### Private Leagues
 
@@ -282,11 +299,12 @@ python3 setup.py install
 - TIMEZONE: The timezone that the messages will look to send in. (America/New_York by default)
 - INIT_MSG: The message that the bot will say when it is started (“Hi” by default, can be blank for no message)
 - TOP_HALF_SCORING: If set to True, when standings are posted on Wednesday it will also include top half scoring wins
-- RANDOM_PHRASE: If set to True, when matchups are posted on Tuesday it will also include a random phrase
+- RANDOM_PHRASE: If set to 1, when matchups, heads up report, inactive report, waiver report, and final scores are posted, will include a random phrase from a list
+- TUES_SCHED: If set to 1, will move updates accordingly for a COVID delayed game to Tuesday
 - ESPN_S2: Used for private leagues. See [Private Leagues Section](#private-leagues) for documentation
 - SWID: Used for private leagues. See [Private Leagues Section](#private-leagues) for documentation
-- ESPN_USERNAME: Used for private leagues. See [Private Leagues Section](#private-leagues) for documentation **Experimental, currently not working**
-- ESPN_PASSWORD: Used for private leagues. See [Private Leagues Section](#private-leagues) for documentation **Experimental, currently not working**
+- USERS: List of Discord user IDs, comma separated, in the format of \<@[-ID 1 HERE-]\>,\<@[-ID 2 HERE-]\>,etc.
+- EMOTES: List of Discord emote IDs, comma separated, in the format of \<:[-Emote shortcut-]:[-Emote ID-]\>,\<:[-Emote shortcut-]:[-Emote ID-]\>,etc.
 
 ### Running with Docker
 
