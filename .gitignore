@@ -132,3 +132,5 @@ dmypy.json
 
 #misc.
 .vscode/*
+
+ff_bot/ids.txt
