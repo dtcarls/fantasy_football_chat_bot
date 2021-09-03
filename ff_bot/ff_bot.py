@@ -236,13 +236,13 @@ def scan_roster(lineup, team):
     players = []
     for i in lineup:
         if i.slot_position != 'BE' and i.slot_position != 'IR':
-            if i.injuryStatus != 'ACTIVE' and i.injuryStatus != 'NORMAL' or i.projected_points <= 1:
+            if i.injuryStatus != 'ACTIVE' and i.injuryStatus != 'NORMAL' or i.projected_points <= 4:
                 count += 1
                 player = i.position + ' ' + i.name + ' - '
-                if i.projected_points <= 1:
+                if i.projected_points <= 4:
                     player += '**' + str(i.projected_points) + ' pts**'
                 else:
-                    player += '**' + i.injuryStatus.title().replace("_", " ") + '**'
+                    player += '**' + i.injuryStatus.title().replace('_', ' ') + '**'
                 players += [player]
 
     list = ""
@@ -265,7 +265,7 @@ def scan_inactives(lineup, team):
             if i.injuryStatus == 'OUT' or i.injuryStatus == 'DOUBTFUL' or i.projected_points <= 0:
                 if i.game_played == 0:
                     count += 1
-                    players += ['%s %s - **%s**, %d pts' % (i.position, i.name, i.injuryStatus.title().replace("_", " "), i.projected_points)]
+                    players += ['%s %s - **%s**, %d pts' % (i.position, i.name, i.injuryStatus.title().replace('_', ' '), i.projected_points)]
 
     inactive_list = ""
     inactives = ""
@@ -457,32 +457,44 @@ def get_trophies(league, week=None):
         if i.home_score > high_score:
             high_score = i.home_score
             high_team_name = i.home_team.team_name
+            high_team_emote = emotes[i.home_team.team_id]
         if i.home_score < low_score:
             low_score = i.home_score
             low_team_name = i.home_team.team_name
+            low_team_emote = emotes[i.home_team.team_id]
         if i.away_score > high_score:
             high_score = i.away_score
             high_team_name = i.away_team.team_name
+            high_team_emote = emotes[i.away_team.team_id]
         if i.away_score < low_score:
             low_score = i.away_score
             low_team_name = i.away_team.team_name
+            low_team_emote = emotes[i.away_team.team_id]
         if i.away_score - i.home_score != 0 and \
             abs(i.away_score - i.home_score) < closest_score:
             closest_score = abs(i.away_score - i.home_score)
             if i.away_score - i.home_score < 0:
                 close_winner = i.home_team.team_name
+                close_winner_emote = emotes[i.home_team.team_id]
                 close_loser = i.away_team.team_name
+                close_loser_emote = emotes[i.away_team.team_id]
             else:
                 close_winner = i.away_team.team_name
+                close_winner_emote = emotes[i.away_team.team_id]
                 close_loser = i.home_team.team_name
+                close_loser_emote = emotes[i.home_team.team_id]
         if abs(i.away_score - i.home_score) > biggest_blowout:
             biggest_blowout = abs(i.away_score - i.home_score)
             if i.away_score - i.home_score < 0:
                 ownerer_team_name = i.home_team.team_name
+                ownerer_emote = emotes[i.home_team.team_id]
                 blown_out_team_name = i.away_team.team_name
+                blown_out_emote = emotes[i.away_team.team_id]
             else:
                 ownerer_team_name = i.away_team.team_name
+                ownerer_emote = emotes[i.away_team.team_id]
                 blown_out_team_name = i.home_team.team_name
+                blown_out_emote = emotes[i.home_team.team_id]
 
     if emotes[1] != '':
         low_score_str = ['Low score: %s **%s** with %.2f points' % (low_team_emote, low_team_name, low_score)]
@@ -504,7 +516,7 @@ def get_trophies(league, week=None):
 def test_users(league):
     message = []
     for t in league.teams:
-        message += ['%s %s' % (t.team_name, users[t.team_id])]
+        message += ['%s %s %s' % (t.team_name, users[t.team_id], emotes[t.team_id])]
 
     text = ['**Users:** '] + message + [' '] + random_phrase()
     return '\n'.join(text)
