@@ -29,7 +29,7 @@ Main code forked from https://github.com/dtcarls/fantasy_football_chat_bot
 - Sends out the following messages on this schedule:
 - Scoreboard - Sun - 16:00, 20:00 east coast time (Current ESPN fantasy scoreboard)
 - Scoreboard - Mon,Tue,Fri - 7:30 local time (Current ESPN fantasy scoreboard)
-- Close Scores - Sun,Mon - 18:30 east coast time (Games that are within 16 points of eachother to keep an eye on during the Monday night game)
+- Close Scores - Sun,Mon - 18:30 east coast time (Games that are within 16 points of eachother to keep an eye on during the Sunday & Monday night games)
 - Final scores and Trophies- Tue - 7:30 local time (High score, low score, biggest win, closest win)
 - Current standings - Tue - 18:30 local time
 - Power rankings - Tue - 18:30 local time
@@ -202,8 +202,8 @@ Unfortunately to do auto deploys of the latest version you need admin access to 
 
 If you're using Discord and would like to go to the effort, you can provide lists of your Discord user and emote IDs in the Environment Variables.
 
-- USERS: List of Discord user IDs, comma separated, in the format of \<@[-ID 1 HERE-]\>,\<@[-ID 2 HERE-]\>,etc.
-- EMOTES: List of Discord emote IDs, comma separated, in the format of \<:[-Emote shortcut-]:[-Emote ID-]\>,\<:[-Emote shortcut-]:[-Emote ID-]\>,etc.
+- USERS: List of Discord user IDs, comma separated, in the format of \<@[ID 1 HERE]\>,\<@[ID 2 HERE]\>,etc.
+- EMOTES: List of Discord emote IDs, comma separated, in the format of \<:[Emote shortcut]:[Emote ID]\>,\<:[Emote shortcut]:[Emote ID]\>,etc.
 
 Replace the [ ] and the content within with the IDs.
 
@@ -211,7 +211,7 @@ To get IDs, first enable Developer Mode in Discord's Advanced settings.
 
 For Users, just right click the user in the server list and select "Copy ID".
 
-Emotes MUST be from the server-specific list. To get the ID, say '\:[-Emote shortcut-]:' in any text channel and copy the text that appears.
+Emotes MUST be from the server-specific list. To get the ID, say '\\:[Emote shortcut]:' in any text channel and copy the text that appears.
 
 #### Private Leagues
 
