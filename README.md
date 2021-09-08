@@ -3,7 +3,7 @@
 
 For troubleshooting, join the discord!
 
-![Discord Banner 2](https://discordapp.com/api/guilds/878995504225218620/widget.png?style=banner2)
+[![Discord Banner 2](https://discordapp.com/api/guilds/878995504225218620/widget.png?style=banner2)](https://discord.gg/bkShnqTTP8)
 
 Like the bot? Star the repository and consider making a donation to buy me a coffee
 ------
@@ -23,9 +23,9 @@ ESPN Fantasy Football information to a GroupMe, Discord or Slack chat room.
 - Sends out the following messages on this schedule:
 - Close Scores - Mon - 18:30 east coast time (Games that are within 16 points of eachother to keep an eye on during the Monday night game)
 - Scoreboard - Mon,Tue,Fri - 7:30 local time (Current ESPN fantasy scoreboard)
-- Trophies- Tue - 7:30 local time (High score, low score, biggest win, closest win)
+- Trophies - Tue - 7:30 local time (High score, low score, biggest win, closest win)
 - Power rankings - Tue - 18:30 local time
-- Current standings - Tue - 7:30 local time
+- Current standings - Wed - 7:30 local time
 - Matchups - Thu - 19:30 east coast time (Upcoming matchups)
 - Scoreboard - Sun - 16:00, 20:00 east coast time (Current ESPN fantasy scoreboard)
 
@@ -141,9 +141,6 @@ Save the "Webhook URL" on this page
 
 ### Heroku setup
 
-<details>
-  <summary>Click to expand!</summary>
-
 Heroku is what we will be using to host the chat bot (for free)
 
 **You should not need to enter credit card information for this hosting service for our needs.**
@@ -152,12 +149,13 @@ You **may** run out of free hours without a credit card linked. If you decide to
 Go to https://id.heroku.com/login and sign up or login
 
 
-**!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!**
+:warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning:
 
-**Click this handy button:**
+:rotating_light:**Click this purple button to automatically deploy the code:**:rotating_light:
+
 [![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
 
-**!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!**
+:warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning:
 
 Go to your dashboard (https://dashboard.heroku.com/apps)
 Now you will need to setup your environment variables so that it works for your league. Click Settings at your dashboard. Then click "Reveal Config Vars" button and you will see something like this.
@@ -190,7 +188,6 @@ You should see something like below. Click the pencil on the right and toggle th
 You're done! You now have a fully featured GroupMe/Slack/Discord chat bot for ESPN leagues! If you have an INIT_MSG you will see it exclaimed in your GroupMe, Discord, or Slack chat room.
 
 Unfortunately to do auto deploys of the latest version you need admin access to the repository on git. You can check for updates on the github page (https://github.com/dtcarls/ff_bot/commits/master) and click the deploy button again; however, this will deploy a new instance and the variables will need to be edited again.
-</details>
 
 #### Private Leagues
 
