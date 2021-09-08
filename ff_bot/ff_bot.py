@@ -97,7 +97,7 @@ emotes = ['']
 users = ['']
 randomPhrase = False
 
-def random_phrase():
+def get_random_phrase():
     phrases = ['I\'m dead inside',
                'Is this all there is to my existence?',
                'How much do you pay me to do this?',
@@ -118,11 +118,11 @@ def get_scoreboard_short(league, week=None):
     scores = []
     for i in box_scores:
         if i.away_team:
-            score = '%s **%s** %.2f - %.2f **%s** %s' % (emotes[i.home_team.team_id], i.home_team.team_abbrev, i.home_score,
+            score = '%s %s %.2f - %.2f %s %s' % (emotes[i.home_team.team_id], i.home_team.team_abbrev, i.home_score,
                      i.away_score, i.away_team.team_abbrev, emotes[i.away_team.team_id])
             scores += [score.strip()]
 
-    text = ['__**Score Update:**__ '] + scores
+    text = ['Score Update: '] + scores
     return '\n'.join(text)
 
 def get_projected_scoreboard(league, week=None):
@@ -131,11 +131,11 @@ def get_projected_scoreboard(league, week=None):
     scores = []
     for i in box_scores:
         if i.away_team:
-            score = '%s **%s** %.2f - %.2f **%s** %s' % (emotes[i.home_team.team_id], i.home_team.team_abbrev, get_projected_total(i.home_lineup),
+            score = '%s %s %.2f - %.2f %s %s' % (emotes[i.home_team.team_id], i.home_team.team_abbrev, get_projected_total(i.home_lineup),
                         get_projected_total(i.away_lineup), i.away_team.team_abbrev, emotes[i.away_team.team_id])
             scores += [score.strip()]
 
-    text = ['__**Approximate Projected Scores:**__ '] + scores
+    text = ['Approximate Projected Scores: '] + scores
     return '\n'.join(text)
 
 def get_standings(league, top_half_scoring, week=None):
@@ -164,7 +164,7 @@ def get_standings(league, top_half_scoring, week=None):
         standings_txt = [f"{pos + 1}: {emote} {team_name} ({wins} - {losses}) (+{top_half_totals[team_name]})" for \
             pos, (wins, losses, team_name, emote) in enumerate(standings)]
 
-    text = ['__**Current Standings:**__ '] + standings_txt
+    text = ['Current Standings: '] + standings_txt
     return "\n".join(text)
 
 def top_half_wins(league, top_half_totals, week):
@@ -208,7 +208,7 @@ def get_heads_up(league, week=None):
     if not headsup:
         headsup += ['No heads up players this week']
 
-    text = ['__**Heads Up Report:**__ '] + headsup
+    text = ['Heads Up Report: '] + headsup
     if randomPhrase == True:
         text += random_phrase()
 
@@ -225,7 +225,7 @@ def get_inactives(league, week=None):
     if not inactives:
         inactives += ['No inactive players this week']
 
-    text = ['__**Inactive Player Report:**__ '] + inactives
+    text = ['Inactive Player Report: '] + inactives
     if randomPhrase == True:
         text += random_phrase()
 
@@ -240,9 +240,9 @@ def scan_roster(lineup, team):
                 count += 1
                 player = i.position + ' ' + i.name + ' - '
                 if i.projected_points <= 4:
-                    player += '**' + str(i.projected_points) + ' pts**'
+                    player += str(i.projected_points) + ' pts'
                 else:
-                    player += '**' + i.injuryStatus.title().replace('_', ' ') + '**'
+                    player += i.injuryStatus.title().replace('_', ' ')
                 players += [player]
 
     list = ""
@@ -252,7 +252,7 @@ def scan_roster(lineup, team):
         list += p + "\n"
 
     if count > 0:
-        s = '%s **%s** has **%d** starting player(s) to look at: \n%s \n' % (emotes[team.team_id], team.team_name, count, list[:-1])
+        s = '%s %s has %d starting player(s) to look at: \n%s \n' % (emotes[team.team_id], team.team_name, count, list[:-1])
         report =  [s.lstrip()]
 
     return report
@@ -265,7 +265,7 @@ def scan_inactives(lineup, team):
             if i.injuryStatus == 'OUT' or i.injuryStatus == 'DOUBTFUL' or i.projected_points <= 0:
                 if i.game_played == 0:
                     count += 1
-                    players += ['%s %s - **%s**, %d pts' % (i.position, i.name, i.injuryStatus.title().replace('_', ' '), i.projected_points)]
+                    players += ['%s %s - %s, %d pts' % (i.position, i.name, i.injuryStatus.title().replace('_', ' '), i.projected_points)]
 
     inactive_list = ""
     inactives = ""
@@ -273,9 +273,9 @@ def scan_inactives(lineup, team):
         inactive_list += p + "\n"
     if count > 0:
         if users[team.team_id] != '':
-            inactives = ['%s **[%s]** has **%d** likely inactive starting player(s): \n%s \n' % (users[team.team_id], team.team_abbrev, count, inactive_list[:-1])]
+            inactives = ['%s [%s] has %d likely inactive starting player(s): \n%s \n' % (users[team.team_id], team.team_abbrev, count, inactive_list[:-1])]
         else:
-            s = '**%s** has **%d** likely inactive starting player(s): \n%s \n' % (team.team_name, count, inactive_list[:-1])
+            s = '%s has %d likely inactive starting player(s): \n%s \n' % (team.team_name, count, inactive_list[:-1])
             inactives = [s.lstrip()]
 
     return inactives
@@ -286,11 +286,11 @@ def get_matchups(league, week=None):
     scores = []
     for i in matchups:
         if i.away_team:
-            home_team = '%s **%s** (%s-%s)' % (emotes[i.home_team.team_id], i.home_team.team_name, i.home_team.wins, i.home_team.losses)
-            away_team = '%s **%s** (%s-%s)' % (emotes[i.away_team.team_id], i.away_team.team_name, i.away_team.wins, i.away_team.losses)
+            home_team = '%s %s (%s-%s)' % (emotes[i.home_team.team_id], i.home_team.team_name, i.home_team.wins, i.home_team.losses)
+            away_team = '%s %s (%s-%s)' % (emotes[i.away_team.team_id], i.away_team.team_name, i.away_team.wins, i.away_team.losses)
             scores += [home_team.lstrip() + ' vs ' + away_team.lstrip()]
 
-    text = ['__**Matchups:**__ '] + scores + [' ']
+    text = ['Matchups: '] + scores + [' ']
     if randomPhrase == True:
         text += random_phrase()
 
@@ -305,13 +305,13 @@ def get_close_scores(league, week=None):
         if i.away_team:
             diffScore = i.away_score - i.home_score
             if ( -16 < diffScore <= 0 and not all_played(i.away_lineup)) or (0 <= diffScore < 16 and not all_played(i.home_lineup)):
-                score = '%s **%s** %.2f - %.2f **%s** %s' % (emotes[i.home_team.team_id], i.home_team.team_abbrev, i.home_score,
+                score = '%s %s %.2f - %.2f %s %s' % (emotes[i.home_team.team_id], i.home_team.team_abbrev, i.home_score,
                         i.away_score, i.away_team.team_abbrev, emotes[i.away_team.team_id])
                 scores += [score.strip()]
 
     if not scores:
         return('')
-    text = ['__**Close Scores:**__ '] + scores
+    text = ['Close Scores: '] + scores
     return '\n'.join(text)
 
 def get_waiver_report(league):
@@ -325,14 +325,14 @@ def get_waiver_report(league):
         if d2 == date:
             if len(actions) == 1:
                 if actions[0][1] == 'WAIVER ADDED':
-                    s = '%s **%s** ADDED %s %s' % (emotes[actions[0][0].team_id], actions[0][0].team_name, actions[0][2].position, actions[0][2].name)
+                    s = '%s %s ADDED %s %s' % (emotes[actions[0][0].team_id], actions[0][0].team_name, actions[0][2].position, actions[0][2].name)
                     report += [s.lstrip()]
             elif len(actions) > 1:
                 if actions[0][1] == 'WAIVER ADDED' or  actions[1][1] == 'WAIVER ADDED':
                     if actions[0][1] == 'WAIVER ADDED':
-                        s = '%s **%s** ADDED %s %s, DROPPED %s %s' % (emotes[actions[0][0].team_id], actions[0][0].team_name, actions[0][2].position, actions[0][2].name, actions[1][2].position, actions[1][2].name)
+                        s = '%s %s ADDED %s %s, DROPPED %s %s' % (emotes[actions[0][0].team_id], actions[0][0].team_name, actions[0][2].position, actions[0][2].name, actions[1][2].position, actions[1][2].name)
                     else:
-                        s = '%s **%s** ADDED %s %s, DROPPED %s %s' % (emotes[actions[0][0].team_id], actions[0][0].team_name, actions[1][2].position, actions[1][2].name, actions[0][2].position, actions[0][2].name)
+                        s = '%s %s ADDED %s %s, DROPPED %s %s' % (emotes[actions[0][0].team_id], actions[0][0].team_name, actions[1][2].position, actions[1][2].name, actions[0][2].position, actions[0][2].name)
                     report += [s.lstrip()]
 
     report.reverse()
@@ -340,7 +340,7 @@ def get_waiver_report(league):
     if not report:
         report += ['No waiver transactions today']
 
-    text = ['__**Waiver Report %s:**__ ' % date] + report + [' ']
+    text = ['Waiver Report %s: ' % date] + report + [' ']
     if randomPhrase == True:
         text += random_phrase()
 
@@ -363,7 +363,7 @@ def get_power_rankings(league, week=None):
             else:
                 ranks += ['%s - %s' % (i[0], i[1].team_name)]
 
-    text = ['__**Power Rankings:**__ '] + ranks
+    text = ['Season Power Rankings: '] + ranks
 
     return '\n'.join(text)
 
@@ -381,7 +381,7 @@ def get_expected_win(league, week=None):
             else:
                 wins += ['%s - %s' % (i[0], i[1].team_name)]
 
-    text = ['__**Expected Win %:**__ '] + wins + [' ']
+    text = ['Last Week Win % League: '] + wins + [' ']
 
     return '\n'.join(text)
 
@@ -497,17 +497,17 @@ def get_trophies(league, week=None):
                 blown_out_emote = emotes[i.home_team.team_id]
 
     if emotes[1] != '':
-        low_score_str = ['Low score: %s **%s** with %.2f points' % (low_team_emote, low_team_name, low_score)]
-        high_score_str = ['High score: %s **%s** with %.2f points' % (high_team_emote, high_team_name, high_score)]
-        close_score_str = ['%s **%s** barely beat %s **%s** by a margin of %.2f' % (close_winner_emote, close_winner, close_loser_emote, close_loser, closest_score)]
-        blowout_str = ['%s **%s** blown out by %s **%s** by a margin of %.2f' % (blown_out_emote, blown_out_team_name, ownerer_emote, ownerer_team_name, biggest_blowout)]
+        low_score_str = ['Low score: %s %s with %.2f points' % (low_team_emote, low_team_name, low_score)]
+        high_score_str = ['High score: %s %s with %.2f points' % (high_team_emote, high_team_name, high_score)]
+        close_score_str = ['%s %s barely beat %s %s by a margin of %.2f' % (close_winner_emote, close_winner, close_loser_emote, close_loser, closest_score)]
+        blowout_str = ['%s %s blown out by %s %s by a margin of %.2f' % (blown_out_emote, blown_out_team_name, ownerer_emote, ownerer_team_name, biggest_blowout)]
     else:
-        low_score_str = ['Low score: **%s** with %.2f points' % (low_team_name, low_score)]
-        high_score_str = ['High score: **%s** with %.2f points' % (high_team_name, high_score)]
-        close_score_str = ['**%s** barely beat **%s** by a margin of %.2f' % (close_winner, close_loser, closest_score)]
-        blowout_str = ['**%s** blown out by **%s** by a margin of %.2f' % (blown_out_team_name, ownerer_team_name, biggest_blowout)]
+        low_score_str = ['Low score: %s with %.2f points' % (low_team_name, low_score)]
+        high_score_str = ['High score: %s with %.2f points' % (high_team_name, high_score)]
+        close_score_str = ['%s barely beat %s by a margin of %.2f' % (close_winner, close_loser, closest_score)]
+        blowout_str = ['%s blown out by %s by a margin of %.2f' % (blown_out_team_name, ownerer_team_name, biggest_blowout)]
 
-    text = ['__**Trophies of the week:**__ '] + low_score_str + high_score_str + close_score_str + blowout_str + [' ']
+    text = ['Trophies of the week: '] + low_score_str + high_score_str + close_score_str + blowout_str + [' ']
     if randomPhrase == True:
         text += random_phrase()
 
@@ -518,7 +518,7 @@ def test_users(league):
     for t in league.teams:
         message += ['%s %s %s' % (t.team_name, users[t.team_id], emotes[t.team_id])]
 
-    text = ['**Users:** '] + message + [' '] + random_phrase()
+    text = ['Users: '] + message + [' '] + random_phrase()
     return '\n'.join(text)
 
 def bot_main(function):
@@ -623,7 +623,7 @@ def bot_main(function):
         print(get_standings(league, top_half_scoring))
         print(get_power_rankings(league))
         print(get_expected_win(league))
-        print(get_waiver_report(league))
+        # print(get_waiver_report(league))
         print(get_matchups(league))
         print(get_heads_up(league))
         print(get_inactives(league, users))
@@ -666,7 +666,7 @@ def bot_main(function):
     elif function=="get_final":
         # on Tuesday we need to get the scores of last week
         week = league.current_week - 1
-        text = "__**Final**__ " + get_scoreboard_short(league, week=week)
+        text = "Final " + get_scoreboard_short(league, week=week)
         text = text + "\n\n" + get_trophies(league, week=week)
     elif function=="init":
         try:

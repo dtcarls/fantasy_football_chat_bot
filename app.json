@@ -10,8 +10,8 @@
     "chat bot",
     "ff"
   ],
-  "website": "https://github.com/sdvgallardo/fantasy_football_chat_bot/",
-  "repository": "https://github.com/sdvgallardo/fantasy_football_chat_bot/",
+  "website": "https://github.com/dtcarls/fantasy_football_chat_bot/",
+  "repository": "https://github.com/dtcarls/fantasy_football_chat_bot/",
   "env": {
     "BOT_ID": {
       "description": "GroupMe Bot ID",
@@ -54,7 +54,7 @@
     },
     "INIT_MSG": {
       "description": "Bot Init Message",
-      "value": "Successfully installed https://github.com/sdvgallardo/fantasy_football_chat_bot you can now remove this init_msg"
+      "value": "Successfully installed https://github.com/dtcarls/fantasy_football_chat_bot you can now remove this init_msg"
     }
   }
 }

@@ -9,8 +9,6 @@ For troubleshooting, join the discord!
 
 This package creates a docker container that runs a GroupMe, Discord, or Slack chat bot to send ESPN Fantasy Football information to a GroupMe, Discord or Slack chat room.
 
-Main code forked from https://github.com/dtcarls/fantasy_football_chat_bot
-
 **What are the differences from the main repo?**
 
 - Adds an extra method of determining team dominance, Expected Win Percentange, which calculates how many games a given team could have won each week
