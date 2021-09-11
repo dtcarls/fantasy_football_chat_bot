@@ -96,6 +96,7 @@ class DiscordBot(object):
 emotes = ['']
 users = ['']
 randomPhrase = False
+extraTrophies = False
 
 def random_phrase():
     phrases = ['I\'m dead inside',
@@ -581,11 +582,10 @@ def get_trophies(league, week=None):
     if emotes[1] != '':
         low_score_str = ['Low score: %s **%s** with %.2f points' % (low_team_emote, low_team_name, low_score)]
         high_score_str = ['High score: %s **%s** with %.2f points' % (high_team_emote, high_team_name, high_score)]
-        over_str = ['Overachiever: %s **%s** with %.2f points more than their projection' % (over_emote, over_team, over_diff)]
+        if over_diff > 0:
+            over_str = ['Overachiever: %s **%s** with %.2f points more than their projection' % (over_emote, over_team, over_diff)]
         if under_diff < 0:
             under_str = ['Underachiever: %s **%s** with %.2f points less than their projection' % (under_emote, under_team, abs(under_diff))]
-        else:
-            under_str = ['Underachiever: %s **%s** with only %.2f points more than their projection' % (under_emote, under_team, under_diff)]
         mvp_str = ['Week MVP: %s, %s **%s** with %s' % (mvp, mvp_emote, mvp_team, mvp_score)]
         lvp_str = ['Week LVP: %s, %s **%s** with %s' % (lvp, lvp_emote, lvp_team, lvp_score)]
         close_score_str = ['%s **%s** barely beat %s **%s** by a margin of %.2f' % (close_winner_emote, close_winner, close_loser_emote, close_loser, closest_score)]
@@ -593,17 +593,26 @@ def get_trophies(league, week=None):
     else:
         low_score_str = ['Low score: **%s** with %.2f points' % (low_team_name, low_score)]
         high_score_str = ['High score: **%s** with %.2f points' % (high_team_name, high_score)]
-        over_str = ['Overachiever: **%s** with %.2f points more than their projection' % (over_team, over_diff)]
+        if over_diff > 0:
+            over_str = ['Overachiever: **%s** with %.2f points more than their projection' % (over_team, over_diff)]
         if under_diff < 0:
             under_str = ['Underachiever: **%s** with %.2f points less than their projection' % (under_team, abs(under_diff))]
-        else:
-            under_str = ['Underachiever: **%s** with only %.2f points more than their projection' % (under_team, under_diff)]
         mvp_str = ['Week MVP: %s, **%s** with %s' % (mvp, mvp_team, mvp_score)]
         lvp_str = ['Week LVP: %s, **%s** with %s' % (lvp, lvp_team, lvp_score)]
         close_score_str = ['**%s** barely beat **%s** by a margin of %.2f' % (close_winner, close_loser, closest_score)]
         blowout_str = ['**%s** got blown out by **%s** by a margin of %.2f' % (blown_out_team_name, ownerer_team_name, biggest_blowout)]
 
-    text = ['__**Trophies of the week:**__ '] + low_score_str + high_score_str + over_str + under_str + mvp_str + lvp_str + close_score_str + blowout_str + [' ']
+    text = ['__**Trophies of the week:**__ '] + low_score_str + high_score_str + close_score_str + blowout_str
+
+    if extraTrophies == True:
+        if under_diff < 0:
+            text += under_str
+        if over_diff > 0:
+            text += over_str
+        text += lvp_str + mvp_str + [' ']
+    else:
+        text += [' ']
+
     if randomPhrase == True:
         text += random_phrase()
 
@@ -689,6 +698,12 @@ def bot_main(function):
     except KeyError:
         randomPhrase = False
 
+    global extraTrophies
+    try:
+        extraTrophies = True if os.environ["EXTRA_TROPHIES"] == '1' else False
+    except KeyError:
+        extraTrophies = False
+
     bot = GroupMeBot(bot_id)
     slack_bot = SlackBot(slack_webhook_url)
     discord_bot = DiscordBot(discord_webhook_url)
@@ -713,17 +728,21 @@ def bot_main(function):
         emotes += [''] * league.teams[-1].team_id
 
     if test:
-        # print(get_scoreboard_short(league))
-        # print(get_projected_scoreboard(league))
-        # print(get_close_scores(league))
-        # print(get_standings(league, top_half_scoring))
-        # print(get_power_rankings(league))
-        # print(get_expected_win(league))
-        # print(get_waiver_report(league))
-        # print(get_matchups(league))
-        # print(get_heads_up(league))
-        # print(get_inactives(league, users))
-        # print(test_users(league))
+        print(get_scoreboard_short(league))
+        print(get_projected_scoreboard(league))
+        print(get_close_scores(league))
+        print(get_standings(league, top_half_scoring))
+        print(get_power_rankings(league))
+        print(get_expected_win(league))
+        try:
+            if os.environ["SWID"] and os.environ["ESPN_S2"]:
+                print(get_waiver_report(league))
+        except KeyError:
+            print("SWID and ESPN_S2 not provided")
+        print(get_matchups(league))
+        print(get_heads_up(league))
+        print(get_inactives(league, users))
+        print(test_users(league))
         function="get_final"
         # bot.send_message("Testing")
         # slack_bot.send_message("Testing")
@@ -845,9 +864,14 @@ if __name__ == '__main__':
         sched.add_job(bot_main, 'cron', ['get_standings'], id='standings',
             day_of_week='tue', hour=18, minute=30, start_date=ff_start_date, end_date=ff_end_date,
             timezone=my_timezone, replace_existing=True)
-        sched.add_job(bot_main, 'cron', ['get_waiver_report'], id='waiver_report',
-            day_of_week='wed', hour=8, start_date=ff_start_date, end_date=ff_end_date,
-            timezone=game_timezone, replace_existing=True)
+        try:
+            if os.environ["SWID"] and os.environ["ESPN_S2"]:
+                sched.add_job(bot_main, 'cron', ['get_waiver_report'], id='waiver_report',
+                    day_of_week='wed', hour=8, start_date=ff_start_date, end_date=ff_end_date,
+                    timezone=my_timezone, replace_existing=True)
+                ready_text += " SWID and ESPN_S2 provided."
+        except KeyError:
+            ready_text += " SWID and ESPN_S2 not provided."
 
     #schedule with a COVID delay to tuesday:
     #extra score update:                 tuesday morning at 7:30am local time.
@@ -869,9 +893,14 @@ if __name__ == '__main__':
         sched.add_job(bot_main, 'cron', ['get_standings'], id='standings',
             day_of_week='wed', hour=18, minute=30, start_date=ff_start_date, end_date=ff_end_date,
             timezone=my_timezone, replace_existing=True)
-        sched.add_job(bot_main, 'cron', ['get_waiver_report'], id='waiver_report',
-            day_of_week='thu', hour=8, start_date=ff_start_date, end_date=ff_end_date,
-            timezone=game_timezone, replace_existing=True)
+        try:
+            if os.environ["SWID"] and os.environ["ESPN_S2"]:
+                sched.add_job(bot_main, 'cron', ['get_waiver_report'], id='waiver_report',
+                    day_of_week='thu', hour=8, start_date=ff_start_date, end_date=ff_end_date,
+                    timezone=my_timezone, replace_existing=True)
+                ready_text += " SWID and ESPN_S2 provided."
+        except KeyError:
+            ready_text += " SWID and ESPN_S2 not provided."
 
     print(ready_text)
     sched.start()
