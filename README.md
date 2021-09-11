@@ -22,6 +22,11 @@ Main code forked from https://github.com/dtcarls/fantasy_football_chat_bot
 - When provided in the Environmental Variables USERS and EMOTES, bot will display them in the scheduled updates
 - Custom formatting changes
 - Custom forks and changes for my two leagues
+- Additional trophies, which will display when the Environmental Variable EXTRA_TROPHIES is set to 1:
+  - Week MVP: Player with the highest score differential. Calculated with (actual score - projected score)/projected score
+  - Week LVP: Player with the lowest score differential.
+  - Overachiever: Team with the highest score over their projected score (actual score - projected score). Awarded when this is different from the highest overall scorer.
+  - Underachiever: Team with the lowest score under their projected score. Awarded when this is different from the lowest overall scorer. 
 
 
 **What does this do?**
@@ -30,7 +35,7 @@ Main code forked from https://github.com/dtcarls/fantasy_football_chat_bot
 - Scoreboard - Sun - 16:00, 20:00 east coast time (Current ESPN fantasy scoreboard)
 - Scoreboard - Mon,Tue,Fri - 7:30 local time (Current ESPN fantasy scoreboard)
 - Close Scores - Sun,Mon - 18:30 east coast time (Games that are within 16 points of eachother to keep an eye on during the Sunday & Monday night games)
-- Final scores and Trophies- Tue - 7:30 local time (High score, low score, biggest win, closest win)
+- Final scores and Trophies- Tue - 7:30 local time
 - Current standings - Tue - 18:30 local time
 - Power rankings - Tue - 18:30 local time
 - Expected win percentage - Tue - 18:30 local time
@@ -47,6 +52,7 @@ Table of Contents
      * [Slack setup](#slack-setup)
      * [Discord setup](#discord-setup)
      * [Heroku setup](#heroku-setup)
+     * [User and Emote IDs](#user-and-emote-ids)
      * [Private Leagues](#private-leagues)
   * [Troubleshooting / FAQ](#troubleshooting--faq)
   * [Getting Started for development and testing](#getting-started-for-development-and-testing)
@@ -185,6 +191,7 @@ Note: App will restart when you change any variable so your chat room may be sem
 - INIT_MSG: The message that the bot will say when it is started (“Hi” by default, can be blank for no message)
 - TOP_HALF_SCORING: If set to True, when standings are posted on Wednesday it will also include top half scoring wins
 - RANDOM_PHRASE: If set to 1, when matchups, heads up report, inactive report, waiver report, and final scores are posted, will include a random phrase from a list
+- EXTRA_TROPHIES: If set to 1, will award the additional trophies Week MVP, Week LVP, Overachiever, and Underachiever, when final scores are posted
 - ESPN_S2: Used for private leagues. See [Private Leagues Section](#private-leagues) for documentation
 - SWID: Used for private leagues. See [Private Leagues Section](#private-leagues) for documentation
 - ESPN_USERNAME: Used for private leagues. See [Private Leagues Section](#private-leagues) for documentation **Experimental, currently not working**
@@ -200,6 +207,9 @@ Unfortunately to do auto deploys of the latest version you need admin access to 
 
 ### User and Emote IDs
 
+<details>
+  <summary>Click to expand!</summary>
+ 
 If you're using Discord and would like to go to the effort, you can provide lists of your Discord user and emote IDs in the Environment Variables.
 
 - USERS: List of Discord user IDs, comma separated, in the format of \<@[ID 1 HERE]\>,\<@[ID 2 HERE]\>,etc.
@@ -212,8 +222,10 @@ To get IDs, first enable Developer Mode in Discord's Advanced settings.
 For Users, just right click the user in the server list and select "Copy ID".
 
 Emotes MUST be from the server-specific list. To get the ID, say '\\:[Emote shortcut]:' in any text channel and copy the text that appears.
-
-#### Private Leagues
+ 
+ </details>
+ 
+### Private Leagues
 
 <details>
   <summary>Click to expand!</summary>
@@ -300,6 +312,7 @@ python3 setup.py install
 - INIT_MSG: The message that the bot will say when it is started (“Hi” by default, can be blank for no message)
 - TOP_HALF_SCORING: If set to True, when standings are posted on Wednesday it will also include top half scoring wins
 - RANDOM_PHRASE: If set to 1, when matchups, heads up report, inactive report, waiver report, and final scores are posted, will include a random phrase from a list
+- EXTRA_TROPHIES: If set to 1, will award the additional trophies Week MVP, Week LVP, Overachiever, and Underachiever, when final scores are posted
 - TUES_SCHED: If set to 1, will move updates accordingly for a COVID delayed game to Tuesday
 - ESPN_S2: Used for private leagues. See [Private Leagues Section](#private-leagues) for documentation
 - SWID: Used for private leagues. See [Private Leagues Section](#private-leagues) for documentation
