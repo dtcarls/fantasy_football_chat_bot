@@ -580,23 +580,19 @@ def get_trophies(league, week=None):
                     lvp_emote = emotes[i.away_team.team_id]
 
     if emotes[1] != '':
-        low_score_str = ['Low score: %s **%s** with %.2f points' % (low_team_emote, low_team_name, low_score)]
-        high_score_str = ['High score: %s **%s** with %.2f points' % (high_team_emote, high_team_name, high_score)]
-        if over_diff > 0:
-            over_str = ['Overachiever: %s **%s** with %.2f points more than their projection' % (over_emote, over_team, over_diff)]
-        if under_diff < 0:
-            under_str = ['Underachiever: %s **%s** with %.2f points less than their projection' % (under_emote, under_team, abs(under_diff))]
+        low_score_str = ['Lowest score: %s **%s** with %.2f points' % (low_team_emote, low_team_name, low_score)]
+        high_score_str = ['Highest score: %s **%s** with %.2f points' % (high_team_emote, high_team_name, high_score)]
+        over_str = ['Overachiever: %s **%s** with %.2f points more than their projection' % (over_emote, over_team, over_diff)]
+        under_str = ['Underachiever: %s **%s** with %.2f points less than their projection' % (under_emote, under_team, abs(under_diff))]
         mvp_str = ['Week MVP: %s, %s **%s** with %s' % (mvp, mvp_emote, mvp_team, mvp_score)]
         lvp_str = ['Week LVP: %s, %s **%s** with %s' % (lvp, lvp_emote, lvp_team, lvp_score)]
         close_score_str = ['%s **%s** barely beat %s **%s** by a margin of %.2f' % (close_winner_emote, close_winner, close_loser_emote, close_loser, closest_score)]
         blowout_str = ['%s **%s** got blown out by %s **%s** by a margin of %.2f' % (blown_out_emote, blown_out_team_name, ownerer_emote, ownerer_team_name, biggest_blowout)]
     else:
-        low_score_str = ['Low score: **%s** with %.2f points' % (low_team_name, low_score)]
-        high_score_str = ['High score: **%s** with %.2f points' % (high_team_name, high_score)]
-        if over_diff > 0:
-            over_str = ['Overachiever: **%s** with %.2f points more than their projection' % (over_team, over_diff)]
-        if under_diff < 0:
-            under_str = ['Underachiever: **%s** with %.2f points less than their projection' % (under_team, abs(under_diff))]
+        low_score_str = ['Lowest score: **%s** with %.2f points' % (low_team_name, low_score)]
+        high_score_str = ['Highest score: **%s** with %.2f points' % (high_team_name, high_score)]
+        over_str = ['Overachiever: **%s** with %.2f points more than their projection' % (over_team, over_diff)]
+        under_str = ['Underachiever: **%s** with %.2f points less than their projection' % (under_team, abs(under_diff))]
         mvp_str = ['Week MVP: %s, **%s** with %s' % (mvp, mvp_team, mvp_score)]
         lvp_str = ['Week LVP: %s, **%s** with %s' % (lvp, lvp_team, lvp_score)]
         close_score_str = ['**%s** barely beat **%s** by a margin of %.2f' % (close_winner, close_loser, closest_score)]
@@ -605,9 +601,9 @@ def get_trophies(league, week=None):
     text = ['__**Trophies of the week:**__ '] + low_score_str + high_score_str + close_score_str + blowout_str
 
     if extraTrophies == True:
-        if under_diff < 0:
+        if under_diff < 0 and low_team_name != under_team:
             text += under_str
-        if over_diff > 0:
+        if over_diff > 0 and high_team_name != over_team:
             text += over_str
         text += lvp_str + mvp_str + [' ']
     else:
