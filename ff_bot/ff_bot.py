@@ -118,7 +118,7 @@ def get_scoreboard_short(league, week=None):
     scores = []
     for i in box_scores:
         if i.away_team:
-            score = '%s **%s** %.2f - %.2f **%s** %s' % (emotes[i.home_team.team_id], i.home_team.team_abbrev, i.home_score,
+            score = '%s **%s** `%.2f - %.2f` **%s** %s' % (emotes[i.home_team.team_id], i.home_team.team_abbrev, i.home_score,
                      i.away_score, i.away_team.team_abbrev, emotes[i.away_team.team_id])
             scores += [score.strip()]
 
@@ -131,7 +131,7 @@ def get_projected_scoreboard(league, week=None):
     scores = []
     for i in box_scores:
         if i.away_team:
-            score = '%s **%s** %.2f - %.2f **%s** %s' % (emotes[i.home_team.team_id], i.home_team.team_abbrev, get_projected_total(i.home_lineup),
+            score = '%s **%s** `%.2f - %.2f` **%s** %s' % (emotes[i.home_team.team_id], i.home_team.team_abbrev, get_projected_total(i.home_lineup),
                         get_projected_total(i.away_lineup), i.away_team.team_abbrev, emotes[i.away_team.team_id])
             scores += [score.strip()]
 
@@ -190,6 +190,13 @@ def get_projected_total(lineup):
             else:
                 total_projected += i.projected_points
     return total_projected
+
+def get_projected_final(lineup):
+    final_projected = 0
+    for i in lineup:
+        if i.slot_position != 'BE' and i.slot_position != 'IR':
+            final_projected += i.projected_points
+    return final_projected
 
 def all_played(lineup):
     for i in lineup:
@@ -305,7 +312,7 @@ def get_close_scores(league, week=None):
         if i.away_team:
             diffScore = i.away_score - i.home_score
             if ( -16 < diffScore <= 0 and not all_played(i.away_lineup)) or (0 <= diffScore < 16 and not all_played(i.home_lineup)):
-                score = '%s **%s** %.2f - %.2f **%s** %s' % (emotes[i.home_team.team_id], i.home_team.team_abbrev, i.home_score,
+                score = '%s **%s** `%.2f - %.2f` **%s** %s' % (emotes[i.home_team.team_id], i.home_team.team_abbrev, i.home_score,
                         i.away_score, i.away_team.team_abbrev, emotes[i.away_team.team_id])
                 scores += [score.strip()]
 
@@ -434,24 +441,48 @@ def expected_win_percent(league, week):
     return [(powerRankingDictSorted[x],x) for x in powerRankingDictSorted.keys()]    #return in the format that the bot expects
 
 def get_trophies(league, week=None):
-    #Gets trophies for highest score, lowest score, closest score, and biggest win
+    #Gets trophies for highest score, lowest score, overachiever, underachiever, week MVP & LVP, closest score, and biggest win
     matchups = league.box_scores(week=week)
+
     low_score = 9999
     low_team_name = ''
     low_team_emote = ''
+
     high_score = -1
     high_team_name = ''
     high_team_emote = ''
+
     closest_score = 9999
     close_winner = ''
     close_winner_emote = ''
     close_loser = ''
     close_loser_emote = ''
+
     biggest_blowout = -1
     blown_out_team_name = ''
     blown_out_emote = ''
     ownerer_team_name = ''
     ownerer_emote = ''
+
+    over_diff = -1000
+    over_team = ''
+    over_emote = ''
+
+    under_diff = 999
+    under_team = ''
+    uner_emote = ''
+
+    mvp_score_diff = -100
+    mvp_score = ''
+    mvp = ''
+    mvp_team = -1
+    mvp_emote = ''
+
+    lvp_score_diff = 999
+    lvp_score = ''
+    lvp = ''
+    lvp_team = -1
+    lvp_emote = ''
 
     for i in matchups:
         if i.home_score > high_score:
@@ -470,6 +501,7 @@ def get_trophies(league, week=None):
             low_score = i.away_score
             low_team_name = i.away_team.team_name
             low_team_emote = emotes[i.away_team.team_id]
+
         if i.away_score - i.home_score != 0 and \
             abs(i.away_score - i.home_score) < closest_score:
             closest_score = abs(i.away_score - i.home_score)
@@ -483,6 +515,7 @@ def get_trophies(league, week=None):
                 close_winner_emote = emotes[i.away_team.team_id]
                 close_loser = i.home_team.team_name
                 close_loser_emote = emotes[i.home_team.team_id]
+
         if abs(i.away_score - i.home_score) > biggest_blowout:
             biggest_blowout = abs(i.away_score - i.home_score)
             if i.away_score - i.home_score < 0:
@@ -496,18 +529,81 @@ def get_trophies(league, week=None):
                 blown_out_team_name = i.home_team.team_name
                 blown_out_emote = emotes[i.home_team.team_id]
 
+        if (i.home_score - get_projected_final(i.home_lineup)) > over_diff:
+            over_diff = i.home_score - get_projected_final(i.home_lineup)
+            over_team = i.home_team.team_name
+            over_emote = emotes[i.home_team.team_id]
+        elif (i.home_score - get_projected_final(i.home_lineup)) < under_diff:
+            under_diff = i.home_score - get_projected_final(i.home_lineup)
+            under_team = i.home_team.team_name
+            under_emote = emotes[i.home_team.team_id]
+
+        if (i.away_score - get_projected_final(i.away_lineup)) > over_diff:
+            over_diff = i.away_score - get_projected_final(i.away_lineup)
+            over_team = i.away_team.team_name
+            over_emote = emotes[i.away_team.team_id]
+        elif (i.away_score - get_projected_final(i.away_lineup)) < under_diff:
+            under_diff = i.away_score - get_projected_final(i.away_lineup)
+            under_team = i.away_team.team_name
+            under_emote = emotes[i.away_team.team_id]
+
+        for p in i.home_lineup:
+            if p.slot_position != 'BE' and p.slot_position != 'IR' and p.position != 'D/ST':
+                score_diff = (p.points - p.projected_points)/p.projected_points
+                if score_diff > mvp_score_diff:
+                    mvp_score_diff = score_diff
+                    mvp_score = '%.2f points (%.2f diff ratio)' % (p.points, score_diff)
+                    mvp = p.position + ' ' + p.name
+                    mvp_team = i.home_team.team_abbrev
+                    mvp_emote = emotes[i.home_team.team_id]
+                elif score_diff < lvp_score_diff:
+                    lvp_score_diff = score_diff
+                    lvp_score = '%.2f points (%.2f diff ratio)' % (p.points, score_diff)
+                    lvp = p.position + ' ' + p.name
+                    lvp_team = i.home_team.team_abbrev
+                    lvp_emote = emotes[i.home_team.team_id]
+        for p in i.away_lineup:
+            if p.slot_position != 'BE' and p.slot_position != 'IR' and p.position != 'D/ST':
+                score_diff = (p.points - p.projected_points)/p.projected_points
+                if score_diff > mvp_score_diff:
+                    mvp_score_diff = score_diff
+                    mvp_score = '%.2f points (%.2f diff ratio)' % (p.points, score_diff)
+                    mvp = p.position + ' ' + p.name
+                    mvp_team = i.away_team.team_abbrev
+                    mvp_emote = emotes[i.away_team.team_id]
+                elif score_diff < lvp_score_diff:
+                    lvp_score_diff = score_diff
+                    lvp_score = '%.2f points (%.2f diff ratio)' % (p.points, score_diff)
+                    lvp = p.position + ' ' + p.name
+                    lvp_team = i.away_team.team_abbrev
+                    lvp_emote = emotes[i.away_team.team_id]
+
     if emotes[1] != '':
         low_score_str = ['Low score: %s **%s** with %.2f points' % (low_team_emote, low_team_name, low_score)]
         high_score_str = ['High score: %s **%s** with %.2f points' % (high_team_emote, high_team_name, high_score)]
+        over_str = ['Overachiever: %s **%s** with %.2f points more than their projection' % (over_emote, over_team, over_diff)]
+        if under_diff < 0:
+            under_str = ['Underachiever: %s **%s** with %.2f points less than their projection' % (under_emote, under_team, abs(under_diff))]
+        else:
+            under_str = ['Underachiever: %s **%s** with only %.2f points more than their projection' % (under_emote, under_team, under_diff)]
+        mvp_str = ['Week MVP: %s, %s **%s** with %s' % (mvp, mvp_emote, mvp_team, mvp_score)]
+        lvp_str = ['Week LVP: %s, %s **%s** with %s' % (lvp, lvp_emote, lvp_team, lvp_score)]
         close_score_str = ['%s **%s** barely beat %s **%s** by a margin of %.2f' % (close_winner_emote, close_winner, close_loser_emote, close_loser, closest_score)]
-        blowout_str = ['%s **%s** blown out by %s **%s** by a margin of %.2f' % (blown_out_emote, blown_out_team_name, ownerer_emote, ownerer_team_name, biggest_blowout)]
+        blowout_str = ['%s **%s** got blown out by %s **%s** by a margin of %.2f' % (blown_out_emote, blown_out_team_name, ownerer_emote, ownerer_team_name, biggest_blowout)]
     else:
         low_score_str = ['Low score: **%s** with %.2f points' % (low_team_name, low_score)]
         high_score_str = ['High score: **%s** with %.2f points' % (high_team_name, high_score)]
+        over_str = ['Overachiever: **%s** with %.2f points more than their projection' % (over_team, over_diff)]
+        if under_diff < 0:
+            under_str = ['Underachiever: **%s** with %.2f points less than their projection' % (under_team, abs(under_diff))]
+        else:
+            under_str = ['Underachiever: **%s** with only %.2f points more than their projection' % (under_team, under_diff)]
+        mvp_str = ['Week MVP: %s, **%s** with %s' % (mvp, mvp_team, mvp_score)]
+        lvp_str = ['Week LVP: %s, **%s** with %s' % (lvp, lvp_team, lvp_score)]
         close_score_str = ['**%s** barely beat **%s** by a margin of %.2f' % (close_winner, close_loser, closest_score)]
-        blowout_str = ['**%s** blown out by **%s** by a margin of %.2f' % (blown_out_team_name, ownerer_team_name, biggest_blowout)]
+        blowout_str = ['**%s** got blown out by **%s** by a margin of %.2f' % (blown_out_team_name, ownerer_team_name, biggest_blowout)]
 
-    text = ['__**Trophies of the week:**__ '] + low_score_str + high_score_str + close_score_str + blowout_str + [' ']
+    text = ['__**Trophies of the week:**__ '] + low_score_str + high_score_str + over_str + under_str + mvp_str + lvp_str + close_score_str + blowout_str + [' ']
     if randomPhrase == True:
         text += random_phrase()
 
@@ -617,17 +713,17 @@ def bot_main(function):
         emotes += [''] * league.teams[-1].team_id
 
     if test:
-        print(get_scoreboard_short(league))
-        print(get_projected_scoreboard(league))
-        print(get_close_scores(league))
-        print(get_standings(league, top_half_scoring))
-        print(get_power_rankings(league))
-        print(get_expected_win(league))
-        print(get_waiver_report(league))
-        print(get_matchups(league))
-        print(get_heads_up(league))
-        print(get_inactives(league, users))
-        print(test_users(league))
+        # print(get_scoreboard_short(league))
+        # print(get_projected_scoreboard(league))
+        # print(get_close_scores(league))
+        # print(get_standings(league, top_half_scoring))
+        # print(get_power_rankings(league))
+        # print(get_expected_win(league))
+        # print(get_waiver_report(league))
+        # print(get_matchups(league))
+        # print(get_heads_up(league))
+        # print(get_inactives(league, users))
+        # print(test_users(league))
         function="get_final"
         # bot.send_message("Testing")
         # slack_bot.send_message("Testing")
