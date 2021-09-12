@@ -119,8 +119,10 @@ def get_scoreboard_short(league, week=None):
     scores = []
     for i in box_scores:
         if i.away_team:
-            score = '%s **%s** `%.2f - %.2f` **%s** %s' % (emotes[i.home_team.team_id], i.home_team.team_abbrev, i.home_score,
-                     i.away_score, i.away_team.team_abbrev, emotes[i.away_team.team_id])
+            home_score = '%.2f' % (i.home_score)
+            away_score = '%.2f' % (i.away_score)
+            score = '%s `%s %s - %s %s` %s' % (emotes[i.home_team.team_id], i.home_team.team_abbrev.rjust(4), home_score.rjust(6),
+                        away_score.ljust(6), i.away_team.team_abbrev.ljust(4), emotes[i.away_team.team_id])
             scores += [score.strip()]
 
     text = ['__**Score Update:**__ '] + scores
@@ -132,8 +134,10 @@ def get_projected_scoreboard(league, week=None):
     scores = []
     for i in box_scores:
         if i.away_team:
-            score = '%s **%s** `%.2f - %.2f` **%s** %s' % (emotes[i.home_team.team_id], i.home_team.team_abbrev, get_projected_total(i.home_lineup),
-                        get_projected_total(i.away_lineup), i.away_team.team_abbrev, emotes[i.away_team.team_id])
+            home_score = '%.2f' % (get_projected_total(i.home_lineup))
+            away_score = '%.2f' % (get_projected_total(i.away_lineup))
+            score = '%s `%s %s - %s %s` %s' % (emotes[i.home_team.team_id], i.home_team.team_abbrev.rjust(4), home_score.rjust(6),
+                        away_score.ljust(6), i.away_team.team_abbrev.ljust(4), emotes[i.away_team.team_id])
             scores += [score.strip()]
 
     text = ['__**Approximate Projected Scores:**__ '] + scores
@@ -313,8 +317,11 @@ def get_close_scores(league, week=None):
         if i.away_team:
             diffScore = i.away_score - i.home_score
             if ( -16 < diffScore <= 0 and not all_played(i.away_lineup)) or (0 <= diffScore < 16 and not all_played(i.home_lineup)):
-                score = '%s **%s** `%.2f - %.2f` **%s** %s' % (emotes[i.home_team.team_id], i.home_team.team_abbrev, i.home_score,
-                        i.away_score, i.away_team.team_abbrev, emotes[i.away_team.team_id])
+                home_score = '%.2f' % (i.home_score)
+                away_score = '%.2f' % (i.away_score)
+                score = '%s `%s %s - %s %s` %s' % (emotes[i.home_team.team_id], i.home_team.team_abbrev.rjust(4), home_score.rjust(6),
+                            away_score.ljust(6), i.away_team.team_abbrev.ljust(4), emotes[i.away_team.team_id])
+
                 scores += [score.strip()]
 
     if not scores:
@@ -550,7 +557,7 @@ def get_trophies(league, week=None):
 
         for p in i.home_lineup:
             if p.slot_position != 'BE' and p.slot_position != 'IR' and p.position != 'D/ST':
-                score_diff = (p.points - p.projected_points)/p.projected_points
+                score_diff = (p.points - p.projected_points)/p.projected_points and p.projected_points > 0
                 if score_diff > mvp_score_diff:
                     mvp_score_diff = score_diff
                     mvp_score = '%.2f points (%.2f diff ratio)' % (p.points, score_diff)
@@ -564,7 +571,7 @@ def get_trophies(league, week=None):
                     lvp_team = i.home_team.team_abbrev
                     lvp_emote = emotes[i.home_team.team_id]
         for p in i.away_lineup:
-            if p.slot_position != 'BE' and p.slot_position != 'IR' and p.position != 'D/ST':
+            if p.slot_position != 'BE' and p.slot_position != 'IR' and p.position != 'D/ST' and p.projected_points > 0:
                 score_diff = (p.points - p.projected_points)/p.projected_points
                 if score_diff > mvp_score_diff:
                     mvp_score_diff = score_diff
