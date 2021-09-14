@@ -218,7 +218,7 @@ def get_heads_up(league, week=None):
         headsup += scan_roster(i.away_lineup, i.away_team)
 
     if not headsup:
-        headsup += ['No heads up players this week']
+        return ('')
 
     text = ['__**Heads Up Report:**__ '] + headsup
     if randomPhrase == True:
@@ -235,7 +235,7 @@ def get_inactives(league, week=None):
         inactives += scan_inactives(i.away_lineup, i.away_team)
 
     if not inactives:
-        inactives += ['No inactive players this week']
+        return ('')
 
     text = ['__**Inactive Player Report:**__ '] + inactives
     if randomPhrase == True:
@@ -353,7 +353,7 @@ def get_waiver_report(league):
     report.reverse()
 
     if not report:
-        report += ['No waiver transactions today']
+        return ('')
 
     text = ['__**Waiver Report %s:**__ ' % date] + report + [' ']
     if randomPhrase == True:
@@ -556,8 +556,8 @@ def get_trophies(league, week=None):
             under_emote = emotes[i.away_team.team_id]
 
         for p in i.home_lineup:
-            if p.slot_position != 'BE' and p.slot_position != 'IR' and p.position != 'D/ST':
-                score_diff = (p.points - p.projected_points)/p.projected_points and p.projected_points > 0
+            if p.slot_position != 'BE' and p.slot_position != 'IR' and p.position != 'D/ST' and p.projected_points > 0:
+                score_diff = (p.points - p.projected_points)/p.projected_points
                 if score_diff > mvp_score_diff:
                     mvp_score_diff = score_diff
                     mvp_score = '%.2f points (%.2f diff ratio)' % (p.points, score_diff)
