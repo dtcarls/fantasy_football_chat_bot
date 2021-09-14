@@ -481,12 +481,14 @@ def get_trophies(league, week=None):
     uner_emote = ''
 
     mvp_score_diff = -100
+    mvp_proj = -100
     mvp_score = ''
     mvp = ''
     mvp_team = -1
     mvp_emote = ''
 
     lvp_score_diff = 999
+    lvp_proj = 999
     lvp_score = ''
     lvp = ''
     lvp_team = -1
@@ -558,30 +560,36 @@ def get_trophies(league, week=None):
         for p in i.home_lineup:
             if p.slot_position != 'BE' and p.slot_position != 'IR' and p.position != 'D/ST' and p.projected_points > 0:
                 score_diff = (p.points - p.projected_points)/p.projected_points
-                if score_diff > mvp_score_diff:
+                proj_diff = p.points - p.projected_points
+                if (score_diff > mvp_score_diff) or (score_diff == mvp_score_diff and proj_diff > mvp_proj):
                     mvp_score_diff = score_diff
-                    mvp_score = '%.2f points (%.2f diff ratio)' % (p.points, score_diff)
+                    mvp_proj = proj_diff
+                    mvp_score = '%.2f points (%.2f proj, %.2f diff ratio)' % (p.points, p.projected_points, score_diff)
                     mvp = p.position + ' ' + p.name
                     mvp_team = i.home_team.team_abbrev
                     mvp_emote = emotes[i.home_team.team_id]
-                elif score_diff < lvp_score_diff:
+                elif (score_diff < lvp_score_diff) or (score_diff == lvp_score_diff and proj_diff < lvp_proj):
                     lvp_score_diff = score_diff
-                    lvp_score = '%.2f points (%.2f diff ratio)' % (p.points, score_diff)
+                    lvp_proj = proj_diff
+                    lvp_score = '%.2f points (%.2f proj, %.2f diff ratio)' % (p.points, p.projected_points, score_diff)
                     lvp = p.position + ' ' + p.name
                     lvp_team = i.home_team.team_abbrev
                     lvp_emote = emotes[i.home_team.team_id]
         for p in i.away_lineup:
             if p.slot_position != 'BE' and p.slot_position != 'IR' and p.position != 'D/ST' and p.projected_points > 0:
                 score_diff = (p.points - p.projected_points)/p.projected_points
-                if score_diff > mvp_score_diff:
+                proj_diff = p.points - p.projected_points
+                if (score_diff > mvp_score_diff) or (score_diff == mvp_score_diff and proj_diff > mvp_proj):
                     mvp_score_diff = score_diff
-                    mvp_score = '%.2f points (%.2f diff ratio)' % (p.points, score_diff)
+                    mvp_proj = proj_diff
+                    mvp_score = '%.2f points (%.2f proj, %.2f diff ratio)' % (p.points, p.projected_points, score_diff)
                     mvp = p.position + ' ' + p.name
                     mvp_team = i.away_team.team_abbrev
                     mvp_emote = emotes[i.away_team.team_id]
-                elif score_diff < lvp_score_diff:
+                elif (score_diff < lvp_score_diff) or (score_diff == lvp_score_diff and proj_diff < lvp_proj):
                     lvp_score_diff = score_diff
-                    lvp_score = '%.2f points (%.2f diff ratio)' % (p.points, score_diff)
+                    lvp_proj = proj_diff
+                    lvp_score = '%.2f points (%.2f proj, %.2f diff ratio)' % (p.points, p.projected_points, score_diff)
                     lvp = p.position + ' ' + p.name
                     lvp_team = i.away_team.team_abbrev
                     lvp_emote = emotes[i.away_team.team_id]
@@ -731,21 +739,21 @@ def bot_main(function):
         emotes += [''] * league.teams[-1].team_id
 
     if test:
-        print(get_scoreboard_short(league))
-        print(get_projected_scoreboard(league))
-        print(get_close_scores(league))
-        print(get_standings(league, top_half_scoring))
-        print(get_power_rankings(league))
-        print(get_expected_win(league))
-        try:
-            if os.environ["SWID"] and os.environ["ESPN_S2"]:
-                print(get_waiver_report(league))
-        except KeyError:
-            print("SWID and ESPN_S2 not provided")
-        print(get_matchups(league))
-        print(get_heads_up(league))
-        print(get_inactives(league, users))
-        print(test_users(league))
+        # print(get_scoreboard_short(league))
+        # print(get_projected_scoreboard(league))
+        # print(get_close_scores(league))
+        # print(get_standings(league, top_half_scoring))
+        # print(get_power_rankings(league))
+        # print(get_expected_win(league))
+        # try:
+        #     if os.environ["SWID"] and os.environ["ESPN_S2"]:
+        #         print(get_waiver_report(league))
+        # except KeyError:
+        #     print("SWID and ESPN_S2 not provided")
+        # print(get_matchups(league))
+        # print(get_heads_up(league))
+        # print(get_inactives(league, users))
+        # print(test_users(league))
         function="get_final"
         # bot.send_message("Testing")
         # slack_bot.send_message("Testing")
