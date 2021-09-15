@@ -125,7 +125,11 @@ def get_scoreboard_short(league, week=None):
                         away_score.ljust(6), i.away_team.team_abbrev.ljust(4), emotes[i.away_team.team_id])
             scores += [score.strip()]
 
-    text = ['__**Score Update:**__ '] + scores
+    if week == league.current_week - 1:
+        text = ['__**Final Score Update:**__ ']
+    else:
+        text = ['__**Score Update:**__ ']
+    text += scores
     return '\n'.join(text)
 
 def get_projected_scoreboard(league, week=None):
@@ -210,7 +214,7 @@ def all_played(lineup):
     return True
 
 def get_heads_up(league, week=None):
-    box_scores = league.box_scores(week=1)
+    box_scores = league.box_scores(week=week)
     headsup = []
 
     for i in box_scores:
@@ -227,7 +231,7 @@ def get_heads_up(league, week=None):
     return '\n'.join(text)
 
 def get_inactives(league, week=None):
-    box_scores = league.box_scores(week=1)
+    box_scores = league.box_scores(week=week)
     inactives = []
 
     for i in box_scores:
@@ -342,14 +346,14 @@ def get_waiver_report(league):
                 if d2 == date:
                     if len(actions) == 1:
                         if actions[0][1] == 'WAIVER ADDED':
-                            s = '%s **%s** ADDED %s %s' % (emotes[actions[0][0].team_id], actions[0][0].team_name, actions[0][2].position, actions[0][2].name)
+                            s = '%s **%s** ADDED%s %s' % (emotes[actions[0][0].team_id], actions[0][0].team_name, ' '+actions[0][2].position if actions[0][2].position != 'D/ST' else '', actions[0][2].name)
                             report += [s.lstrip()]
                     elif len(actions) > 1:
                         if actions[0][1] == 'WAIVER ADDED' or  actions[1][1] == 'WAIVER ADDED':
                             if actions[0][1] == 'WAIVER ADDED':
-                                s = '%s **%s** ADDED %s %s, DROPPED %s %s' % (emotes[actions[0][0].team_id], actions[0][0].team_name, actions[0][2].position, actions[0][2].name, actions[1][2].position, actions[1][2].name)
+                                s = '%s **%s** ADDED%s %s, DROPPED%s %s' % (emotes[actions[0][0].team_id], actions[0][0].team_name, ' '+actions[0][2].position if actions[0][2].position != 'D/ST' else '', actions[0][2].name, ' '+actions[1][2].position if actions[1][2].position != 'D/ST' else '', actions[1][2].name)
                             else:
-                                s = '%s **%s** ADDED %s %s, DROPPED %s %s' % (emotes[actions[0][0].team_id], actions[0][0].team_name, actions[1][2].position, actions[1][2].name, actions[0][2].position, actions[0][2].name)
+                                s = '%s **%s** ADDED%s %s, DROPPED%s %s' % (emotes[actions[0][0].team_id], actions[0][0].team_name, ' '+actions[1][2].position if actions[1][2].position != 'D/ST' else '', actions[1][2].name, ' '+actions[0][2].position if actions[0][2].position != 'D/ST' else '', actions[0][2].name)
                             report += [s.lstrip()]
 
             report.reverse()
@@ -754,9 +758,9 @@ def bot_main(function):
         print(get_waiver_report(league))
         print(get_matchups(league))
         print(get_heads_up(league))
-        print(get_inactives(league, users))
-        print(test_users(league))
+        print(get_inactives(league))
         function="get_final"
+        # print(test_users(league))
         # bot.send_message("Testing")
         # slack_bot.send_message("Testing")
         # discord_bot.send_message(get_heads_up(league))
@@ -794,7 +798,7 @@ def bot_main(function):
     elif function=="get_final":
         # on Tuesday we need to get the scores of last week
         week = league.current_week - 1
-        text = "__**Final**__ " + get_scoreboard_short(league, week=week)
+        text = get_scoreboard_short(league, week=week)
         text = text + "\n\n" + get_trophies(league, week=week)
     elif function=="init":
         try:
