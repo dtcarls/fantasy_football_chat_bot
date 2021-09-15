@@ -330,36 +330,40 @@ def get_close_scores(league, week=None):
     return '\n'.join(text)
 
 def get_waiver_report(league):
-    activities = league.recent_activity(50)
-    report     = []
-    date       = datetime.today().strftime('%Y-%m-%d')
+    try:
+        if os.environ["SWID"] and os.environ["ESPN_S2"]:
+            activities = league.recent_activity(50)
+            report     = []
+            date       = datetime.today().strftime('%Y-%m-%d')
 
-    for activity in activities:
-        actions = activity.actions
-        d2      = datetime.fromtimestamp(activity.date/1000).strftime('%Y-%m-%d')
-        if d2 == date:
-            if len(actions) == 1:
-                if actions[0][1] == 'WAIVER ADDED':
-                    s = '%s **%s** ADDED %s %s' % (emotes[actions[0][0].team_id], actions[0][0].team_name, actions[0][2].position, actions[0][2].name)
-                    report += [s.lstrip()]
-            elif len(actions) > 1:
-                if actions[0][1] == 'WAIVER ADDED' or  actions[1][1] == 'WAIVER ADDED':
-                    if actions[0][1] == 'WAIVER ADDED':
-                        s = '%s **%s** ADDED %s %s, DROPPED %s %s' % (emotes[actions[0][0].team_id], actions[0][0].team_name, actions[0][2].position, actions[0][2].name, actions[1][2].position, actions[1][2].name)
-                    else:
-                        s = '%s **%s** ADDED %s %s, DROPPED %s %s' % (emotes[actions[0][0].team_id], actions[0][0].team_name, actions[1][2].position, actions[1][2].name, actions[0][2].position, actions[0][2].name)
-                    report += [s.lstrip()]
+            for activity in activities:
+                actions = activity.actions
+                d2      = datetime.fromtimestamp(activity.date/1000).strftime('%Y-%m-%d')
+                if d2 == date:
+                    if len(actions) == 1:
+                        if actions[0][1] == 'WAIVER ADDED':
+                            s = '%s **%s** ADDED %s %s' % (emotes[actions[0][0].team_id], actions[0][0].team_name, actions[0][2].position, actions[0][2].name)
+                            report += [s.lstrip()]
+                    elif len(actions) > 1:
+                        if actions[0][1] == 'WAIVER ADDED' or  actions[1][1] == 'WAIVER ADDED':
+                            if actions[0][1] == 'WAIVER ADDED':
+                                s = '%s **%s** ADDED %s %s, DROPPED %s %s' % (emotes[actions[0][0].team_id], actions[0][0].team_name, actions[0][2].position, actions[0][2].name, actions[1][2].position, actions[1][2].name)
+                            else:
+                                s = '%s **%s** ADDED %s %s, DROPPED %s %s' % (emotes[actions[0][0].team_id], actions[0][0].team_name, actions[1][2].position, actions[1][2].name, actions[0][2].position, actions[0][2].name)
+                            report += [s.lstrip()]
 
-    report.reverse()
+            report.reverse()
 
-    if not report:
+            if not report:
+                return ('')
+
+            text = ['__**Waiver Report %s:**__ ' % date] + report + [' ']
+            if randomPhrase == True:
+                text += random_phrase()
+
+            return '\n'.join(text)
+    except KeyError:
         return ('')
-
-    text = ['__**Waiver Report %s:**__ ' % date] + report + [' ']
-    if randomPhrase == True:
-        text += random_phrase()
-
-    return '\n'.join(text)
 
 def get_power_rankings(league, week=None):
     # power rankings requires an integer value, so this grabs the current week for that
@@ -396,7 +400,9 @@ def get_expected_win(league, week=None):
             else:
                 wins += ['%s - %s' % (i[0], i[1].team_name)]
 
-    text = ['__**Expected Win %:**__ '] + wins + [' ']
+    text = ['__**Expected Win %:**__ '] + wins
+    if randomPhrase == True:
+        text += [' '] + random_phrase()
 
     return '\n'.join(text)
 
@@ -739,21 +745,17 @@ def bot_main(function):
         emotes += [''] * league.teams[-1].team_id
 
     if test:
-        # print(get_scoreboard_short(league))
-        # print(get_projected_scoreboard(league))
-        # print(get_close_scores(league))
-        # print(get_standings(league, top_half_scoring))
-        # print(get_power_rankings(league))
-        # print(get_expected_win(league))
-        # try:
-        #     if os.environ["SWID"] and os.environ["ESPN_S2"]:
-        #         print(get_waiver_report(league))
-        # except KeyError:
-        #     print("SWID and ESPN_S2 not provided")
-        # print(get_matchups(league))
-        # print(get_heads_up(league))
-        # print(get_inactives(league, users))
-        # print(test_users(league))
+        print(get_scoreboard_short(league))
+        print(get_projected_scoreboard(league))
+        print(get_close_scores(league))
+        print(get_standings(league, top_half_scoring))
+        print(get_power_rankings(league))
+        print(get_expected_win(league))
+        print(get_waiver_report(league))
+        print(get_matchups(league))
+        print(get_heads_up(league))
+        print(get_inactives(league, users))
+        print(test_users(league))
         function="get_final"
         # bot.send_message("Testing")
         # slack_bot.send_message("Testing")
@@ -784,11 +786,11 @@ def bot_main(function):
     elif function=="get_trophies":
         text = get_trophies(league)
     elif function=="get_standings":
-        text = get_standings(league, top_half_scoring) + '\n\n'
-        text += get_power_rankings(league) + '\n\n'
-        text += get_expected_win(league)
-        if randomPhrase == True:
-            text += '\n' + random_phrase()[0]
+        text = get_standings(league, top_half_scoring)
+    elif function=="get_power_rankings":
+        text = get_power_rankings(league)
+    elif function=="get_expected_win":
+        text = get_expected_win(league)
     elif function=="get_final":
         # on Tuesday we need to get the scores of last week
         week = league.current_week - 1
@@ -875,14 +877,16 @@ if __name__ == '__main__':
         sched.add_job(bot_main, 'cron', ['get_standings'], id='standings',
             day_of_week='tue', hour=18, minute=30, start_date=ff_start_date, end_date=ff_end_date,
             timezone=my_timezone, replace_existing=True)
-        try:
-            if os.environ["SWID"] and os.environ["ESPN_S2"]:
-                sched.add_job(bot_main, 'cron', ['get_waiver_report'], id='waiver_report',
-                    day_of_week='wed', hour=8, start_date=ff_start_date, end_date=ff_end_date,
-                    timezone=my_timezone, replace_existing=True)
-                ready_text += " SWID and ESPN_S2 provided."
-        except KeyError:
-            ready_text += " SWID and ESPN_S2 not provided."
+        sched.add_job(bot_main, 'cron', ['get_power_rankings'], id='power_rankings',
+            day_of_week='tue', hour=18, minute=30, second=5, start_date=ff_start_date, end_date=ff_end_date,
+            timezone=my_timezone, replace_existing=True)
+        sched.add_job(bot_main, 'cron', ['get_expected_win'], id='get_expected_win',
+            day_of_week='tue', hour=18, minute=30, second=10, start_date=ff_start_date, end_date=ff_end_date,
+            timezone=my_timezone, replace_existing=True)
+        sched.add_job(bot_main, 'cron', ['get_waiver_report'], id='waiver_report',
+            day_of_week='wed', hour=8, start_date=ff_start_date, end_date=ff_end_date,
+            timezone=my_timezone, replace_existing=True)
+
 
     #schedule with a COVID delay to tuesday:
     #extra score update:                 tuesday morning at 7:30am local time.
@@ -904,14 +908,21 @@ if __name__ == '__main__':
         sched.add_job(bot_main, 'cron', ['get_standings'], id='standings',
             day_of_week='wed', hour=18, minute=30, start_date=ff_start_date, end_date=ff_end_date,
             timezone=my_timezone, replace_existing=True)
-        try:
-            if os.environ["SWID"] and os.environ["ESPN_S2"]:
-                sched.add_job(bot_main, 'cron', ['get_waiver_report'], id='waiver_report',
-                    day_of_week='thu', hour=8, start_date=ff_start_date, end_date=ff_end_date,
-                    timezone=my_timezone, replace_existing=True)
-                ready_text += " SWID and ESPN_S2 provided."
-        except KeyError:
-            ready_text += " SWID and ESPN_S2 not provided."
+        sched.add_job(bot_main, 'cron', ['get_power_rankings'], id='power_rankings',
+            day_of_week='wed', hour=18, minute=30, second=5, start_date=ff_start_date, end_date=ff_end_date,
+            timezone=my_timezone, replace_existing=True)
+        sched.add_job(bot_main, 'cron', ['get_expected_win'], id='get_expected_win',
+            day_of_week='wed', hour=18, minute=30, second=10, start_date=ff_start_date, end_date=ff_end_date,
+            timezone=my_timezone, replace_existing=True)
+        sched.add_job(bot_main, 'cron', ['get_waiver_report'], id='waiver_report',
+            day_of_week='thu', hour=8, start_date=ff_start_date, end_date=ff_end_date,
+            timezone=my_timezone, replace_existing=True)
+
+    try:
+        if os.environ["SWID"] and os.environ["ESPN_S2"]:
+            ready_text += " SWID and ESPN_S2 provided."
+    except KeyError:
+        ready_text += " SWID and ESPN_S2 not provided."
 
     print(ready_text)
     sched.start()
