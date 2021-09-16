@@ -130,12 +130,9 @@ def get_standings(league, top_half_scoring, week=None):
     teams = league.teams
     standings = []
     if not top_half_scoring:
-        for t in teams:
-            standings.append((t.wins, t.losses, t.team_name))
-
-        standings = sorted(standings, key=lambda tup: tup[0], reverse=True)
-        standings_txt = [f"{pos + 1}: {team_name} ({wins} - {losses})" for \
-            pos, (wins, losses, team_name) in enumerate(standings)]
+        standings = league.standings()
+        standings_txt = [f"{pos + 1}: {team.team_name} ({team.wins} - {team.losses})" for \
+            pos, team in enumerate(standings)]
     else:
         top_half_totals = {t.team_name: 0 for t in teams}
         if not week:
