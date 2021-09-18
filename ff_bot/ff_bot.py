@@ -130,12 +130,9 @@ def get_standings(league, top_half_scoring, week=None):
     teams = league.teams
     standings = []
     if not top_half_scoring:
-        for t in teams:
-            standings.append((t.wins, t.losses, t.team_name))
-
-        standings = sorted(standings, key=lambda tup: tup[0], reverse=True)
-        standings_txt = [f"{pos + 1}: {team_name} ({wins} - {losses})" for \
-            pos, (wins, losses, team_name) in enumerate(standings)]
+        standings = league.standings()
+        standings_txt = [f"{pos + 1}: {team.team_name} ({team.wins} - {team.losses})" for \
+            pos, team in enumerate(standings)]
     else:
         top_half_totals = {t.team_name: 0 for t in teams}
         if not week:
@@ -280,6 +277,9 @@ def get_trophies(league, week=None):
     text = ['Trophies of the week:'] + low_score_str + high_score_str + close_score_str + blowout_str
     return '\n'.join(text)
 
+def str_to_bool(check):
+  return check.lower() in ("yes", "true", "t", "1")
+
 def bot_main(function):
     try:
         bot_id = os.environ["BOT_ID"]
@@ -337,17 +337,17 @@ def bot_main(function):
         espn_password = '1'
 
     try:
-        test = os.environ["TEST"]
+        test = str_to_bool(os.environ["TEST"])
     except KeyError:
         test = False
 
     try:
-        top_half_scoring = os.environ["TOP_HALF_SCORING"]
+        top_half_scoring = str_to_bool(os.environ["TOP_HALF_SCORING"])
     except KeyError:
         top_half_scoring = False
 
     try:
-        random_phrase = os.environ["RANDOM_PHRASE"]
+        random_phrase = str_to_bool(os.environ["RANDOM_PHRASE"])
     except KeyError:
         random_phrase = False
 
