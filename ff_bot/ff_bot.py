@@ -1,4 +1,5 @@
 import requests
+import datetime
 import json
 import os
 import random
@@ -182,37 +183,32 @@ def all_played(lineup):
     return True
 
 def get_heads_up(league, week=None):
-    box_scores = league.box_scores(week=1)
+    box_scores = league.box_scores()
     headsup = []
 
     for i in box_scores:
         headsup += scan_roster(i.home_lineup, i.home_team)
         headsup += scan_roster(i.away_lineup, i.away_team)
 
-    if not headsup:
-        headsup += ['No heads up players this week']
-
-    text = ['Heads Up Report: '] + headsup
-    if randomPhrase == True:
-        text += get_random_phrase()
+    if headsup:
+        text = ['Heads Up Report: '] + headsup
+    # if randomPhrase == True:
+    #     text += get_random_phrase()
 
     return '\n'.join(text)
 
 def get_inactives(league, week=None):
     box_scores = league.box_scores(week=1)
     inactives = []
-
+    text=""
     for i in box_scores:
         inactives += scan_inactives(i.home_lineup, i.home_team)
         inactives += scan_inactives(i.away_lineup, i.away_team)
 
-    if not inactives:
-        inactives += ['No inactive players this week']
-
-    text = ['Inactive Player Report: '] + inactives
-    if randomPhrase == True:
-        text += get_random_phrase()
-
+    if inactives:
+        text = ['Inactive Player Report: '] + inactives
+        # if randomPhrase == True:
+        #     text += get_random_phrase()
     return '\n'.join(text)
 
 def scan_roster(lineup, team):
@@ -236,7 +232,7 @@ def scan_roster(lineup, team):
         list += p + "\n"
 
     if count > 0:
-        s = '%s %s has %d starting player(s) to look at: \n%s \n' % (emotes[team.team_id], team.team_name, count, list[:-1])
+        s = '%s has %d starting player(s) to look at: \n%s \n' % (team.team_name, count, list[:-1])
         report =  [s.lstrip()]
 
     return report
@@ -256,11 +252,8 @@ def scan_inactives(lineup, team):
     for p in players:
         inactive_list += p + "\n"
     if count > 0:
-        if users[team.team_id] != '':
-            inactives = ['%s [%s] has %d likely inactive starting player(s): \n%s \n' % (users[team.team_id], team.team_abbrev, count, inactive_list[:-1])]
-        else:
-            s = '%s has %d likely inactive starting player(s): \n%s \n' % (team.team_name, count, inactive_list[:-1])
-            inactives = [s.lstrip()]
+        s = '%s has %d likely inactive starting player(s): \n%s \n' % (team.team_name, count, inactive_list[:-1])
+        inactives = [s.lstrip()]
 
     return inactives
 
@@ -292,6 +285,7 @@ def get_close_scores(league, week=None):
         return('')
     text = ['Close Scores'] + score
     return '\n'.join(text)
+
 def get_waiver_report(league):
     activities = league.recent_activity(50)
     report     = []
@@ -303,14 +297,14 @@ def get_waiver_report(league):
         if d2 == date:
             if len(actions) == 1:
                 if actions[0][1] == 'WAIVER ADDED':
-                    s = '%s %s ADDED %s %s' % (emotes[actions[0][0].team_id], actions[0][0].team_name, actions[0][2].position, actions[0][2].name)
+                    s = '%s ADDED %s %s' % (actions[0][0].team_name, actions[0][2].position, actions[0][2].name)
                     report += [s.lstrip()]
             elif len(actions) > 1:
                 if actions[0][1] == 'WAIVER ADDED' or  actions[1][1] == 'WAIVER ADDED':
                     if actions[0][1] == 'WAIVER ADDED':
-                        s = '%s %s ADDED %s %s, DROPPED %s %s' % (emotes[actions[0][0].team_id], actions[0][0].team_name, actions[0][2].position, actions[0][2].name, actions[1][2].position, actions[1][2].name)
+                        s = '%s ADDED %s %s, DROPPED %s %s' % (actions[0][0].team_name, actions[0][2].position, actions[0][2].name, actions[1][2].position, actions[1][2].name)
                     else:
-                        s = '%s %s ADDED %s %s, DROPPED %s %s' % (emotes[actions[0][0].team_id], actions[0][0].team_name, actions[1][2].position, actions[1][2].name, actions[0][2].position, actions[0][2].name)
+                        s = '%s ADDED %s %s, DROPPED %s %s' % (actions[0][0].team_name, actions[1][2].position, actions[1][2].name, actions[0][2].position, actions[0][2].name)
                     report += [s.lstrip()]
 
     report.reverse()
@@ -319,8 +313,8 @@ def get_waiver_report(league):
         report += ['No waiver transactions today']
 
     text = ['Waiver Report %s: ' % date] + report + [' ']
-    if randomPhrase == True:
-        text += get_random_phrase()
+    # if randomPhrase == True:
+    #     text += get_random_phrase()
 
     return '\n'.join(text)
 
@@ -332,32 +326,18 @@ def get_power_rankings(league, week=None):
     #Using 2 step dominance, as well as a combination of points scored and margin of victory.
     #It's weighted 80/15/5 respectively
     power_rankings = league.power_rankings(week=week)
-    ranks = []
 
-    for i in power_rankings:
-        if i:
-            if emotes[i[1].team_id] != '':
-                ranks += ['%s - %s %s' % (i[0], emotes[i[1].team_id], i[1].team_name)]
-            else:
-                ranks += ['%s - %s' % (i[0], i[1].team_name)]
-
-    text = ['Season Power Rankings: '] + ranks
-
+    score = ['%s - %s' % (i[0], i[1].team_name) for i in power_rankings
+             if i]
+    text = ['Power Rankings'] + score
     return '\n'.join(text)
 
 def get_expected_win(league, week=None):
-    if not week:
-        week = league.current_week
-
     win_percent = expected_win_percent(league, week=week)
     wins = []
 
     for i in win_percent:
-        if i:
-            if emotes[i[1].team_id] != '':
-                wins += ['%s - %s %s' % (i[0], emotes[i[1].team_id], i[1].team_name)]
-            else:
-                wins += ['%s - %s' % (i[0], i[1].team_name)]
+        wins += ['%s - %s' % (i[0], i[1].team_name)]
 
     text = ['Last Week Win % League: '] + wins + [' ']
 
@@ -408,7 +388,7 @@ def expected_win_percent(league, week):
         powerRankingDict[team] = sum([projRecDicts[i][team] for i in range(lastWeek)])/float(lastWeek) #total up the expected wins from each week, divide by the number of weeks
 
     powerRankingDictSortedTemp = {k: v for k, v in sorted(powerRankingDict.items(), key=lambda item: item[1],reverse=True)} #sort for presentation purposes
-    powerRankingDictSorted = {x: ('{:.3f}'.format(powerRankingDictSortedTemp[x])) for x in powerRankingDictSortedTemp.keys()}  #put into a prettier format
+    powerRankingDictSorted = {x: ('{:.2f}'.format(powerRankingDictSortedTemp[x]*100)) for x in powerRankingDictSortedTemp.keys()}  #put into a prettier format
     return [(powerRankingDictSorted[x],x) for x in powerRankingDictSorted.keys()]    #return in the format that the bot expects
 
 def get_trophies(league, week=None):
@@ -547,15 +527,12 @@ def bot_main(function):
         print(get_standings(league, top_half_scoring))
         print(get_power_rankings(league))
         print(get_expected_win(league))
-        # print(get_waiver_report(league))
-        print(get_matchups(league))
+        #print(get_waiver_report(league))
         print(get_heads_up(league))
-        print(get_inactives(league, users))
-        print(test_users(league))
+        print(get_inactives(league))
         function="get_final"
         # bot.send_message("Testing")
         # slack_bot.send_message("Testing")
-        # discord_bot.send_message(get_heads_up(league))
         # discord_bot.send_message("Testing")
 
     text = ''
@@ -585,8 +562,8 @@ def bot_main(function):
         text = get_standings(league, top_half_scoring) + '\n\n'
         text += get_power_rankings(league) + '\n\n'
         text += get_expected_win(league)
-        if randomPhrase == True:
-            text += '\n' + get_random_phrase()[0]
+        # if random_phrase:
+        #     text += '\n' + get_random_phrase()[0]
     elif function=="get_final":
         # on Tuesday we need to get the scores of last week
         week = league.current_week - 1
@@ -667,5 +644,6 @@ if __name__ == '__main__':
     sched.add_job(bot_main, 'cron', ['get_waiver_report'], id='waiver_report',
         day_of_week='wed', hour=8, start_date=ff_start_date, end_date=ff_end_date,
         timezone=game_timezone, replace_existing=True)
+
     print("Ready!")
     sched.start()
