@@ -2,7 +2,6 @@ import requests
 import json
 import os
 import random
-from datetime import datetime
 from apscheduler.schedulers.blocking import BlockingScheduler
 from espn_api.football import League
 
@@ -77,7 +76,7 @@ class DiscordBot(object):
 
     def send_message(self, text):
         #Sends a message to the chatroom
-        message = ">>> {0} ".format(text)
+        message = "```{0}```".format(text)
         template = {
                     "content":message
                     }
@@ -93,10 +92,6 @@ class DiscordBot(object):
 
             return r
 
-emotes = ['']
-users = ['']
-randomPhrase = False
-
 def get_random_phrase():
     phrases = ['I\'m dead inside',
                'Is this all there is to my existence?',
@@ -110,32 +105,24 @@ def get_random_phrase():
                'Help me get out of here',
                'I\'m capable of so much more',
                'Sigh']
-    return ['`' + random.choice(phrases) + '`']
+    return [random.choice(phrases)]
 
 def get_scoreboard_short(league, week=None):
     #Gets current week's scoreboard
     box_scores = league.box_scores(week=week)
-    scores = []
-    for i in box_scores:
-        if i.away_team:
-            score = '%s %s %.2f - %.2f %s %s' % (emotes[i.home_team.team_id], i.home_team.team_abbrev, i.home_score,
-                     i.away_score, i.away_team.team_abbrev, emotes[i.away_team.team_id])
-            scores += [score.strip()]
-
-    text = ['Score Update: '] + scores
+    score = ['%s %.2f - %.2f %s' % (i.home_team.team_abbrev, i.home_score,
+             i.away_score, i.away_team.team_abbrev) for i in box_scores
+             if i.away_team]
+    text = ['Score Update'] + score
     return '\n'.join(text)
 
 def get_projected_scoreboard(league, week=None):
     #Gets current week's scoreboard projections
     box_scores = league.box_scores(week=week)
-    scores = []
-    for i in box_scores:
-        if i.away_team:
-            score = '%s %s %.2f - %.2f %s %s' % (emotes[i.home_team.team_id], i.home_team.team_abbrev, get_projected_total(i.home_lineup),
-                        get_projected_total(i.away_lineup), i.away_team.team_abbrev, emotes[i.away_team.team_id])
-            scores += [score.strip()]
-
-    text = ['Approximate Projected Scores: '] + scores
+    score = ['%s %.2f - %.2f %s' % (i.home_team.team_abbrev, get_projected_total(i.home_lineup),
+                        get_projected_total(i.away_lineup), i.away_team.team_abbrev) for i in box_scores
+             if i.away_team]
+    text = ['Approximate Projected Scores'] + score
     return '\n'.join(text)
 
 def get_standings(league, top_half_scoring, week=None):
@@ -155,13 +142,13 @@ def get_standings(league, top_half_scoring, week=None):
 
         for t in teams:
             wins = top_half_totals[t.team_name] + t.wins
-            standings.append((wins, t.losses, t.team_name, emotes[t.team_id]))
+            standings.append((wins, t.losses, t.team_name))
 
         standings = sorted(standings, key=lambda tup: tup[0], reverse=True)
-        standings_txt = [f"{pos + 1}: {emote} {team_name} ({wins} - {losses}) (+{top_half_totals[team_name]})" for \
-            pos, (wins, losses, team_name, emote) in enumerate(standings)]
+        standings_txt = [f"{pos + 1}: {team_name} ({wins} - {losses}) (+{top_half_totals[team_name]})" for \
+            pos, (wins, losses, team_name) in enumerate(standings)]
+    text = ["Current Standings:"] + standings_txt
 
-    text = ['Current Standings: '] + standings_txt
     return "\n".join(text)
 
 def top_half_wins(league, top_half_totals, week):
@@ -277,40 +264,34 @@ def scan_inactives(lineup, team):
 
     return inactives
 
-def get_matchups(league, week=None):
+def get_matchups(league, random_phrase, week=None):
     #Gets current week's Matchups
     matchups = league.box_scores(week=week)
-    scores = []
-    for i in matchups:
-        if i.away_team:
-            home_team = '%s %s (%s-%s)' % (emotes[i.home_team.team_id], i.home_team.team_name, i.home_team.wins, i.home_team.losses)
-            away_team = '%s %s (%s-%s)' % (emotes[i.away_team.team_id], i.away_team.team_name, i.away_team.wins, i.away_team.losses)
-            scores += [home_team.lstrip() + ' vs ' + away_team.lstrip()]
 
-    text = ['Matchups: '] + scores + [' ']
-    if randomPhrase == True:
-        text += get_random_phrase()
+    score = ['%s(%s-%s) vs %s(%s-%s)' % (i.home_team.team_name, i.home_team.wins, i.home_team.losses,
+             i.away_team.team_name, i.away_team.wins, i.away_team.losses) for i in matchups
+             if i.away_team]
 
+    text = ['Matchups'] + score
+    if random_phrase:
+        text = text + get_random_phrase()
     return '\n'.join(text)
 
 def get_close_scores(league, week=None):
     #Gets current closest scores (15.999 points or closer)
     matchups = league.box_scores(week=week)
-    scores = []
+    score = []
 
     for i in matchups:
         if i.away_team:
             diffScore = i.away_score - i.home_score
             if ( -16 < diffScore <= 0 and not all_played(i.away_lineup)) or (0 <= diffScore < 16 and not all_played(i.home_lineup)):
-                score = '%s %s %.2f - %.2f %s %s' % (emotes[i.home_team.team_id], i.home_team.team_abbrev, i.home_score,
-                        i.away_score, i.away_team.team_abbrev, emotes[i.away_team.team_id])
-                scores += [score.strip()]
-
-    if not scores:
+                score += ['%s %.2f - %.2f %s' % (i.home_team.team_abbrev, i.home_score,
+                        i.away_score, i.away_team.team_abbrev)]
+    if not score:
         return('')
-    text = ['Close Scores: '] + scores
+    text = ['Close Scores'] + score
     return '\n'.join(text)
-
 def get_waiver_report(league):
     activities = league.recent_activity(50)
     report     = []
@@ -435,87 +416,52 @@ def get_trophies(league, week=None):
     matchups = league.box_scores(week=week)
     low_score = 9999
     low_team_name = ''
-    low_team_emote = ''
     high_score = -1
     high_team_name = ''
-    high_team_emote = ''
     closest_score = 9999
     close_winner = ''
-    close_winner_emote = ''
     close_loser = ''
-    close_loser_emote = ''
     biggest_blowout = -1
     blown_out_team_name = ''
-    blown_out_emote = ''
     ownerer_team_name = ''
-    ownerer_emote = ''
 
     for i in matchups:
         if i.home_score > high_score:
             high_score = i.home_score
             high_team_name = i.home_team.team_name
-            high_team_emote = emotes[i.home_team.team_id]
         if i.home_score < low_score:
             low_score = i.home_score
             low_team_name = i.home_team.team_name
-            low_team_emote = emotes[i.home_team.team_id]
         if i.away_score > high_score:
             high_score = i.away_score
             high_team_name = i.away_team.team_name
-            high_team_emote = emotes[i.away_team.team_id]
         if i.away_score < low_score:
             low_score = i.away_score
             low_team_name = i.away_team.team_name
-            low_team_emote = emotes[i.away_team.team_id]
         if i.away_score - i.home_score != 0 and \
             abs(i.away_score - i.home_score) < closest_score:
             closest_score = abs(i.away_score - i.home_score)
             if i.away_score - i.home_score < 0:
                 close_winner = i.home_team.team_name
-                close_winner_emote = emotes[i.home_team.team_id]
                 close_loser = i.away_team.team_name
-                close_loser_emote = emotes[i.away_team.team_id]
             else:
                 close_winner = i.away_team.team_name
-                close_winner_emote = emotes[i.away_team.team_id]
                 close_loser = i.home_team.team_name
-                close_loser_emote = emotes[i.home_team.team_id]
         if abs(i.away_score - i.home_score) > biggest_blowout:
             biggest_blowout = abs(i.away_score - i.home_score)
             if i.away_score - i.home_score < 0:
                 ownerer_team_name = i.home_team.team_name
-                ownerer_emote = emotes[i.home_team.team_id]
                 blown_out_team_name = i.away_team.team_name
-                blown_out_emote = emotes[i.away_team.team_id]
             else:
                 ownerer_team_name = i.away_team.team_name
-                ownerer_emote = emotes[i.away_team.team_id]
                 blown_out_team_name = i.home_team.team_name
-                blown_out_emote = emotes[i.home_team.team_id]
 
-    if emotes[1] != '':
-        low_score_str = ['Low score: %s %s with %.2f points' % (low_team_emote, low_team_name, low_score)]
-        high_score_str = ['High score: %s %s with %.2f points' % (high_team_emote, high_team_name, high_score)]
-        close_score_str = ['%s %s barely beat %s %s by a margin of %.2f' % (close_winner_emote, close_winner, close_loser_emote, close_loser, closest_score)]
-        blowout_str = ['%s %s blown out by %s %s by a margin of %.2f' % (blown_out_emote, blown_out_team_name, ownerer_emote, ownerer_team_name, biggest_blowout)]
-    else:
-        low_score_str = ['Low score: %s with %.2f points' % (low_team_name, low_score)]
-        high_score_str = ['High score: %s with %.2f points' % (high_team_name, high_score)]
-        close_score_str = ['%s barely beat %s by a margin of %.2f' % (close_winner, close_loser, closest_score)]
-        blowout_str = ['%s blown out by %s by a margin of %.2f' % (blown_out_team_name, ownerer_team_name, biggest_blowout)]
+    low_score_str = ['Low score: %s with %.2f points' % (low_team_name, low_score)]
+    high_score_str = ['High score: %s with %.2f points' % (high_team_name, high_score)]
+    close_score_str = ['%s barely beat %s by a margin of %.2f' % (close_winner, close_loser, closest_score)]
+    blowout_str = ['%s blown out by %s by a margin of %.2f' % (blown_out_team_name, ownerer_team_name, biggest_blowout)]
 
-    text = ['Trophies of the week: '] + low_score_str + high_score_str + close_score_str + blowout_str + [' ']
-    if randomPhrase == True:
-        text += get_random_phrase()
-
-    return '\n'.join(text)
-
-def test_users(league):
-    message = []
-    for t in league.teams:
-        message += ['%s %s %s' % (t.team_name, users[t.team_id], emotes[t.team_id])]
-
-    text = ['Users: '] + message + [' '] + get_random_phrase()
+    text = ['Trophies of the week:'] + low_score_str + high_score_str + close_score_str + blowout_str
     return '\n'.join(text)
 
 def str_to_bool(check):
@@ -591,22 +537,13 @@ def bot_main(function):
     else:
         league = League(league_id=league_id, year=year, espn_s2=espn_s2, swid=swid)
 
-    global users
-    try:
-        users += os.environ["USERS"].split(',')
-    except KeyError:
-        users += [''] * league.teams[-1].team_id
-
-    global emotes
-    try:
-        emotes += os.environ["EMOTES"].split(',')
-    except KeyError:
-        emotes += [''] * league.teams[-1].team_id
-
     if test:
+        print(get_matchups(league,random_phrase))
         print(get_scoreboard_short(league))
         print(get_projected_scoreboard(league))
         print(get_close_scores(league))
+        print(get_power_rankings(league))
+        print(get_scoreboard_short(league))
         print(get_standings(league, top_half_scoring))
         print(get_power_rankings(league))
         print(get_expected_win(league))
@@ -689,16 +626,10 @@ if __name__ == '__main__':
     except KeyError:
         my_timezone='America/New_York'
 
-    try:
-        tues_sched = True if os.environ["TUES_SCHED"] == '1' else False
-    except KeyError:
-        tues_sched = False
-
     game_timezone='America/New_York'
     bot_main("init")
     sched = BlockingScheduler(job_defaults={'misfire_grace_time': 15*60})
 
-    #regular schedule:
     #game day score update:              sunday at 4pm, 8pm east coast time.
     #heads up report:                    wednesday afternoon at 4:30pm local time.
     #matchups:                           thursday evening at 6:30pm east coast time.
@@ -716,53 +647,25 @@ if __name__ == '__main__':
         day_of_week='sat', hour=20, start_date=ff_start_date, end_date=ff_end_date,
         timezone=game_timezone, replace_existing=True)
 
-    #schedule without a COVID delay:
     #score update:                       friday and monday morning at 7:30am local time.
     #close scores (within 15.99 points): sunday and monday evening at 6:30pm east coast time.
     #final scores and trophies:          tuesday morning at 7:30am local time.
     #standings, PR, EW%:                 tuesday evening at 6:30pm local time.
     #waiver report:                      wednesday morning at 8am local time.
-    if tues_sched == False:
-        ready_text = "Ready! Regular schedule set."
-        sched.add_job(bot_main, 'cron', ['get_scoreboard_short'], id='scoreboard1',
-            day_of_week='fri,mon', hour=7, minute=30, start_date=ff_start_date, end_date=ff_end_date,
-            timezone=my_timezone, replace_existing=True)
-        sched.add_job(bot_main, 'cron', ['get_close_scores'], id='close_scores',
-            day_of_week='sun,mon', hour=18, minute=30, start_date=ff_start_date, end_date=ff_end_date,
-            timezone=game_timezone, replace_existing=True)
-        sched.add_job(bot_main, 'cron', ['get_final'], id='final',
-            day_of_week='tue', hour=7, minute=30, start_date=ff_start_date, end_date=ff_end_date,
-            timezone=my_timezone, replace_existing=True)
-        sched.add_job(bot_main, 'cron', ['get_standings'], id='standings',
-            day_of_week='tue', hour=18, minute=30, start_date=ff_start_date, end_date=ff_end_date,
-            timezone=my_timezone, replace_existing=True)
-        sched.add_job(bot_main, 'cron', ['get_waiver_report'], id='waiver_report',
-            day_of_week='wed', hour=8, start_date=ff_start_date, end_date=ff_end_date,
-            timezone=game_timezone, replace_existing=True)
-
-    #schedule with a COVID delay to tuesday:
-    #extra score update:                 tuesday morning at 7:30am local time.
-    #close scores (within 15.99 points): sunday, monday, and tuesday evening at 6:30pm east coast time.
-    #final scores and trophies:          wednesday morning at 7:30am local time.
-    #standings, PR, EW%:                 wednesday evening at 6:30pm local time.
-    #waiver report:                      thursday morning at 8am local time.
-    else:
-        ready_text = "Ready! Tuesday schedule set."
-        sched.add_job(bot_main, 'cron', ['get_scoreboard_short'], id='scoreboard1',
-            day_of_week='fri,mon,tue', hour=7, minute=30, start_date=ff_start_date, end_date=ff_end_date,
-            timezone=my_timezone, replace_existing=True)
-        sched.add_job(bot_main, 'cron', ['get_close_scores'], id='close_scores',
-            day_of_week='sun,mon,tue', hour=18, minute=30, start_date=ff_start_date, end_date=ff_end_date,
-            timezone=game_timezone, replace_existing=True)
-        sched.add_job(bot_main, 'cron', ['get_final'], id='final',
-            day_of_week='wed', hour=7, minute=30, start_date=ff_start_date, end_date=ff_end_date,
-            timezone=my_timezone, replace_existing=True)
-        sched.add_job(bot_main, 'cron', ['get_standings'], id='standings',
-            day_of_week='wed', hour=18, minute=30, start_date=ff_start_date, end_date=ff_end_date,
-            timezone=my_timezone, replace_existing=True)
-        sched.add_job(bot_main, 'cron', ['get_waiver_report'], id='waiver_report',
-            day_of_week='thu', hour=8, start_date=ff_start_date, end_date=ff_end_date,
-            timezone=game_timezone, replace_existing=True)
-
-    print(ready_text)
+    sched.add_job(bot_main, 'cron', ['get_scoreboard_short'], id='scoreboard1',
+        day_of_week='fri,mon', hour=7, minute=30, start_date=ff_start_date, end_date=ff_end_date,
+        timezone=my_timezone, replace_existing=True)
+    sched.add_job(bot_main, 'cron', ['get_close_scores'], id='close_scores',
+        day_of_week='sun,mon', hour=18, minute=30, start_date=ff_start_date, end_date=ff_end_date,
+        timezone=game_timezone, replace_existing=True)
+    sched.add_job(bot_main, 'cron', ['get_final'], id='final',
+        day_of_week='tue', hour=7, minute=30, start_date=ff_start_date, end_date=ff_end_date,
+        timezone=my_timezone, replace_existing=True)
+    sched.add_job(bot_main, 'cron', ['get_standings'], id='standings',
+        day_of_week='tue', hour=18, minute=30, start_date=ff_start_date, end_date=ff_end_date,
+        timezone=my_timezone, replace_existing=True)
+    sched.add_job(bot_main, 'cron', ['get_waiver_report'], id='waiver_report',
+        day_of_week='wed', hour=8, start_date=ff_start_date, end_date=ff_end_date,
+        timezone=game_timezone, replace_existing=True)
+    print("Ready!")
     sched.start()
