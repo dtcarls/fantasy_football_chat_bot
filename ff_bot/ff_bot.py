@@ -568,16 +568,6 @@ def bot_main(function):
         espn_s2 = '1'
 
     try:
-        espn_username = os.environ["ESPN_USERNAME"]
-    except KeyError:
-        espn_username = '1'
-
-    try:
-        espn_password = os.environ["ESPN_PASSWORD"]
-    except KeyError:
-        espn_password = '1'
-
-    try:
         test = str_to_bool(os.environ["TEST"])
     except KeyError:
         test = False
@@ -596,12 +586,10 @@ def bot_main(function):
     slack_bot = SlackBot(slack_webhook_url)
     discord_bot = DiscordBot(discord_webhook_url)
 
-    if swid == '{1}' and espn_s2 == '1': # and espn_username == '1' and espn_password == '1':
+    if swid == '{1}' and espn_s2 == '1':
         league = League(league_id=league_id, year=year)
     else:
         league = League(league_id=league_id, year=year, espn_s2=espn_s2, swid=swid)
-#    if espn_username and espn_password:
-#        league = League(league_id=league_id, year=year, username=espn_username, password=espn_password)
 
     global users
     try:
