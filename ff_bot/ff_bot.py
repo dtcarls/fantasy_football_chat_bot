@@ -143,12 +143,9 @@ def get_standings(league, top_half_scoring, week=None):
     teams = league.teams
     standings = []
     if not top_half_scoring:
-        for t in teams:
-            standings.append((t.wins, t.losses, t.team_name, emotes[t.team_id]))
-
-        standings = sorted(standings, key=lambda tup: tup[0], reverse=True)
-        standings_txt = [f"{pos + 1}: {emote} {team_name} ({wins} - {losses})" for \
-            pos, (wins, losses, team_name, emote) in enumerate(standings)]
+        standings = league.standings()
+        standings_txt = [f"{pos + 1}: {team.team_name} ({team.wins} - {team.losses})" for \
+            pos, team in enumerate(standings)]
     else:
         top_half_totals = {t.team_name: 0 for t in teams}
         if not week:
@@ -210,7 +207,7 @@ def get_heads_up(league, week=None):
 
     text = ['Heads Up Report: '] + headsup
     if randomPhrase == True:
-        text += random_phrase()
+        text += get_random_phrase()
 
     return '\n'.join(text)
 
@@ -227,7 +224,7 @@ def get_inactives(league, week=None):
 
     text = ['Inactive Player Report: '] + inactives
     if randomPhrase == True:
-        text += random_phrase()
+        text += get_random_phrase()
 
     return '\n'.join(text)
 
@@ -292,7 +289,7 @@ def get_matchups(league, week=None):
 
     text = ['Matchups: '] + scores + [' ']
     if randomPhrase == True:
-        text += random_phrase()
+        text += get_random_phrase()
 
     return '\n'.join(text)
 
@@ -342,7 +339,7 @@ def get_waiver_report(league):
 
     text = ['Waiver Report %s: ' % date] + report + [' ']
     if randomPhrase == True:
-        text += random_phrase()
+        text += get_random_phrase()
 
     return '\n'.join(text)
 
@@ -509,7 +506,7 @@ def get_trophies(league, week=None):
 
     text = ['Trophies of the week: '] + low_score_str + high_score_str + close_score_str + blowout_str + [' ']
     if randomPhrase == True:
-        text += random_phrase()
+        text += get_random_phrase()
 
     return '\n'.join(text)
 
@@ -518,8 +515,11 @@ def test_users(league):
     for t in league.teams:
         message += ['%s %s %s' % (t.team_name, users[t.team_id], emotes[t.team_id])]
 
-    text = ['Users: '] + message + [' '] + random_phrase()
+    text = ['Users: '] + message + [' '] + get_random_phrase()
     return '\n'.join(text)
+
+def str_to_bool(check):
+  return check.lower() in ("yes", "true", "t", "1")
 
 def bot_main(function):
     try:
@@ -578,20 +578,19 @@ def bot_main(function):
         espn_password = '1'
 
     try:
-        test = os.environ["TEST"]
+        test = str_to_bool(os.environ["TEST"])
     except KeyError:
         test = False
 
     try:
-        top_half_scoring = os.environ["TOP_HALF_SCORING"]
+        top_half_scoring = str_to_bool(os.environ["TOP_HALF_SCORING"])
     except KeyError:
         top_half_scoring = False
 
-    global randomPhrase
     try:
-        randomPhrase = True if os.environ["RANDOM_PHRASE"] == '1' else False
+        random_phrase = str_to_bool(os.environ["RANDOM_PHRASE"])
     except KeyError:
-        randomPhrase = False
+        random_phrase = False
 
     bot = GroupMeBot(bot_id)
     slack_bot = SlackBot(slack_webhook_url)
@@ -662,7 +661,7 @@ def bot_main(function):
         text += get_power_rankings(league) + '\n\n'
         text += get_expected_win(league)
         if randomPhrase == True:
-            text += '\n' + random_phrase()[0]
+            text += '\n' + get_random_phrase()[0]
     elif function=="get_final":
         # on Tuesday we need to get the scores of last week
         week = league.current_week - 1
