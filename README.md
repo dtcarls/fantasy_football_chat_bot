@@ -1,7 +1,7 @@
 [![Build Status](https://travis-ci.com/dtcarls/fantasy_football_chat_bot.svg?branch=master)](https://travis-ci.com/dtcarls/fantasy_football_chat_bot)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/d8506396005d48d1a52dee114f2c05ae)](https://www.codacy.com/app/dtcarls/ff_bot?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=dtcarls/ff_bot&amp;utm_campaign=Badge_Grade)
 
-For troubleshooting, join the discord!
+For troubleshooting and release notifications, join the discord!
 
 [![Discord Banner 2](https://discordapp.com/api/guilds/878995504225218620/widget.png?style=banner2)](https://discord.gg/bkShnqTTP8)
 
@@ -10,8 +10,9 @@ Like the bot? Star the repository and consider making a donation to buy me a cof
 * PayPal:
 [![paypal](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=ZDLFECJVGG6RG&currency_code=USD&source=url)
 * BTC: bc1q3wxm269mdmwdqjqkxgt7s5zp8ah05dexdua0zv
-* ETH: 0x8c096710e3621fe5f8E384efBd17D8E3E798Dc0c
+* ETH: 0x8c096710e3621fe5f8E384efBd17D8E3E798Dc0c (Cryptik.eth)
 * DOGE: D6n2g2KGdqEwR4MhhT7uAdvZFaTwqwd6rS
+* Venmo: @dtcarls
 
 # ESPN Fantasy Football GroupMe Slack and Discord Chat Bot
 
@@ -26,8 +27,11 @@ ESPN Fantasy Football information to a GroupMe, Discord or Slack chat room.
 - Trophies - Tue - 7:30 local time (High score, low score, biggest win, closest win)
 - Power rankings - Tue - 18:30 local time
 - Current standings - Wed - 7:30 local time
+- Waiver report - Wed - 7:30 local time
 - Matchups - Thu - 19:30 east coast time (Upcoming matchups)
+- Players to Monitor report - Sun - 7:30 local time (Players in starting lineup that are Questionable, Doubtful, Out, or projected for less than 4 points)
 - Scoreboard - Sun - 16:00, 20:00 east coast time (Current ESPN fantasy scoreboard)
+
 
 Table of Contents
 =================
@@ -173,13 +177,14 @@ Note: App will restart when you change any variable so your chat room may be sem
 - END_DATE: This is when the bot will stop paying attention and stop sending messages to your chat. (2020-12-30 by default)
 - LEAGUE_YEAR: ESPN League year to look at (2020 by default)
 - TIMEZONE: The timezone that the messages will look to send in. (America/New_York by default)
-- INIT_MSG: The message that the bot will say when it is started (“Hi” by default, can be blank for no message)
+- INIT_MSG: The message that the bot will say when it is started (can be blank or deleted for no message)
 - TOP_HALF_SCORING: If set to True, when standings are posted on Wednesday it will also include top half scoring wins
 - RANDOM_PHRASE: If set to True, when matchups are posted on Tuesday it will also include a random phrase
+- MONITOR_REPORT: If set to True, will provide a report of players in starting lineup that are Questionable, Doubtful, Out, or projected for less than 4 points
+- WAIVER_REPORT: If set to True, will provide a waiver report of add/drops. :warning: ESPN_S2 and SWID are required for this to work :warning:
 - ESPN_S2: Used for private leagues. See [Private Leagues Section](#private-leagues) for documentation
 - SWID: Used for private leagues. See [Private Leagues Section](#private-leagues) for documentation
-- ESPN_USERNAME: Used for private leagues. See [Private Leagues Section](#private-leagues) for documentation **Experimental, currently not working**
-- ESPN_PASSWORD: Used for private leagues. See [Private Leagues Section](#private-leagues) for documentation **Experimental, currently not working**
+
 
 After you have setup your variables you will need to turn it on. Navigate to the "Resources" tab of your Heroku app Dashboard.
 You should see something like below. Click the pencil on the right and toggle the buton so it is blue like depicted and click "Confirm."
@@ -191,9 +196,6 @@ Unfortunately to do auto deploys of the latest version you need admin access to 
 
 #### Private Leagues
 
-<details>
-  <summary>Click to expand!</summary>
-
 For private league you will need to get your swid and espn_s2.
 You can find these two values after logging into your espn fantasy football account on espn's website.
 (Chrome Browser)
@@ -202,14 +204,7 @@ From there click Application on the top bar.
 On the left under Storage section click Cookies then http://fantasy.espn.com.
 From there you should be able to find your swid and espn_s2 variables and values.
 
-There is a new **Experimental (may not work)** option to use a username and password for espn to access private leagues instead of having to use swid and s2.
-
-</details>
-
 ## Troubleshooting / FAQ
-
-<details>
-  <summary>Click to expand!</summary>
 
 **League must be full.**
 
@@ -217,7 +212,7 @@ The bot isn't working
 Did you miss a step in the instructions? Try doing it from scratch again. If still no luck, open an issue (https://github.com/dtcarls/fantasy_football_chat_bot/issues) so the answer can be shared with others.
 
 How are power ranks calculated?
-They are calculated using 2 step dominance, as well as a combination of points scored and margin of victory. Weighted 80/15/5 respectively. I wouldn't so much pay attention to the actual number but more of the gap between teams. Full source of the calculations can be seen here: https://github.com/cwendt94/ff-espn-api/commit/61f8a34de5c42196ba0b1552aa25282297f070c5
+They are calculated using 2 step dominance, as well as a combination of points scored and margin of victory. Weighted 80/15/5 respectively. I wouldn't so much pay attention to the actual number but more of the gap between teams. Full source of the calculations can be seen here: https://github.com/cwendt94/espn-api/pull/12/files. If you want a tutorial on dominance matrices: https://www.youtube.com/watch?v=784TmwaHPOw
 
 Is there a version of this for Yahoo/CBS/NFL/[insert other site]?
 No, this would require a significant rework for other sites.
@@ -273,13 +268,13 @@ python3 setup.py install
 - END_DATE: This is when the bot will stop paying attention and stop sending messages to your chat. (2020-12-30 by default)
 - LEAGUE_YEAR: ESPN League year to look at (2020 by default)
 - TIMEZONE: The timezone that the messages will look to send in. (America/New_York by default)
-- INIT_MSG: The message that the bot will say when it is started (“Hi” by default, can be blank for no message)
+- INIT_MSG: The message that the bot will say when it is started (can be blank or deleted for no message)
 - TOP_HALF_SCORING: If set to True, when standings are posted on Wednesday it will also include top half scoring wins
 - RANDOM_PHRASE: If set to True, when matchups are posted on Tuesday it will also include a random phrase
+- MONITOR_REPORT: If set to True, will provide a report of players in starting lineup that are Questionable, Doubtful, Out, or projected for less than 4 points
+- WAIVER_REPORT: If set to True, will provide a waiver report of add/drops. :warning: ESPN_S2 and SWID are required for this to work :warning:
 - ESPN_S2: Used for private leagues. See [Private Leagues Section](#private-leagues) for documentation
 - SWID: Used for private leagues. See [Private Leagues Section](#private-leagues) for documentation
-- ESPN_USERNAME: Used for private leagues. See [Private Leagues Section](#private-leagues) for documentation **Experimental, currently not working**
-- ESPN_PASSWORD: Used for private leagues. See [Private Leagues Section](#private-leagues) for documentation **Experimental, currently not working**
 
 ### Running with Docker
 
