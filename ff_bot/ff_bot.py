@@ -251,7 +251,7 @@ def scan_roster(lineup, team):
         if i.slot_position != 'BE' and i.slot_position != 'IR':
             if i.injuryStatus != 'ACTIVE' and i.injuryStatus != 'NORMAL' or i.projected_points <= 4:
                 count += 1
-                player = i.position + ' ' + i.name + ' - '
+                player = (i.position + ' ' if i.position != 'D/ST' else '') + i.name + ' - '
                 if i.projected_points <= 4:
                     player += '**' + str(i.projected_points) + ' pts**'
                 else:
@@ -366,6 +366,47 @@ def get_waiver_report(league):
     except KeyError:
         return ('')
 
+def combined_power_rankings(league, week=None):
+    if not week:
+        week = league.current_week
+
+    pr = league.power_rankings(week=week)
+    ew = expected_win_percent(league, week=week)
+
+    combRankingDict = {x: 0. for x in league.teams}
+
+    for team in combRankingDict.keys():			#for each team
+        for i in pr:
+            fpr = float(i[0])
+            for j in ew:
+                few = float(j[0])
+                if i[1].team_id == j[1].team_id and i[1].team_id == team.team_id:
+                    com = round(fpr+(few*10)+(team.points_for), 3)
+                    combRankingDict[team] = com/10
+
+
+    combRankingDictSortedTemp = {k: v for k, v in sorted(combRankingDict.items(), key=lambda item: item[1],reverse=True)} #sort for presentation purposes
+    combRankingDictSorted = {x: ('{:.2f}'.format(combRankingDictSortedTemp[x])) for x in combRankingDictSortedTemp.keys()}  #put into a prettier format
+
+    combined_power_rankings = [(combRankingDictSorted[x],x) for x in combRankingDictSorted.keys()]
+
+    ranks = []
+    pos = 1
+
+    for i in combined_power_rankings:
+        if i:
+            if emotes[i[1].team_id] != '':
+                ranks += ['%s: %s %s' % (pos, emotes[i[1].team_id], i[1].team_name)]
+            else:
+                ranks += ['%s: %s' % (pos, i[1].team_name)]
+        pos += 1
+
+    text = ['__**Power Rankings:**__ '] + ranks
+    if randomPhrase == True:
+        text += [' '] + random_phrase()
+
+    return '\n'.join(text)
+
 def get_power_rankings(league, week=None):
     # power rankings requires an integer value, so this grabs the current week for that
     if not week:
@@ -409,7 +450,6 @@ def get_expected_win(league, week=None):
 
 def expected_win_percent(league, week):
     #This script gets power rankings, given an already-connected league and a week to look at. Requires espn_api
-
     #Get what week most recently passed
     lastWeek = league.current_week
 
@@ -753,8 +793,7 @@ def bot_main(function):
         print(get_projected_scoreboard(league))
         print(get_close_scores(league))
         print(get_standings(league, top_half_scoring))
-        print(get_power_rankings(league))
-        print(get_expected_win(league))
+        print(combined_power_rankings(league))
         print(get_waiver_report(league))
         print(get_matchups(league))
         print(get_heads_up(league))
@@ -782,7 +821,7 @@ def bot_main(function):
     elif function=="get_close_scores":
         text = get_close_scores(league)
     elif function=="get_power_rankings":
-        text = get_power_rankings(league)
+        text = combined_power_rankings(league)
     elif function=="get_expected_win":
         text = get_expected_win(league)
     elif function=="get_waiver_report":
@@ -791,10 +830,6 @@ def bot_main(function):
         text = get_trophies(league)
     elif function=="get_standings":
         text = get_standings(league, top_half_scoring)
-    elif function=="get_power_rankings":
-        text = get_power_rankings(league)
-    elif function=="get_expected_win":
-        text = get_expected_win(league)
     elif function=="get_final":
         # on Tuesday we need to get the scores of last week
         week = league.current_week - 1
@@ -884,9 +919,6 @@ if __name__ == '__main__':
         sched.add_job(bot_main, 'cron', ['get_power_rankings'], id='power_rankings',
             day_of_week='tue', hour=18, minute=30, second=5, start_date=ff_start_date, end_date=ff_end_date,
             timezone=my_timezone, replace_existing=True)
-        sched.add_job(bot_main, 'cron', ['get_expected_win'], id='get_expected_win',
-            day_of_week='tue', hour=18, minute=30, second=10, start_date=ff_start_date, end_date=ff_end_date,
-            timezone=my_timezone, replace_existing=True)
         sched.add_job(bot_main, 'cron', ['get_waiver_report'], id='waiver_report',
             day_of_week='wed', hour=8, start_date=ff_start_date, end_date=ff_end_date,
             timezone=my_timezone, replace_existing=True)
@@ -914,9 +946,6 @@ if __name__ == '__main__':
             timezone=my_timezone, replace_existing=True)
         sched.add_job(bot_main, 'cron', ['get_power_rankings'], id='power_rankings',
             day_of_week='wed', hour=18, minute=30, second=5, start_date=ff_start_date, end_date=ff_end_date,
-            timezone=my_timezone, replace_existing=True)
-        sched.add_job(bot_main, 'cron', ['get_expected_win'], id='get_expected_win',
-            day_of_week='wed', hour=18, minute=30, second=10, start_date=ff_start_date, end_date=ff_end_date,
             timezone=my_timezone, replace_existing=True)
         sched.add_job(bot_main, 'cron', ['get_waiver_report'], id='waiver_report',
             day_of_week='thu', hour=8, start_date=ff_start_date, end_date=ff_end_date,
