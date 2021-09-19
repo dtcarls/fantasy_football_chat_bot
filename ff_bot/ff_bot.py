@@ -498,6 +498,11 @@ def bot_main(function):
     except KeyError:
         waiver_report = False
 
+    try:
+        monitor_report = str_to_bool(os.environ["MONITOR_REPORT"])
+    except KeyError:
+        monitor_report = True
+
     bot = GroupMeBot(bot_id)
     slack_bot = SlackBot(slack_webhook_url)
     discord_bot = DiscordBot(discord_webhook_url)
@@ -529,7 +534,7 @@ def bot_main(function):
     if function=="get_matchups":
         text = get_matchups(league)
         text = text + "\n\n" + get_projected_scoreboard(league)
-    elif function=="get_monitor":
+    elif monitor_report and function=="get_monitor" :
         text = get_monitor(league)
     elif function=="get_scoreboard_short":
         text = get_scoreboard_short(league)
