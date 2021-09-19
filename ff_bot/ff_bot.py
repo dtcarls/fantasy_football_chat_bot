@@ -532,7 +532,7 @@ def bot_main(function):
 
     text = ''
     if function=="get_matchups":
-        text = get_matchups(league)
+        text = get_matchups(league, random_phrase)
         text = text + "\n\n" + get_projected_scoreboard(league)
     elif monitor_report and function=="get_monitor" :
         text = get_monitor(league)
@@ -545,8 +545,8 @@ def bot_main(function):
         text = get_close_scores(league)
     elif function=="get_power_rankings":
         text = get_power_rankings(league)
-    elif function=="get_expected_win":
-        text = get_expected_win(league)
+    # elif function=="get_expected_win":
+    #     text = get_expected_win(league)
     # elif function=="get_waiver_report":
     #     text = get_waiver_report(league)
     elif function=="get_trophies":
