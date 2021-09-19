@@ -1,8 +1,8 @@
 import requests
-import datetime
 import json
 import os
 import random
+from datetime import date
 from apscheduler.schedulers.blocking import BlockingScheduler
 from espn_api.football import League
 
@@ -276,12 +276,12 @@ def get_close_scores(league, week=None):
 def get_waiver_report(league):
     activities = league.recent_activity(50)
     report     = []
-    date       = datetime.today().strftime('%Y-%m-%d')
+    today      = date.today().strftime('%Y-%m-%d')
 
     for activity in activities:
         actions = activity.actions
-        d2      = datetime.fromtimestamp(activity.date/1000).strftime('%Y-%m-%d')
-        if d2 == date:
+        d2      = date.fromtimestamp(activity.date/1000).strftime('%Y-%m-%d')
+        if d2 == today: #only get waiver activites from today
             if len(actions) == 1:
                 if actions[0][1] == 'WAIVER ADDED':
                     s = '%s ADDED %s %s' % (actions[0][0].team_name, actions[0][2].position, actions[0][2].name)
@@ -297,11 +297,9 @@ def get_waiver_report(league):
     report.reverse()
 
     if not report:
-        report += ['No waiver transactions today']
+        report += ['No waiver transactions']
 
-    text = ['Waiver Report %s: ' % date] + report + [' ']
-    # if randomPhrase == True:
-    #     text += get_random_phrase()
+    text = ['Waiver Report %s: ' % today] + report + [' ']
 
     return '\n'.join(text)
 
