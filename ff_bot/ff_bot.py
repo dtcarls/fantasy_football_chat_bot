@@ -6,66 +6,8 @@ from datetime import datetime
 from apscheduler.schedulers.blocking import BlockingScheduler
 from espn_api.football import League
 
-class GroupMeException(Exception):
-    pass
-
-class SlackException(Exception):
-    pass
-
 class DiscordException(Exception):
     pass
-
-class GroupMeBot(object):
-    #Creates GroupMe Bot to send messages
-    def __init__(self, bot_id):
-        self.bot_id = bot_id
-
-    def __repr__(self):
-        return "GroupMeBot(%s)" % self.bot_id
-
-    def send_message(self, text):
-        #Sends a message to the chatroom
-        template = {
-                    "bot_id": self.bot_id,
-                    "text": text,
-                    "attachments": []
-                    }
-
-        headers = {'content-type': 'application/json'}
-
-        if self.bot_id not in (1, "1", ''):
-            r = requests.post("https://api.groupme.com/v3/bots/post",
-                              data=json.dumps(template), headers=headers)
-            if r.status_code != 202:
-                raise GroupMeException('Invalid BOT_ID')
-
-            return r
-
-class SlackBot(object):
-    #Creates GroupMe Bot to send messages
-    def __init__(self, webhook_url):
-        self.webhook_url = webhook_url
-
-    def __repr__(self):
-        return "Slack Webhook Url(%s)" % self.webhook_url
-
-    def send_message(self, text):
-        #Sends a message to the chatroom
-        message = "```{0}```".format(text)
-        template = {
-                    "text":message
-                    }
-
-        headers = {'content-type': 'application/json'}
-
-        if self.webhook_url not in (1, "1", ''):
-            r = requests.post(self.webhook_url,
-                              data=json.dumps(template), headers=headers)
-
-            if r.status_code != 200:
-                raise SlackException('WEBHOOK_URL')
-
-            return r
 
 class DiscordBot(object):
     #Creates Discord Bot to send messages
@@ -689,23 +631,11 @@ def str_to_bool(check):
 
 def bot_main(function):
     try:
-        bot_id = os.environ["BOT_ID"]
-    except KeyError:
-        bot_id = 1
-
-    try:
-        slack_webhook_url = os.environ["SLACK_WEBHOOK_URL"]
-    except KeyError:
-        slack_webhook_url = 1
-
-    try:
         discord_webhook_url = os.environ["DISCORD_WEBHOOK_URL"]
     except KeyError:
         discord_webhook_url = 1
 
-    if (len(str(bot_id)) <= 1 and
-        len(str(slack_webhook_url)) <= 1 and
-        len(str(discord_webhook_url)) <= 1):
+    if len(str(discord_webhook_url)) <= 1:
         #Ensure that there's info for at least one messaging platform,
         #use length of str in case of blank but non null env variable
         raise Exception("No messaging platform info provided. Be sure one of BOT_ID,\
@@ -734,16 +664,6 @@ def bot_main(function):
         espn_s2 = '1'
 
     try:
-        espn_username = os.environ["ESPN_USERNAME"]
-    except KeyError:
-        espn_username = '1'
-
-    try:
-        espn_password = os.environ["ESPN_PASSWORD"]
-    except KeyError:
-        espn_password = '1'
-
-    try:
         test = str_to_bool(os.environ["TEST"])
     except KeyError:
         test = False
@@ -755,18 +675,16 @@ def bot_main(function):
 
     global randomPhrase
     try:
-        randomPhrase = True if os.environ["RANDOM_PHRASE"] == '1' else False
+        randomPhrase = str_to_bool(os.environ["RANDOM_PHRASE"])
     except KeyError:
         randomPhrase = False
 
     global extraTrophies
     try:
-        extraTrophies = True if os.environ["EXTRA_TROPHIES"] == '1' else False
+        extraTrophies = str_to_bool(os.environ["EXTRA_TROPHIES"])
     except KeyError:
         extraTrophies = False
 
-    bot = GroupMeBot(bot_id)
-    slack_bot = SlackBot(slack_webhook_url)
     discord_bot = DiscordBot(discord_webhook_url)
 
     if swid == '{1}' and espn_s2 == '1': # and espn_username == '1' and espn_password == '1':
@@ -800,9 +718,6 @@ def bot_main(function):
         print(get_inactives(league))
         function="get_final"
         # print(test_users(league))
-        # bot.send_message("Testing")
-        # slack_bot.send_message("Testing")
-        # discord_bot.send_message(get_heads_up(league))
         # discord_bot.send_message("Testing")
 
     text = ''
@@ -845,8 +760,6 @@ def bot_main(function):
         text = "Something happened. HALP"
 
     if text != '' and not test:
-        bot.send_message(text)
-        slack_bot.send_message(text)
         discord_bot.send_message(text)
 
     if test:
@@ -870,7 +783,7 @@ if __name__ == '__main__':
         my_timezone='America/New_York'
 
     try:
-        tues_sched = True if os.environ["TUES_SCHED"] == '1' else False
+        tues_sched = str_to_bool(os.environ["TUES_SCHED"])
     except KeyError:
         tues_sched = False
 
@@ -922,7 +835,6 @@ if __name__ == '__main__':
         sched.add_job(bot_main, 'cron', ['get_waiver_report'], id='waiver_report',
             day_of_week='wed', hour=8, start_date=ff_start_date, end_date=ff_end_date,
             timezone=my_timezone, replace_existing=True)
-
 
     #schedule with a COVID delay to tuesday:
     #extra score update:                 tuesday morning at 7:30am local time.

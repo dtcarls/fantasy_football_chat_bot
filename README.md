@@ -5,9 +5,9 @@ For troubleshooting, join the discord!
 
 [![Discord Banner 2](https://discordapp.com/api/guilds/878995504225218620/widget.png?style=banner2)](https://discord.gg/bkShnqTTP8)
 
-# ESPN Fantasy Football GroupMe Slack and Discord Chat Bot
+# ESPN Fantasy Football Discord Chat Bot
 
-This package creates a docker container that runs a GroupMe, Discord, or Slack chat bot to send ESPN Fantasy Football information to a GroupMe, Discord or Slack chat room.
+This package creates a docker container that runs a Discord chat bot to send ESPN Fantasy Football information to a Discord chat room.
 
 Main code forked from https://github.com/dtcarls/fantasy_football_chat_bot
 
@@ -26,7 +26,7 @@ Main code forked from https://github.com/dtcarls/fantasy_football_chat_bot
   - Week MVP: Player with the highest score differential. Calculated with (actual score - projected score)/projected score
   - Week LVP: Player with the lowest score differential.
   - Overachiever: Team with the highest score over their projected score (actual score - projected score). Awarded when this is different from the highest overall scorer.
-  - Underachiever: Team with the lowest score under their projected score. Awarded when this is different from the lowest overall scorer. 
+  - Underachiever: Team with the lowest score under their projected score. Awarded when this is different from the lowest overall scorer.
 
 
 **What does this do?**
@@ -46,9 +46,7 @@ Main code forked from https://github.com/dtcarls/fantasy_football_chat_bot
 Table of Contents
 =================
 
-  * [Setting up GroupMe, Discord, or Slack, and deploying app in Heroku](#setting-up-groupme-discord-or-slack-and-deploying-app-in-heroku)
-     * [GroupMe Setup](#groupme-setup)
-     * [Slack setup](#slack-setup)
+  * [Setting up Discord and deploying app in Heroku](#setting-up-discord-and-deploying-app-in-heroku)
      * [Discord setup](#discord-setup)
      * [Heroku setup](#heroku-setup)
      * [User and Emote IDs](#user-and-emote-ids)
@@ -61,73 +59,9 @@ Table of Contents
      * [Running without Docker](#running-without-docker)
      * [Running the tests](#running-the-tests)
 
-## Setting up GroupMe, Discord, or Slack, and deploying app in Heroku
+## Setting up Discord and deploying app in Heroku
 
 **Do not deploy 2 of the same bot in the same chat. In general, you should let your commissioner do the setup**
-
-### GroupMe Setup
-<details>
-  <summary>Click to expand!</summary>
-
-Go to www.groupme.com and sign up or login
-
-If you don't have one for your league already, create a new "Group Chat"
-
-![](https://i.imgur.com/32ioDoZ.png)
-
-Next we will setup the bot for GroupMe
-
-Go to https://dev.groupme.com/session/new and login
-
-Click "Create Bot"
-
-![](https://i.imgur.com/TI1bpwE.png)
-
-Create your bot. GroupMe does a good job explaining what each thing is.
-
-![](https://i.imgur.com/DQUcuuI.png)
-
-After you have created your bot you will see something similar to this. Click "Edit"
-
-![](https://i.imgur.com/Z9vwKKt.png)
-
-This page is important as you will need the "Bot ID" on this page.You can also send a test message with the text box to be sure it is connected to your chat room.
-Side note: If you use the bot id depicted in the page you will spam an empty chat room so not worth the effort
-
-![](https://i.imgur.com/k65EZFJ.png)
-</details>
-
-### Slack setup
-<details>
-  <summary>Click to expand!</summary>
-
-Go to https://slack.com/signin and sign in to the workspace the bot will be in
-
-If you don't have one for your league already, create a new League Channel
-
-Next we will setup the bot for Slack
-
-Go to https://api.slack.com/apps/new
-
-Name the app, and choose the intended workspace from the dropdown.
-
-Select the Incoming Webhooks section on the side.
-
-![](https://i.imgur.com/ziRQCVP.png)
-
-Change the toggle from Off to On.
-
-Select Add New Webhook to Workspace
-
-![](https://i.imgur.com/tJRRrfz.png)
-
-In the Post to dropdown, select the channel you want to send messages to, then
-select Authorize.
-
-This page is important as you will need the "Webhook URL" on this page.
-
-![](https://i.imgur.com/mmzhDS0.png)
-</details>
 
 ### Discord setup
  <details>
@@ -180,9 +114,7 @@ Now you will need to setup your environment variables so that it works for your 
 Now we will need to edit these variables (click the pencil to the right of the variable to modify)
 Note: App will restart when you change any variable so your chat room may be semi-spammed with the init message of "Hi" you can change the INIT_MSG variable to be blank to have no init message. It should also be noted that Heroku seems to restart the app about once a day
 
-- BOT_ID: This is your Bot ID from the GroupMe developers page (REQUIRED IF USING GROUPME)
-- SLACK_WEBHOOK_URL: This is your Webhook URL from the Slack App page (REQUIRED IF USING SLACK)
-- DISCORD_WEBHOOK_URL: This is your Webhook URL from the Discord Settings page (REQUIRED IF USING DISCORD)
+- DISCORD_WEBHOOK_URL: This is your Webhook URL from the Discord Settings page (REQUIRED)
 - LEAGUE_ID: This is your ESPN league id (REQUIRED)
 - START_DATE: This is when the bot will start paying attention and sending messages to your chat. (2020-09-10 by default)
 - END_DATE: This is when the bot will stop paying attention and stop sending messages to your chat. (2020-12-30 by default)
@@ -194,8 +126,6 @@ Note: App will restart when you change any variable so your chat room may be sem
 - EXTRA_TROPHIES: If set to 1, will award the additional trophies Week MVP, Week LVP, Overachiever, and Underachiever, when final scores are posted
 - ESPN_S2: Used for private leagues. See [Private Leagues Section](#private-leagues) for documentation
 - SWID: Used for private leagues. See [Private Leagues Section](#private-leagues) for documentation
-- ESPN_USERNAME: Used for private leagues. See [Private Leagues Section](#private-leagues) for documentation **Experimental, currently not working**
-- ESPN_PASSWORD: Used for private leagues. See [Private Leagues Section](#private-leagues) for documentation **Experimental, currently not working**
 
 After you have setup your variables you will need to turn it on. Navigate to the "Resources" tab of your Heroku app Dashboard.
 You should see something like below. Click the pencil on the right and toggle the buton so it is blue like depicted and click "Confirm."
@@ -209,7 +139,7 @@ Unfortunately to do auto deploys of the latest version you need admin access to 
 
 <details>
   <summary>Click to expand!</summary>
- 
+
 If you're using Discord and would like to go to the effort, you can provide lists of your Discord user and emote IDs in the Environment Variables.
 
 - USERS: List of Discord user IDs, comma separated, in the format of \<@[ID 1 HERE]\>,\<@[ID 2 HERE]\>,etc.
@@ -219,12 +149,14 @@ Replace the [ ] and the content within with the IDs.
 
 To get IDs, first enable Developer Mode in Discord's Advanced settings.
 
-For Users, just right click the user in the server list and select "Copy ID".
+For Users, just right click the user in the server list and select "Copy ID". User IDs must go in the order of the teams in the league.
 
 Emotes MUST be from the server-specific list. To get the ID, say '\\:[Emote shortcut]:' in any text channel and copy the text that appears.
- 
+
+Both the Users and Emotes lists need to go in order that the teams joined your league. On your league page, go to League -> Members, which will give you a list of teams in this order. Additionally, each team has a team ID that reflects this order. You can visit each team page to make sure your order is correct. If you have deleted a team in the past, then that number does not get reused and you will need to leave their entry in the list blank, with nothing between the commas. For instance, if Team 2 was deleted your list would look like: "ID1,,ID3,..."
+
  </details>
- 
+
 ### Private Leagues
 
 <details>
@@ -301,8 +233,6 @@ python3 setup.py install
 
 ### Environment Variables
 
-- BOT_ID: This is your Bot ID from the GroupMe developers page (REQUIRED IF USING GROUPME)
-- SLACK_WEBHOOK_URL: This is your Webhook URL from the Slack App page (REQUIRED IF USING SLACK)
 - DISCORD_WEBHOOK_URL: This is your Webhook URL from the Discord Settings page (REQUIRED IF USING DISCORD)
 - LEAGUE_ID: This is your ESPN league id (REQUIRED)
 - START_DATE: This is when the bot will start paying attention and sending messages to your chat. (2020-09-10 by default)
@@ -321,16 +251,13 @@ python3 setup.py install
 
 ### Running with Docker
 
-Use BOT_ID if using Groupme, DISCORD_WEBHOOK_URL if using Discord, and SLACK_WEBHOOK_URL if using Slack (or multiple to get messages in multiple places)
-
 ```bash
->>> export BOT_ID=[enter your GroupMe Bot ID]
->>> export WEBHOOK_URL=[enter your Webhook URL]
+>>> export DISCORD_WEBHOOK_URL=[enter your Webhook URL]
 >>> export LEAGUE_ID=[enter ESPN league ID]
 >>> export LEAGUE_YEAR=[enter league year]
 >>> cd ff_bot
 >>> docker run --rm=True \
--e BOT_ID=$BOT_ID \
+-e DISCORD_WEBHOOK_URL=$DISCORD_WEBHOOK_URL \
 -e LEAGUE_ID=$LEAGUE_ID \
 -e LEAGUE_YEAR=$LEAGUE_YEAR \
 ff_bot
@@ -338,11 +265,8 @@ ff_bot
 
 ### Running without Docker
 
-Use BOT_ID if using Groupme, DISCORD_WEBHOOK_URL if using Discord, and SLACK_WEBHOOK_URL if using Slack (or multiple to get messages in multiple places)
-
 ```bash
->>> export BOT_ID=[enter your GroupMe Bot ID]
->>> export WEBHOOK_URL=[enter your Webhook URL]
+>>> export DISCORD_WEBHOOK_URL=[enter your Webhook URL]
 >>> export LEAGUE_ID=[enter ESPN league ID]
 >>> export LEAGUE_YEAR=[enter league year]
 >>> cd ff_bot
