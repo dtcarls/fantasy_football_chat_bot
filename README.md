@@ -33,12 +33,11 @@ Main code forked from https://github.com/dtcarls/fantasy_football_chat_bot
 
 - Sends out the following messages on this schedule:
 - Scoreboard - Sun - 16:00, 20:00 east coast time (Current ESPN fantasy scoreboard)
-- Scoreboard - Mon,Tue,Fri - 7:30 local time (Current ESPN fantasy scoreboard)
+- Scoreboard - Mon,Fri - 7:30 local time (Current ESPN fantasy scoreboard)
 - Close Scores - Sun,Mon - 18:30 east coast time (Games that are within 16 points of eachother to keep an eye on during the Sunday & Monday night games)
 - Final scores and Trophies- Tue - 7:30 local time
 - Current standings - Tue - 18:30 local time
 - Power rankings - Tue - 18:30 local time
-- Expected win percentage - Tue - 18:30 local time
 - Waiver report - Wed - 8:00 local time
 - Heads up report - Wed - 16:30 local time
 - Matchups - Thu - 18:30 east coast time (Upcoming matchups)
@@ -165,12 +164,13 @@ You **may** run out of free hours without a credit card linked. If you decide to
 Go to https://id.heroku.com/login and sign up or login
 
 
-**!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!**
+:warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning:
 
-**Click this handy button:**
+:rotating_light:**Click this purple button to automatically deploy the code:**:rotating_light:
+
 [![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
 
-**!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!**
+:warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning:
 
 Go to your dashboard (https://dashboard.heroku.com/apps)
 Now you will need to setup your environment variables so that it works for your league. Click Settings at your dashboard. Then click "Reveal Config Vars" button and you will see something like this.

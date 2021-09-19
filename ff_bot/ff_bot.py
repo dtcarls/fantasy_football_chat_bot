@@ -152,12 +152,9 @@ def get_standings(league, top_half_scoring, week=None):
     teams = league.teams
     standings = []
     if not top_half_scoring:
-        for t in teams:
-            standings.append((t.wins, t.losses, t.team_name, emotes[t.team_id]))
-
-        standings = sorted(standings, key=lambda tup: tup[0], reverse=True)
-        standings_txt = [f"{pos + 1}: {emote} {team_name} ({wins} - {losses})" for \
-            pos, (wins, losses, team_name, emote) in enumerate(standings)]
+        standings = league.standings()
+        standings_txt = [f"{pos + 1}: {emotes[team.team_id]} {team.team_name} ({team.wins} - {team.losses})" for \
+            pos, team in enumerate(standings)]
     else:
         top_half_totals = {t.team_name: 0 for t in teams}
         if not week:
@@ -647,6 +644,9 @@ def test_users(league):
     text = ['**Users:** '] + message + [' '] + random_phrase()
     return '\n'.join(text)
 
+def str_to_bool(check):
+  return check.lower() in ("yes", "true", "t", "1")
+
 def bot_main(function):
     try:
         bot_id = os.environ["BOT_ID"]
@@ -704,12 +704,12 @@ def bot_main(function):
         espn_password = '1'
 
     try:
-        test = os.environ["TEST"]
+        test = str_to_bool(os.environ["TEST"])
     except KeyError:
         test = False
 
     try:
-        top_half_scoring = os.environ["TOP_HALF_SCORING"]
+        top_half_scoring = str_to_bool(os.environ["TOP_HALF_SCORING"])
     except KeyError:
         top_half_scoring = False
 
