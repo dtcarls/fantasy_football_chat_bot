@@ -273,7 +273,7 @@ def get_close_scores(league, week=None):
     text = ['Close Scores'] + score
     return '\n'.join(text)
 
-def get_waiver_report(league):
+def get_waiver_report(league, faab):
     activities = league.recent_activity(50)
     report     = []
     today      = date.today().strftime('%Y-%m-%d')
@@ -282,22 +282,24 @@ def get_waiver_report(league):
         actions = activity.actions
         d2      = date.fromtimestamp(activity.date/1000).strftime('%Y-%m-%d')
         if d2 == today: #only get waiver activites from today
-            if len(actions) == 1:
-                if actions[0][1] == 'WAIVER ADDED':
-                    # s = '%s ADDED %s %s' % (actions[0][0].team_name, actions[0][2].position, actions[0][2].name)
-                    s = '%s ADDED %s %s' % (actions[0][0].team_abbrev, actions[0][2].position, actions[0][2].name)
-                    report += [s.lstrip()]
+            if len(actions) == 1 and actions[0][1] == 'WAIVER ADDED': # player added, but not dropped
+                if faab:
+                    s = '%s \nADDED %s %s ($%s)\n' % (actions[0][0].team_name, actions[0][2].position, actions[0][2].name, actions[0][3])
+                else:
+                    s = '%s \nADDED %s %s\n' % (actions[0][0].team_name, actions[0][2].position, actions[0][2].name)
+                report += [s.lstrip()]
             elif len(actions) > 1:
                 if actions[0][1] == 'WAIVER ADDED' or  actions[1][1] == 'WAIVER ADDED':
                     if actions[0][1] == 'WAIVER ADDED':
-                        s = '%s ADDED %s %s, DROPPED %s %s' % (actions[0][0].team_abbrev, actions[0][2].position, actions[0][2].name, actions[1][2].position, actions[1][2].name)
+                        if faab:
+                            s = '%s \nADDED %s %s ($%s)\nDROPPED %s %s\n' % (actions[0][0].team_name, actions[0][2].position, actions[0][2].name, actions[0][3], actions[1][2].position, actions[1][2].name)
+                        else:
+                            s = '%s \nADDED %s %s\nDROPPED %s %s\n' % (actions[0][0].team_name, actions[0][2].position, actions[0][2].name, actions[1][2].position, actions[1][2].name)
                     else:
-                        s = '%s ADDED %s %s, DROPPED %s %s' % (actions[0][0].team_abbrev, actions[1][2].position, actions[1][2].name, actions[0][2].position, actions[0][2].name)
-
-                    # if actions[0][1] == 'WAIVER ADDED':
-                    #     s = '%s ADDED %s %s, DROPPED %s %s' % (actions[0][0].team_name, actions[0][2].position, actions[0][2].name, actions[1][2].position, actions[1][2].name)
-                    # else:
-                    #     s = '%s ADDED %s %s, DROPPED %s %s' % (actions[0][0].team_name, actions[1][2].position, actions[1][2].name, actions[0][2].position, actions[0][2].name)
+                        if faab:
+                            s = '%s \nADDED %s %s ($%s)\nDROPPED %s %s\n' % (actions[0][0].team_name, actions[1][2].position, actions[1][2].name, actions[1][3], actions[0][2].position, actions[0][2].name)
+                        else:
+                            s = '%s \nADDED %s %s\nDROPPED %s %s\n' % (actions[0][0].team_name, actions[1][2].position, actions[1][2].name, actions[0][2].position, actions[0][2].name)
                     report += [s.lstrip()]
 
     report.reverse()
@@ -509,6 +511,11 @@ def bot_main(function):
     except KeyError:
         monitor_report = True
 
+    try:
+        faab = str_to_bool(os.environ["FAAB"])
+    except KeyError:
+        faab = False
+
     bot = GroupMeBot(bot_id)
     slack_bot = SlackBot(slack_webhook_url)
     discord_bot = DiscordBot(discord_webhook_url)
@@ -560,7 +567,7 @@ def bot_main(function):
     elif function=="get_standings":
         text = get_standings(league, top_half_scoring)
         if waiver_report and swid != '{1}' and espn_s2 != '1':
-            text += '\n\n' + get_waiver_report(league)
+            text += '\n\n' + get_waiver_report(league, faab)
     elif function=="get_final":
         # on Tuesday we need to get the scores of last week
         week = league.current_week - 1
