@@ -132,7 +132,7 @@ def get_standings(league, top_half_scoring, week=None):
     standings = []
     if not top_half_scoring:
         standings = league.standings()
-        standings_txt = [f"{pos + 1}: {team.team_name} ({team.wins} - {team.losses})" for \
+        standings_txt = [f"{pos + 1}: {team.team_name} ({team.wins}-{team.losses})" for \
             pos, team in enumerate(standings)]
     else:
         top_half_totals = {t.team_name: 0 for t in teams}
@@ -146,7 +146,7 @@ def get_standings(league, top_half_scoring, week=None):
             standings.append((wins, t.losses, t.team_name))
 
         standings = sorted(standings, key=lambda tup: tup[0], reverse=True)
-        standings_txt = [f"{pos + 1}: {team_name} ({wins} - {losses}) (+{top_half_totals[team_name]})" for \
+        standings_txt = [f"{pos + 1}: {team_name} ({wins}-{losses}) (+{top_half_totals[team_name]})" for \
             pos, (wins, losses, team_name) in enumerate(standings)]
     text = ["Current Standings:"] + standings_txt
 
@@ -284,14 +284,20 @@ def get_waiver_report(league):
         if d2 == today: #only get waiver activites from today
             if len(actions) == 1:
                 if actions[0][1] == 'WAIVER ADDED':
-                    s = '%s ADDED %s %s' % (actions[0][0].team_name, actions[0][2].position, actions[0][2].name)
+                    # s = '%s ADDED %s %s' % (actions[0][0].team_name, actions[0][2].position, actions[0][2].name)
+                    s = '%s ADDED %s %s' % (actions[0][0].team_abbrev, actions[0][2].position, actions[0][2].name)
                     report += [s.lstrip()]
             elif len(actions) > 1:
                 if actions[0][1] == 'WAIVER ADDED' or  actions[1][1] == 'WAIVER ADDED':
                     if actions[0][1] == 'WAIVER ADDED':
-                        s = '%s ADDED %s %s, DROPPED %s %s' % (actions[0][0].team_name, actions[0][2].position, actions[0][2].name, actions[1][2].position, actions[1][2].name)
+                        s = '%s ADDED %s %s, DROPPED %s %s' % (actions[0][0].team_abbrev, actions[0][2].position, actions[0][2].name, actions[1][2].position, actions[1][2].name)
                     else:
-                        s = '%s ADDED %s %s, DROPPED %s %s' % (actions[0][0].team_name, actions[1][2].position, actions[1][2].name, actions[0][2].position, actions[0][2].name)
+                        s = '%s ADDED %s %s, DROPPED %s %s' % (actions[0][0].team_abbrev, actions[1][2].position, actions[1][2].name, actions[0][2].position, actions[0][2].name)
+
+                    # if actions[0][1] == 'WAIVER ADDED':
+                    #     s = '%s ADDED %s %s, DROPPED %s %s' % (actions[0][0].team_name, actions[0][2].position, actions[0][2].name, actions[1][2].position, actions[1][2].name)
+                    # else:
+                    #     s = '%s ADDED %s %s, DROPPED %s %s' % (actions[0][0].team_name, actions[1][2].position, actions[1][2].name, actions[0][2].position, actions[0][2].name)
                     report += [s.lstrip()]
 
     report.reverse()
@@ -299,7 +305,7 @@ def get_waiver_report(league):
     if not report:
         report += ['No waiver transactions']
 
-    text = ['Waiver Report %s: ' % today] + report + [' ']
+    text = ['Waiver Report %s: ' % today] + report
 
     return '\n'.join(text)
 
@@ -554,7 +560,7 @@ def bot_main(function):
     elif function=="get_standings":
         text = get_standings(league, top_half_scoring)
         if waiver_report and swid != '{1}' and espn_s2 != '1':
-            text += get_waiver_report(league)
+            text += '\n\n' + get_waiver_report(league)
     elif function=="get_final":
         # on Tuesday we need to get the scores of last week
         week = league.current_week - 1
