@@ -13,7 +13,7 @@ Main code forked from https://github.com/dtcarls/fantasy_football_chat_bot
 
 **What are the differences from the main repo?**
 
-- Adds an extra method of determining team dominance, Expected Win Percentange, which calculates how many games a given team could have won each week
+- Adds an extra method of determining team dominance, Expected Win Percentange, which calculates how many games a given team might win
 - Adds a Waiver Report that provides a quick overview of the adds and drops that have taken place on waiver days *[ESPN_S2 and SWID variables are REQUIRED for this functionality]*
 - Adds a Heads Up Report, which lets players know if they have any players that they might not want to start
 - Adds an Inactive Report, which lets players know when they have players that are designated Out, or would otherwise score them 0 points
@@ -124,6 +124,7 @@ Note: App will restart when you change any variable so your chat room may be sem
 - TOP_HALF_SCORING: If set to True, when standings are posted on Wednesday it will also include top half scoring wins
 - RANDOM_PHRASE: If set to 1, when matchups, heads up report, inactive report, waiver report, and final scores are posted, will include a random phrase from a list
 - EXTRA_TROPHIES: If set to 1, will award the additional trophies Week MVP, Week LVP, Overachiever, and Underachiever, when final scores are posted
+- FAAB: If set to 1, will provide Free-Agent Acquisition Budget (FAAB) dollars to the waiver report
 - ESPN_S2: Used for private leagues. See [Private Leagues Section](#private-leagues) for documentation
 - SWID: Used for private leagues. See [Private Leagues Section](#private-leagues) for documentation
 
@@ -244,6 +245,7 @@ python3 setup.py install
 - RANDOM_PHRASE: If set to 1, when matchups, heads up report, inactive report, waiver report, and final scores are posted, will include a random phrase from a list
 - EXTRA_TROPHIES: If set to 1, will award the additional trophies Week MVP, Week LVP, Overachiever, and Underachiever, when final scores are posted
 - TUES_SCHED: If set to 1, will move updates accordingly for a COVID delayed game to Tuesday
+- FAAB: If set to 1, will provide Free-Agent Acquisition Budget (FAAB) dollars to the waiver report
 - ESPN_S2: Used for private leagues. See [Private Leagues Section](#private-leagues) for documentation
 - SWID: Used for private leagues. See [Private Leagues Section](#private-leagues) for documentation
 - USERS: List of Discord user IDs, comma separated, in the format of \<@[-ID 1 HERE-]\>,\<@[-ID 2 HERE-]\>,etc.

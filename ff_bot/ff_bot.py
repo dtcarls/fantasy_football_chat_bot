@@ -37,10 +37,9 @@ class DiscordBot(object):
 
 emotes = ['']
 users = ['']
-randomPhrase = False
-extraTrophies = False
+random_phrase = False
 
-def random_phrase():
+def get_random_phrase():
     phrases = ['I\'m dead inside',
                'Is this all there is to my existence?',
                'How much do you pay me to do this?',
@@ -95,7 +94,7 @@ def get_standings(league, top_half_scoring, week=None):
     standings = []
     if not top_half_scoring:
         standings = league.standings()
-        standings_txt = [f"{pos + 1}: {emotes[team.team_id]} {team.team_name} ({team.wins} - {team.losses})" for \
+        standings_txt = [f"{pos + 1}: {emotes[team.team_id]} {team.team_name} ({team.wins}-{team.losses})" for \
             pos, team in enumerate(standings)]
     else:
         top_half_totals = {t.team_name: 0 for t in teams}
@@ -109,7 +108,7 @@ def get_standings(league, top_half_scoring, week=None):
             standings.append((wins, t.losses, t.team_name, emotes[t.team_id]))
 
         standings = sorted(standings, key=lambda tup: tup[0], reverse=True)
-        standings_txt = [f"{pos + 1}: {emote} {team_name} ({wins} - {losses}) (+{top_half_totals[team_name]})" for \
+        standings_txt = [f"{pos + 1}: {emote} {team_name} ({wins}-{losses}) (+{top_half_totals[team_name]})" for \
             pos, (wins, losses, team_name, emote) in enumerate(standings)]
 
     text = ['__**Current Standings:**__ '] + standings_txt
@@ -164,8 +163,8 @@ def get_heads_up(league, week=None):
         return ('')
 
     text = ['__**Heads Up Report:**__ '] + headsup
-    if randomPhrase == True:
-        text += random_phrase()
+    if random_phrase == True:
+        text += get_random_phrase()
 
     return '\n'.join(text)
 
@@ -181,8 +180,8 @@ def get_inactives(league, week=None):
         return ('')
 
     text = ['__**Inactive Player Report:**__ '] + inactives
-    if randomPhrase == True:
-        text += random_phrase()
+    if random_phrase == True:
+        text += get_random_phrase()
 
     return '\n'.join(text)
 
@@ -246,8 +245,8 @@ def get_matchups(league, week=None):
             scores += [home_team.lstrip() + ' vs ' + away_team.lstrip()]
 
     text = ['__**Matchups:**__ '] + scores + [' ']
-    if randomPhrase == True:
-        text += random_phrase()
+    if random_phrase == True:
+        text += get_random_phrase()
 
     return '\n'.join(text)
 
@@ -272,27 +271,35 @@ def get_close_scores(league, week=None):
     text = ['__**Close Scores:**__ '] + scores
     return '\n'.join(text)
 
-def get_waiver_report(league):
+def get_waiver_report(league, faab):
     try:
         if os.environ["SWID"] and os.environ["ESPN_S2"]:
             activities = league.recent_activity(50)
             report     = []
-            date       = datetime.today().strftime('%Y-%m-%d')
+            today      = datetime.today().strftime('%Y-%m-%d')
 
             for activity in activities:
                 actions = activity.actions
                 d2      = datetime.fromtimestamp(activity.date/1000).strftime('%Y-%m-%d')
-                if d2 == date:
-                    if len(actions) == 1:
-                        if actions[0][1] == 'WAIVER ADDED':
-                            s = '%s **%s** ADDED%s %s' % (emotes[actions[0][0].team_id], actions[0][0].team_name, ' '+actions[0][2].position if actions[0][2].position != 'D/ST' else '', actions[0][2].name)
-                            report += [s.lstrip()]
+                if d2 == today:
+                    if len(actions) == 1 and actions[0][1] == 'WAIVER ADDED':
+                        if faab:
+                            s = '%s **%s** \nADDED%s %s ($%s)\n' % (emotes[actions[0][0].team_id], actions[0][0].team_name, ' '+actions[0][2].position if actions[0][2].position != 'D/ST' else '', actions[0][2].name, actions[0][3])
+                        else:
+                            s = '%s **%s** \nADDED%s %s\n' % (emotes[actions[0][0].team_id], actions[0][0].team_name, ' '+actions[0][2].position if actions[0][2].position != 'D/ST' else '', actions[0][2].name)
+                        report += [s.lstrip()]
                     elif len(actions) > 1:
                         if actions[0][1] == 'WAIVER ADDED' or  actions[1][1] == 'WAIVER ADDED':
                             if actions[0][1] == 'WAIVER ADDED':
-                                s = '%s **%s** ADDED%s %s, DROPPED%s %s' % (emotes[actions[0][0].team_id], actions[0][0].team_name, ' '+actions[0][2].position if actions[0][2].position != 'D/ST' else '', actions[0][2].name, ' '+actions[1][2].position if actions[1][2].position != 'D/ST' else '', actions[1][2].name)
+                                if faab:
+                                    s = '%s **%s** \nADDED%s %s ($%s)\nDROPPED %s %s\n' % (emotes[actions[0][0].team_id], actions[0][0].team_name, ' '+actions[0][2].position if actions[0][2].position != 'D/ST' else '', actions[0][2].name, actions[0][3], ' '+actions[1][2].position if actions[1][2].position != 'D/ST' else '', actions[1][2].name)
+                                else:
+                                    s = '%s **%s** \nADDED%s %s, \nDROPPED%s %s\n' % (emotes[actions[0][0].team_id], actions[0][0].team_name, ' '+actions[0][2].position if actions[0][2].position != 'D/ST' else '', actions[0][2].name, ' '+actions[1][2].position if actions[1][2].position != 'D/ST' else '', actions[1][2].name)
                             else:
-                                s = '%s **%s** ADDED%s %s, DROPPED%s %s' % (emotes[actions[0][0].team_id], actions[0][0].team_name, ' '+actions[1][2].position if actions[1][2].position != 'D/ST' else '', actions[1][2].name, ' '+actions[0][2].position if actions[0][2].position != 'D/ST' else '', actions[0][2].name)
+                                if faab:
+                                    s = '%s **%s** \nADDED%s %s ($%s)\nDROPPED %s %s\n' % (emotes[actions[0][0].team_id], actions[0][0].team_name, ' '+actions[1][2].position if actions[1][2].position != 'D/ST' else '', actions[1][2].name, actions[1][3], ' '+actions[0][2].position if actions[0][2].position != 'D/ST' else '', actions[0][2].name)
+                                else:
+                                    s = '%s **%s** \nADDED%s %s, \nDROPPED%s %s\n' % (emotes[actions[0][0].team_id], actions[0][0].team_name, ' '+actions[1][2].position if actions[1][2].position != 'D/ST' else '', actions[1][2].name, ' '+actions[0][2].position if actions[0][2].position != 'D/ST' else '', actions[0][2].name)
                             report += [s.lstrip()]
 
             report.reverse()
@@ -301,8 +308,8 @@ def get_waiver_report(league):
                 return ('')
 
             text = ['__**Waiver Report %s:**__ ' % date] + report + [' ']
-            if randomPhrase == True:
-                text += random_phrase()
+            if random_phrase == True:
+                text += get_random_phrase()
 
             return '\n'.join(text)
     except KeyError:
@@ -314,38 +321,31 @@ def combined_power_rankings(league, week=None):
 
     pr = league.power_rankings(week=week)
     ew = expected_win_percent(league, week=week)
+    ew_sorted = expected_win_percent(league, week=week)
 
     combRankingDict = {x: 0. for x in league.teams}
 
-    for team in combRankingDict.keys():			#for each team
-        for i in pr:
-            fpr = float(i[0])
-            for j in ew:
-                few = float(j[0])
-                if i[1].team_id == j[1].team_id and i[1].team_id == team.team_id:
-                    com = round(fpr+(few*10)+(team.points_for), 3)
-                    combRankingDict[team] = com/10
-
-
-    combRankingDictSortedTemp = {k: v for k, v in sorted(combRankingDict.items(), key=lambda item: item[1],reverse=True)} #sort for presentation purposes
-    combRankingDictSorted = {x: ('{:.2f}'.format(combRankingDictSortedTemp[x])) for x in combRankingDictSortedTemp.keys()}  #put into a prettier format
-
-    combined_power_rankings = [(combRankingDictSorted[x],x) for x in combRankingDictSorted.keys()]
+    pos = 0
+    for i in pr:
+        for j in ew:
+            if i[1].team_id == j[1].team_id:
+                ew_sorted[pos] = j
+        pos+=1
 
     ranks = []
     pos = 1
 
-    for i in combined_power_rankings:
+    for i in pr:
         if i:
             if emotes[i[1].team_id] != '':
-                ranks += ['%s: %s %s' % (pos, emotes[i[1].team_id], i[1].team_name)]
+                ranks += ['%s: %s %s (%s - %s)' % (pos, emotes[i[1].team_id], i[1].team_name, i[0], ew_sorted[pos-1][0])]
             else:
-                ranks += ['%s: %s' % (pos, i[1].team_name)]
+                ranks += ['%s: %s (%s - %s)' % (pos, i[1].team_name, i[0], ew_sorted[pos-1][0])]
         pos += 1
 
-    text = ['__**Power Rankings:**__ '] + ranks
-    if randomPhrase == True:
-        text += [' '] + random_phrase()
+    text = ['__**Power Rankings:**__ (PR points - Expected Win %)'] + ranks
+    if random_phrase == True:
+        text += [' '] + get_random_phrase()
 
     return '\n'.join(text)
 
@@ -385,8 +385,8 @@ def get_expected_win(league, week=None):
                 wins += ['%s - %s' % (i[0], i[1].team_name)]
 
     text = ['__**Expected Win %:**__ '] + wins
-    if randomPhrase == True:
-        text += [' '] + random_phrase()
+    if random_phrase == True:
+        text += [' '] + get_random_phrase()
 
     return '\n'.join(text)
 
@@ -437,7 +437,7 @@ def expected_win_percent(league, week):
     powerRankingDictSorted = {x: ('{:.3f}'.format(powerRankingDictSortedTemp[x])) for x in powerRankingDictSortedTemp.keys()}  #put into a prettier format
     return [(powerRankingDictSorted[x],x) for x in powerRankingDictSorted.keys()]    #return in the format that the bot expects
 
-def get_trophies(league, week=None):
+def get_trophies(league, extra_trophies, week=None):
     #Gets trophies for highest score, lowest score, overachiever, underachiever, week MVP & LVP, closest score, and biggest win
     matchups = league.box_scores(week=week)
 
@@ -604,7 +604,7 @@ def get_trophies(league, week=None):
 
     text = ['__**Trophies of the week:**__ '] + low_score_str + high_score_str + close_score_str + blowout_str
 
-    if extraTrophies == True:
+    if extra_trophies == True:
         if under_diff < 0 and low_team_name != under_team:
             text += under_str
         if over_diff > 0 and high_team_name != over_team:
@@ -613,8 +613,8 @@ def get_trophies(league, week=None):
     else:
         text += [' ']
 
-    if randomPhrase == True:
-        text += random_phrase()
+    if random_phrase == True:
+        text += get_random_phrase()
 
     return '\n'.join(text)
 
@@ -623,7 +623,7 @@ def test_users(league):
     for t in league.teams:
         message += ['%s %s %s' % (t.team_name, users[t.team_id], emotes[t.team_id])]
 
-    text = ['**Users:** '] + message + [' '] + random_phrase()
+    text = ['**Users:** '] + message + [' '] + get_random_phrase()
     return '\n'.join(text)
 
 def str_to_bool(check):
@@ -673,26 +673,28 @@ def bot_main(function):
     except KeyError:
         top_half_scoring = False
 
-    global randomPhrase
+    global random_phrase
     try:
-        randomPhrase = str_to_bool(os.environ["RANDOM_PHRASE"])
+        random_phrase = str_to_bool(os.environ["RANDOM_PHRASE"])
     except KeyError:
-        randomPhrase = False
+        random_phrase = False
 
-    global extraTrophies
     try:
-        extraTrophies = str_to_bool(os.environ["EXTRA_TROPHIES"])
+        extra_trophies = str_to_bool(os.environ["EXTRA_TROPHIES"])
     except KeyError:
-        extraTrophies = False
+        extra_trophies = False
+
+    try:
+        faab = str_to_bool(os.environ["FAAB"])
+    except KeyError:
+        faab = False
 
     discord_bot = DiscordBot(discord_webhook_url)
 
-    if swid == '{1}' and espn_s2 == '1': # and espn_username == '1' and espn_password == '1':
+    if swid == '{1}' or espn_s2 == '1': # and espn_username == '1' and espn_password == '1':
         league = League(league_id=league_id, year=year)
     else:
         league = League(league_id=league_id, year=year, espn_s2=espn_s2, swid=swid)
-#    if espn_username and espn_password:
-#        league = League(league_id=league_id, year=year, username=espn_username, password=espn_password)
 
     global users
     try:
@@ -711,8 +713,10 @@ def bot_main(function):
         print(get_projected_scoreboard(league))
         print(get_close_scores(league))
         print(get_standings(league, top_half_scoring))
+        print(get_power_rankings(league))
+        print(get_expected_win(league))
         print(combined_power_rankings(league))
-        print(get_waiver_report(league))
+        print(get_waiver_report(league, faab))
         print(get_matchups(league))
         print(get_heads_up(league))
         print(get_inactives(league))
@@ -740,7 +744,7 @@ def bot_main(function):
     elif function=="get_expected_win":
         text = get_expected_win(league)
     elif function=="get_waiver_report":
-        text = get_waiver_report(league)
+        text = get_waiver_report(league, faab)
     elif function=="get_trophies":
         text = get_trophies(league)
     elif function=="get_standings":
@@ -749,7 +753,7 @@ def bot_main(function):
         # on Tuesday we need to get the scores of last week
         week = league.current_week - 1
         text = get_scoreboard_short(league, week=week)
-        text = text + "\n\n" + get_trophies(league, week=week)
+        text = text + "\n\n" + get_trophies(league, extra_trophies, week=week)
     elif function=="init":
         try:
             text = os.environ["INIT_MSG"]
