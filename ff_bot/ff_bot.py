@@ -539,7 +539,6 @@ def bot_main(function):
         # discord_bot.send_message("Testing")
 
     text = ''
-    function = "get_monitor"
     if function=="get_matchups":
         text = get_matchups(league, random_phrase)
         text = text + "\n\n" + get_projected_scoreboard(league)
