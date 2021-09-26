@@ -187,13 +187,11 @@ def get_monitor(league):
     monitor = []
     text=''
     for i in box_scores:
-        monitor += scan_inactives(i.home_lineup, i.home_team)
         monitor += scan_roster(i.home_lineup, i.home_team)
-        monitor += scan_inactives(i.away_lineup, i.away_team)
         monitor += scan_roster(i.away_lineup, i.away_team)
 
     if monitor:
-        text = ['Players to Monitor: '] + monitor
+        text = ['Starting Players to Monitor: '] + monitor
     else:
         text = ['No Players to Monitor this week. Good Luck!']
     return '\n'.join(text)
@@ -202,15 +200,13 @@ def scan_roster(lineup, team):
     count = 0
     players = []
     for i in lineup:
-        if i.slot_position != 'BE' and i.slot_position != 'IR':
-            if i.injuryStatus != 'ACTIVE' and i.injuryStatus != 'NORMAL' or i.projected_points <= 4:
-                count += 1
-                player = i.position + ' ' + i.name + ' - '
-                if i.projected_points <= 4:
-                    player += str(i.projected_points) + ' pts'
-                else:
-                    player += i.injuryStatus.title().replace('_', ' ')
-                players += [player]
+        if i.slot_position != 'BE' and i.slot_position != 'IR' and \
+            i.injuryStatus != 'ACTIVE' and i.injuryStatus != 'NORMAL' \
+            and i.game_played == 0:
+
+            count += 1
+            player = i.position + ' ' + i.name + ' - ' + i.injuryStatus.title().replace('_', ' ')
+            players += [player]
 
     list = ""
     report = ""
@@ -219,7 +215,7 @@ def scan_roster(lineup, team):
         list += p + "\n"
 
     if count > 0:
-        s = '%s starting player(s) to monitor: \n%s \n' % (team.team_name, list[:-1])
+        s = '%s: \n%s \n' % (team.team_name, list[:-1])
         report =  [s.lstrip()]
 
     return report
@@ -534,16 +530,16 @@ def bot_main(function):
         print(get_scoreboard_short(league))
         print(get_standings(league, top_half_scoring))
         print(get_power_rankings(league))
-        #print(get_expected_win(league))
         print(get_monitor(league))
         if waiver_report and swid != '{1}' and espn_s2 != '1':
-            print(get_waiver_report(league))
+            print(get_waiver_report(league, faab))
         function="get_final"
         # bot.send_message("Testing")
         # slack_bot.send_message("Testing")
         # discord_bot.send_message("Testing")
 
     text = ''
+    function = "get_monitor"
     if function=="get_matchups":
         text = get_matchups(league, random_phrase)
         text = text + "\n\n" + get_projected_scoreboard(league)
