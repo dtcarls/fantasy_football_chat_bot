@@ -307,7 +307,7 @@ def get_waiver_report(league, faab):
             if not report:
                 return ('')
 
-            text = ['__**Waiver Report %s:**__ ' % date] + report + [' ']
+            text = ['__**Waiver Report %s:**__ ' % today] + report + [' ']
             if random_phrase == True:
                 text += get_random_phrase()
 
