@@ -178,13 +178,13 @@ Note: App will restart when you change any variable so your chat room may be sem
 - LEAGUE_YEAR: ESPN League year to look at (2020 by default)
 - TIMEZONE: The timezone that the messages will look to send in. (America/New_York by default)
 - INIT_MSG: The message that the bot will say when it is started (can be blank or deleted for no message)
-- TOP_HALF_SCORING: If set to True, when standings are posted on Wednesday it will also include top half scoring wins
+- TOP_HALF_SCORING: If set to True, when standings are posted on Wednesday it will also include being in the top half of your league for points and you receive an additional "win" for it.
 - RANDOM_PHRASE: If set to True, when matchups are posted on Tuesday it will also include a random phrase
 - MONITOR_REPORT: If set to True, will provide a report of players in starting lineup that are Questionable, Doubtful, Out, or projected for less than 4 points
 - WAIVER_REPORT: If set to True, will provide a waiver report of add/drops. :warning: ESPN_S2 and SWID are required for this to work :warning:
 - FAAB: If set to True, will provide Free-Agent Acquisition Budget (FAAB) dollars to  the waiver report
 - ESPN_S2: Used for private leagues. See [Private Leagues Section](#private-leagues) for documentation
-- SWID: Used for private leagues. See [Private Leagues Section](#private-leagues) for documentation
+- SWID: Used for private leagues. (Can be defined with or without {}) See [Private Leagues Section](#private-leagues) for documentation
 
 
 After you have setup your variables you will need to turn it on. Navigate to the "Resources" tab of your Heroku app Dashboard.
@@ -210,7 +210,7 @@ From there you should be able to find your swid and espn_s2 variables and values
 **League must be full.**
 
 The bot isn't working
-Did you miss a step in the instructions? Try doing it from scratch again. If still no luck, open an issue (https://github.com/dtcarls/fantasy_football_chat_bot/issues) so the answer can be shared with others.
+Did you miss a step in the instructions? Try doing it from scratch again. If still no luck, open an issue (https://github.com/dtcarls/fantasy_football_chat_bot/issues) or hop into the discord (link at the top of readme) so the answer can be shared with others.
 
 How are power ranks calculated?
 They are calculated using 2 step dominance, as well as a combination of points scored and margin of victory. Weighted 80/15/5 respectively. I wouldn't so much pay attention to the actual number but more of the gap between teams. Full source of the calculations can be seen here: https://github.com/cwendt94/espn-api/pull/12/files. If you want a tutorial on dominance matrices: https://www.youtube.com/watch?v=784TmwaHPOw
@@ -221,7 +221,7 @@ No, this would require a significant rework for other sites.
 I'm not getting the init message
 Are you sure you flipped the switch in Heroku to activate the worker (the toggle should be blue)? The other common mistake is misconfigured environment variables.
 
-I keep getting the init message
+I keep getting the init message.
 Remove your init message and it will stop. The init message is really for first setup to ensure it is working.
 
 How do I set another timezone?
@@ -229,6 +229,10 @@ Specify your variable https://en.wikipedia.org/wiki/List_of_tz_database_time_zon
 
 Is there a version of this for Messenger/WhatsApp/[insert other chat]?
 No, but I am open to pull requests implementing their API for additional cross platform support.
+
+My Standings look wrong. I have weird (+1) in it.
+TOP_HALF_SCORING: If set to True, when standings are posted on Wednesday it will also include top half scoring wins
+Top half wins is being in the top half of your league for points and you receive an additional "win" for it. The number in parenthesis (+1) tells you how many added wins over the season for top half wins.
 </details>
 
 ## Getting Started for development and testing
@@ -270,13 +274,13 @@ python3 setup.py install
 - LEAGUE_YEAR: ESPN League year to look at (2020 by default)
 - TIMEZONE: The timezone that the messages will look to send in. (America/New_York by default)
 - INIT_MSG: The message that the bot will say when it is started (can be blank or deleted for no message)
-- TOP_HALF_SCORING: If set to True, when standings are posted on Wednesday it will also include top half scoring wins
+- TOP_HALF_SCORING: If set to True, when standings are posted on Wednesday it will also include being in the top half of your league for points and you receive an additional "win" for it.
 - RANDOM_PHRASE: If set to True, when matchups are posted on Tuesday it will also include a random phrase
 - MONITOR_REPORT: If set to True, will provide a report of players in starting lineup that are Questionable, Doubtful, Out, or projected for less than 4 points
 - WAIVER_REPORT: If set to True, will provide a waiver report of add/drops. :warning: ESPN_S2 and SWID are required for this to work :warning:
 - FAAB: If set to True, will provide Free-Agent Acquisition Budget (FAAB) dollars to  the waiver report
 - ESPN_S2: Used for private leagues. See [Private Leagues Section](#private-leagues) for documentation
-- SWID: Used for private leagues. See [Private Leagues Section](#private-leagues) for documentation
+- SWID: Used for private leagues. (Can be defined with or without {}) See [Private Leagues Section](#private-leagues) for documentation
 
 ### Running with Docker
 
