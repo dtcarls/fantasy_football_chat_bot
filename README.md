@@ -29,7 +29,7 @@ ESPN Fantasy Football information to a GroupMe, Discord or Slack chat room.
 - Current standings - Wed - 7:30 local time
 - Waiver report - Wed - 7:30 local time
 - Matchups - Thu - 19:30 east coast time (Upcoming matchups)
-- Players to Monitor report - Sun - 7:30 local time (Players in starting lineup that are Questionable, Doubtful, Out, or projected for less than 4 points)
+- Players to Monitor report - Sun - 7:30 local time (Players in starting lineup that are Questionable, Doubtful, or Out)
 - Scoreboard - Sun - 16:00, 20:00 east coast time (Current ESPN fantasy scoreboard)
 
 
