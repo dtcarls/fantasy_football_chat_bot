@@ -604,6 +604,8 @@ def bot_main(function):
         week = league.current_week - 1
         text = "Final " + get_scoreboard_short(league, week=week)
         text = text + "\n\n" + get_trophies(league, week=week)
+    elif function == "get_waiver_report" and swid != '{1}' and espn_s2 != '1':
+        text = get_waiver_report(league, faab)
     elif function == "init":
         try:
             text = os.environ["INIT_MSG"]
@@ -640,9 +642,9 @@ if __name__ == '__main__':
         my_timezone = 'America/New_York'
 
     try:
-        waiver_freq = os.environ["WAIVER_FREQUENCY"]
-    except:
-        waiver_freq = 'WEEKLY'
+        daily_waiver = str_to_bool(os.environ["DAILY_WAIVER"])
+    except KeyError:
+        daily_waiver = False
 
     game_timezone = 'America/New_York'
     bot_main("init")
@@ -667,17 +669,14 @@ if __name__ == '__main__':
     sched.add_job(bot_main, 'cron', ['get_final'], id='final',
                   day_of_week='tue', hour=7, minute=30, start_date=ff_start_date, end_date=ff_end_date,
                   timezone=my_timezone, replace_existing=True)
-    if waiver_freq == 'WEEKLY':
-        sched.add_job(bot_main, 'cron', ['get_standings'], id='standings',
-                      day_of_week='wed', hour=7, minute=30, start_date=ff_start_date, end_date=ff_end_date,
+    sched.add_job(bot_main, 'cron', ['get_standings'], id='standings',
+                    day_of_week='wed', hour=7, minute=30, start_date=ff_start_date, end_date=ff_end_date,
+                    timezone=my_timezone, replace_existing=True)
+    if daily_waiver:
+        sched.add_job(bot_main, 'cron', ['get_waiver_report'], id='waiver_report',
+                      day_of_week='mon, tue, thu, fri, sat, sun', hour=7, minute=31, start_date=ff_start_date, end_date=ff_end_date,
                       timezone=my_timezone, replace_existing=True)
-    else:
-        sched.add_job(bot_main, 'cron', ['get_standings'], id='standings',
-                      day_of_week='mon, tue, wed, thu, fri, sat, sun', hour=12, minute=1, start_date=ff_start_date, end_date=ff_end_date,
-                      timezone=my_timezone, replace_existing=True)
-    # sched.add_job(bot_main, 'cron', ['get_waiver_report'], id='waiver_report',
-    #     day_of_week='wed', hour=7, minute=31, start_date=ff_start_date, end_date=ff_end_date,
-    #     timezone=my_timezone, replace_existing=True)
+
     sched.add_job(bot_main, 'cron', ['get_matchups'], id='matchups',
                   day_of_week='thu', hour=19, minute=30, start_date=ff_start_date, end_date=ff_end_date,
                   timezone=game_timezone, replace_existing=True)
