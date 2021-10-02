@@ -293,6 +293,7 @@ def get_waiver_report(league, faab):
     activities = league.recent_activity(50)
     report = []
     today = date.today().strftime('%Y-%m-%d')
+    text = ''
 
     for activity in activities:
         actions = activity.actions
@@ -327,8 +328,8 @@ def get_waiver_report(league, faab):
 
     if not report:
         report += ['No waiver transactions']
-
-    text = ['Waiver Report %s: ' % today] + report
+    else:
+        text = ['Waiver Report %s: ' % today] + report
 
     return '\n'.join(text)
 
