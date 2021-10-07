@@ -29,7 +29,7 @@ ESPN Fantasy Football information to a GroupMe, Discord or Slack chat room.
 - Current standings - Wed - 7:30 local time
 - Waiver report - Wed - 7:30 local time
 - Matchups - Thu - 19:30 east coast time (Upcoming matchups)
-- Players to Monitor report - Sun - 7:30 local time (Players in starting lineup that are Questionable, Doubtful, Out, or projected for less than 4 points)
+- Players to Monitor report - Sun - 7:30 local time (Players in starting lineup that are Questionable, Doubtful, or Out)
 - Scoreboard - Sun - 16:00, 20:00 east coast time (Current ESPN fantasy scoreboard)
 
 
@@ -183,6 +183,7 @@ Note: App will restart when you change any variable so your chat room may be sem
 - MONITOR_REPORT: If set to True, will provide a report of players in starting lineup that are Questionable, Doubtful, Out, or projected for less than 4 points
 - WAIVER_REPORT: If set to True, will provide a waiver report of add/drops. :warning: ESPN_S2 and SWID are required for this to work :warning:
 - FAAB: If set to True, will provide Free-Agent Acquisition Budget (FAAB) dollars to  the waiver report
+- DAILY_WAIVER: If set to True, will provide a waiver report of add/drops daily. :warning: ESPN_S2 and SWID are required for this to work :warning:
 - ESPN_S2: Used for private leagues. See [Private Leagues Section](#private-leagues) for documentation
 - SWID: Used for private leagues. (Can be defined with or without {}) See [Private Leagues Section](#private-leagues) for documentation
 
@@ -279,6 +280,7 @@ python3 setup.py install
 - MONITOR_REPORT: If set to True, will provide a report of players in starting lineup that are Questionable, Doubtful, Out, or projected for less than 4 points
 - WAIVER_REPORT: If set to True, will provide a waiver report of add/drops. :warning: ESPN_S2 and SWID are required for this to work :warning:
 - FAAB: If set to True, will provide Free-Agent Acquisition Budget (FAAB) dollars to  the waiver report
+- DAILY_WAIVER: If set to True, will provide a waiver report of add/drops daily. :warning: ESPN_S2 and SWID are required for this to work :warning:
 - ESPN_S2: Used for private leagues. See [Private Leagues Section](#private-leagues) for documentation
 - SWID: Used for private leagues. (Can be defined with or without {}) See [Private Leagues Section](#private-leagues) for documentation
 
