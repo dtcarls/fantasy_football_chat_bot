@@ -343,9 +343,9 @@ def get_power_rankings(league, week=None):
     # It's weighted 80/15/5 respectively
     power_rankings = league.power_rankings(week=week)
 
-    score = ['%s - %s' % (i[0], i[1].team_name) for i in power_rankings
-             if i]
-    text = ['Power Rankings'] + score
+    score = ['%s (%.1f) - %s' % (i[0], i[1].playoff_pct, i[1].team_name) for i in power_rankings
+            if i]
+    text = ['Power Rankings (Playoff %)'] + score
     return '\n'.join(text)
 
 def get_trophies(league, week=None):
