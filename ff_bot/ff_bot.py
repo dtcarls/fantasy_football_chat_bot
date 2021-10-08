@@ -240,9 +240,9 @@ def scan_inactives(lineup, team):
     count = 0
     players = []
     for i in lineup:
-        if i.slot_position != 'BE' and i.slot_position != 'IR':
-            if i.injuryStatus == 'OUT' or i.injuryStatus == 'DOUBTFUL' or i.projected_points <= 0:
-                if i.game_played == 0:
+        if (i.slot_position != 'BE' and i.slot_position != 'IR') \
+            and (i.injuryStatus == 'OUT' or i.injuryStatus == 'DOUBTFUL' or i.projected_points <= 0) \
+                and i.game_played == 0:
                     count += 1
                     players += ['%s %s - %s, %d pts' %
                                 (i.position, i.name, i.injuryStatus.title().replace('_', ' '), i.projected_points)]
@@ -347,73 +347,6 @@ def get_power_rankings(league, week=None):
              if i]
     text = ['Power Rankings'] + score
     return '\n'.join(text)
-
-
-def get_expected_win(league, week=None):
-    win_percent = expected_win_percent(league, week=week)
-    wins = []
-
-    for i in win_percent:
-        wins += ['%s - %s' % (i[0], i[1].team_name)]
-
-    text = ['Last Week Win % League: '] + wins + [' ']
-
-    return '\n'.join(text)
-
-
-def expected_win_percent(league, week):
-    # This script gets power rankings, given an already-connected league and a week to look at. Requires espn_api
-
-    # Get what week most recently passed
-    lastWeek = league.current_week
-
-    if week:
-        lastWeek = week
-
-    # initialize dictionaries to stash the projected record/expected wins for each week, and to stash each team's score for each week
-    projRecDicts = {i: {x: None for x in league.teams} for i in range(lastWeek)}
-    teamScoreDicts = {i: {x: None for x in league.teams} for i in range(lastWeek)}
-
-    # initialize the dictionary for the final power ranking
-    powerRankingDict = {x: 0. for x in league.teams}
-
-    for i in range(lastWeek):  # for each week that has been played
-        weekNumber = i+1  # set the week
-        boxes = league.box_scores(weekNumber)  # pull box scores from that week
-        for box in boxes:  # for each boxscore
-            teamScoreDicts[i][box.home_team] = box.home_score  # plug the home team's score into the dict
-            teamScoreDicts[i][box.away_team] = box.away_score  # and the away team's
-
-        for team in teamScoreDicts[i].keys():  # for each team
-            wins = 0
-            losses = 0
-            ties = 0
-            oppCount = len(list(teamScoreDicts[i].keys()))-1
-            for opp in teamScoreDicts[i].keys():  # for each potential opponent
-                if team == opp:  # skip yourself
-                    continue
-                if teamScoreDicts[i][team] > teamScoreDicts[i][opp]:  # win case
-                    wins += 1
-                if teamScoreDicts[i][team] < teamScoreDicts[i][opp]:  # loss case
-                    losses += 1
-
-            if wins + losses != oppCount:  # in case of an unlikely tie
-                ties = oppCount - wins - losses
-
-            # store the team's projected record for that week
-            projRecDicts[i][team] = (float(wins) + (0.5*float(ties)))/float(oppCount)
-
-    for team in powerRankingDict.keys():  # for each team
-        # total up the expected wins from each week, divide by the number of weeks
-        powerRankingDict[team] = sum([projRecDicts[i][team] for i in range(lastWeek)])/float(lastWeek)
-
-    powerRankingDictSortedTemp = {k: v for k, v in sorted(powerRankingDict.items(
-    ), key=lambda item: item[1], reverse=True)}  # sort for presentation purposes
-    powerRankingDictSorted = {x: ('{:.2f}'.format(
-        powerRankingDictSortedTemp[x]*100)) for x in powerRankingDictSortedTemp.keys()}  # put into a prettier format
-    # return in the format that the bot expects
-    return [(powerRankingDictSorted[x], x) for x in powerRankingDictSorted.keys()]
-
 
 def get_trophies(league, week=None):
     # Gets trophies for highest score, lowest score, closest score, and biggest win
@@ -590,8 +523,6 @@ def bot_main(function):
         text = get_close_scores(league)
     elif function == "get_power_rankings":
         text = get_power_rankings(league)
-    # elif function=="get_expected_win":
-    #     text = get_expected_win(league)
     # elif function=="get_waiver_report":
     #     text = get_waiver_report(league)
     elif function == "get_trophies":
