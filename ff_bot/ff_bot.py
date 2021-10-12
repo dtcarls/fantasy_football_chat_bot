@@ -473,11 +473,6 @@ def bot_main(function):
         waiver_report = False
 
     try:
-        monitor_report = str_to_bool(os.environ["MONITOR_REPORT"])
-    except KeyError:
-        monitor_report = True
-
-    try:
         faab = str_to_bool(os.environ["FAAB"])
     except KeyError:
         faab = False
@@ -512,7 +507,7 @@ def bot_main(function):
     if function == "get_matchups":
         text = get_matchups(league, random_phrase)
         text = text + "\n\n" + get_projected_scoreboard(league)
-    elif monitor_report and function == "get_monitor":
+    elif function == "get_monitor":
         text = get_monitor(league)
     elif function == "get_scoreboard_short":
         text = get_scoreboard_short(league)
@@ -578,6 +573,11 @@ if __name__ == '__main__':
     except KeyError:
         daily_waiver = False
 
+    try:
+        monitor_report = str_to_bool(os.environ["MONITOR_REPORT"])
+    except KeyError:
+        monitor_report = True
+
     game_timezone = 'America/New_York'
     bot_main("init")
     sched = BlockingScheduler(job_defaults={'misfire_grace_time': 15*60})
@@ -615,9 +615,12 @@ if __name__ == '__main__':
     sched.add_job(bot_main, 'cron', ['get_scoreboard_short'], id='scoreboard1',
                   day_of_week='fri,mon', hour=7, minute=30, start_date=ff_start_date, end_date=ff_end_date,
                   timezone=my_timezone, replace_existing=True)
-    sched.add_job(bot_main, 'cron', ['get_monitor'], id='monitor',
-                  day_of_week='sun', hour=7, minute=30, start_date=ff_start_date, end_date=ff_end_date,
-                  timezone=my_timezone, replace_existing=True)
+
+    if monitor_report:
+        sched.add_job(bot_main, 'cron', ['get_monitor'], id='monitor',
+                    day_of_week='sun', hour=7, minute=30, start_date=ff_start_date, end_date=ff_end_date,
+                    timezone=my_timezone, replace_existing=True)
+
     sched.add_job(bot_main, 'cron', ['get_scoreboard_short'], id='scoreboard2',
                   day_of_week='sun', hour='16,20', start_date=ff_start_date, end_date=ff_end_date,
                   timezone=game_timezone, replace_existing=True)
