@@ -193,7 +193,9 @@ def scan_roster(lineup, team):
             if i.injuryStatus != 'ACTIVE' and i.injuryStatus != 'NORMAL' or i.projected_points <= 4:
                 count += 1
                 player = (i.position + ' ' if i.position != 'D/ST' else '') + i.name + ' - '
-                if i.projected_points <= 4:
+                if i.pro_opponent == 'None':
+                    player += '**BYE**'
+                elif i.projected_points <= 4:
                     player += '**' + str(i.projected_points) + ' pts**'
                 else:
                     player += '**' + i.injuryStatus.title().replace('_', ' ') + '**'
@@ -206,7 +208,7 @@ def scan_roster(lineup, team):
         list += p + "\n"
 
     if count > 0:
-        s = '%s **%s** has **%d** starting player(s) to look at: \n%s \n' % (emotes[team.team_id], team.team_name, count, list[:-1])
+        s = '%s **%s** - **%d**: \n%s \n' % (emotes[team.team_id], team.team_name, count, list[:-1])
         report =  [s.lstrip()]
 
     return report
@@ -216,10 +218,12 @@ def scan_inactives(lineup, team):
     players = []
     for i in lineup:
         if i.slot_position != 'BE' and i.slot_position != 'IR':
-            if i.injuryStatus == 'OUT' or i.injuryStatus == 'DOUBTFUL' or i.projected_points <= 0:
-                if i.game_played == 0:
-                    count += 1
-                    players += ['%s %s - **%s**, %d pts' % (i.position, i.name, i.injuryStatus.title().replace('_', ' '), i.projected_points)]
+            if i.pro_opponent == 'None':
+                count +=1
+                players += ['%s %s - **BYE**' % (i.position, i.name)]
+            elif i.game_played == 0 and (i.injuryStatus == 'OUT' or i.injuryStatus == 'DOUBTFUL' or i.projected_points <= 0):
+                count +=1
+                players += ['%s %s - **%s**, %d pts' % (i.position, i.name, i.injuryStatus.title().replace('_', ' '), i.projected_points)]
 
     inactive_list = ""
     inactives = ""
@@ -227,9 +231,9 @@ def scan_inactives(lineup, team):
         inactive_list += p + "\n"
     if count > 0:
         if users[team.team_id] != '':
-            inactives = ['%s **[%s]** has **%d** likely inactive starting player(s): \n%s \n' % (users[team.team_id], team.team_abbrev, count, inactive_list[:-1])]
+            inactives = ['%s **%s** - **%d**: \n%s \n' % (users[team.team_id], team.team_name, count, inactive_list[:-1])]
         else:
-            s = '**%s** has **%d** likely inactive starting player(s): \n%s \n' % (team.team_name, count, inactive_list[:-1])
+            s = '**%s** - **%d**: \n%s \n' % (team.team_name, count, inactive_list[:-1])
             inactives = [s.lstrip()]
 
     return inactives
@@ -257,10 +261,12 @@ def get_close_scores(league, week=None):
 
     for i in matchups:
         if i.away_team:
-            diffScore = i.away_score - i.home_score
+            home_score = get_projected_total(i.home_lineup)
+            away_score = get_projected_total(i.away_lineup)
+            diffScore = away_score - home_score
             if ( -16 < diffScore <= 0 and not all_played(i.away_lineup)) or (0 <= diffScore < 16 and not all_played(i.home_lineup)):
-                home_score = '%.2f' % (i.home_score)
-                away_score = '%.2f' % (i.away_score)
+                home_score = '%.2f' % (home_score)
+                away_score = '%.2f' % (away_score)
                 score = '%s `%s %s - %s %s` %s' % (emotes[i.home_team.team_id], i.home_team.team_abbrev.rjust(4), home_score.rjust(6),
                             away_score.ljust(6), i.away_team.team_abbrev.ljust(4), emotes[i.away_team.team_id])
 
@@ -268,7 +274,7 @@ def get_close_scores(league, week=None):
 
     if not scores:
         return('')
-    text = ['__**Close Scores:**__ '] + scores
+    text = ['__**Close Projected Scores:**__ '] + scores
     return '\n'.join(text)
 
 def get_waiver_report(league, faab):
@@ -320,16 +326,16 @@ def combined_power_rankings(league, week=None):
         week = league.current_week
 
     pr = league.power_rankings(week=week)
-    ew = expected_win_percent(league, week=week)
-    ew_sorted = expected_win_percent(league, week=week)
+    sr = sim_record_percent(league, week=week)
+    sr_sorted = sim_record_percent(league, week=week)
 
     combRankingDict = {x: 0. for x in league.teams}
 
     pos = 0
     for i in pr:
-        for j in ew:
+        for j in sr:
             if i[1].team_id == j[1].team_id:
-                ew_sorted[pos] = j
+                sr_sorted[pos] = j
         pos+=1
 
     ranks = []
@@ -338,12 +344,12 @@ def combined_power_rankings(league, week=None):
     for i in pr:
         if i:
             if emotes[i[1].team_id] != '':
-                ranks += ['%s: %s %s (%s - %s)' % (pos, emotes[i[1].team_id], i[1].team_name, i[0], ew_sorted[pos-1][0])]
+                ranks += ['%s: %s %s (%s - %.1f - %s)' % (pos, emotes[i[1].team_id], i[1].team_name, i[0], i[1].playoff_pct, sr_sorted[pos-1][0])]
             else:
-                ranks += ['%s: %s (%s - %s)' % (pos, i[1].team_name, i[0], ew_sorted[pos-1][0])]
+                ranks += ['%s: %s (%s - %.1f - %s)' % (pos, i[1].team_name, i[0], i[1].playoff_pct, sr_sorted[pos-1][0])]
         pos += 1
 
-    text = ['__**Power Rankings:**__ (PR points - Expected Win %)'] + ranks
+    text = ['__**Power Rankings:**__ (PR points - Playoff % - Simulated Record)'] + ranks
     if random_phrase == True:
         text += [' '] + get_random_phrase()
 
@@ -370,11 +376,11 @@ def get_power_rankings(league, week=None):
 
     return '\n'.join(text)
 
-def get_expected_win(league, week=None):
+def get_sim_record(league, week=None):
     if not week:
         week = league.current_week
 
-    win_percent = expected_win_percent(league, week=week)
+    win_percent = sim_record_percent(league, week=week)
     wins = []
 
     for i in win_percent:
@@ -384,13 +390,13 @@ def get_expected_win(league, week=None):
             else:
                 wins += ['%s - %s' % (i[0], i[1].team_name)]
 
-    text = ['__**Expected Win %:**__ '] + wins
+    text = ['__**Simulated Record:**__ '] + wins
     if random_phrase == True:
         text += [' '] + get_random_phrase()
 
     return '\n'.join(text)
 
-def expected_win_percent(league, week):
+def sim_record_percent(league, week):
     #This script gets power rankings, given an already-connected league and a week to look at. Requires espn_api
     #Get what week most recently passed
     lastWeek = league.current_week
@@ -714,7 +720,7 @@ def bot_main(function):
         print(get_close_scores(league))
         print(get_standings(league, top_half_scoring))
         print(get_power_rankings(league))
-        print(get_expected_win(league))
+        print(get_sim_record(league))
         print(combined_power_rankings(league))
         print(get_waiver_report(league, faab))
         print(get_matchups(league))
@@ -741,8 +747,8 @@ def bot_main(function):
         text = get_close_scores(league)
     elif function=="get_power_rankings":
         text = combined_power_rankings(league)
-    elif function=="get_expected_win":
-        text = get_expected_win(league)
+    elif function=="get_sim_record":
+        text = get_sim_record(league)
     elif function=="get_waiver_report":
         text = get_waiver_report(league, faab)
     elif function=="get_trophies":
@@ -817,7 +823,7 @@ if __name__ == '__main__':
     #score update:                       friday and monday morning at 7:30am local time.
     #close scores (within 15.99 points): sunday and monday evening at 6:30pm east coast time.
     #final scores and trophies:          tuesday morning at 7:30am local time.
-    #standings, PR, EW%:                 tuesday evening at 6:30pm local time.
+    #standings, PR, PO%, SR:             tuesday evening at 6:30pm local time.
     #waiver report:                      wednesday morning at 8am local time.
     if tues_sched == False:
         ready_text = "Ready! Regular schedule set."
@@ -844,7 +850,7 @@ if __name__ == '__main__':
     #extra score update:                 tuesday morning at 7:30am local time.
     #close scores (within 15.99 points): sunday, monday, and tuesday evening at 6:30pm east coast time.
     #final scores and trophies:          wednesday morning at 7:30am local time.
-    #standings, PR, EW%:                 wednesday evening at 6:30pm local time.
+    #standings, PR, PO%, SR:             wednesday evening at 6:30pm local time.
     #waiver report:                      thursday morning at 8am local time.
     else:
         ready_text = "Ready! Tuesday schedule set."
