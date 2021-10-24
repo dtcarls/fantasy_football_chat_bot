@@ -13,7 +13,7 @@ Main code forked from https://github.com/dtcarls/fantasy_football_chat_bot
 
 **What are the differences from the main repo?**
 
-- Adds an extra method of determining team dominance, Expected Win Percentange, which calculates how many games a given team might win
+- Adds an extra method of determining team dominance, Simulated Record, which calculates how many games a given team would have won had they faced each team every week
 - Adds a Waiver Report that provides a quick overview of the adds and drops that have taken place on waiver days *[ESPN_S2 and SWID variables are REQUIRED for this functionality]*
 - Adds a Heads Up Report, which lets players know if they have any players that they might not want to start
 - Adds an Inactive Report, which lets players know when they have players that are designated Out, or would otherwise score them 0 points
