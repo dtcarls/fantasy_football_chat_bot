@@ -240,9 +240,9 @@ def scan_inactives(lineup, team):
     count = 0
     players = []
     for i in lineup:
-        if i.slot_position != 'BE' and i.slot_position != 'IR':
-            if i.injuryStatus == 'OUT' or i.injuryStatus == 'DOUBTFUL' or i.projected_points <= 0:
-                if i.game_played == 0:
+        if (i.slot_position != 'BE' and i.slot_position != 'IR') \
+            and (i.injuryStatus == 'OUT' or i.injuryStatus == 'DOUBTFUL' or i.projected_points <= 0) \
+                and i.game_played == 0:
                     count += 1
                     players += ['%s %s - %s, %d pts' %
                                 (i.position, i.name, i.injuryStatus.title().replace('_', ' '), i.projected_points)]
@@ -343,77 +343,10 @@ def get_power_rankings(league, week=None):
     # It's weighted 80/15/5 respectively
     power_rankings = league.power_rankings(week=week)
 
-    score = ['%s - %s' % (i[0], i[1].team_name) for i in power_rankings
-             if i]
-    text = ['Power Rankings'] + score
+    score = ['%s (%.1f) - %s' % (i[0], i[1].playoff_pct, i[1].team_name) for i in power_rankings
+            if i]
+    text = ['Power Rankings (Playoff %)'] + score
     return '\n'.join(text)
-
-
-def get_expected_win(league, week=None):
-    win_percent = expected_win_percent(league, week=week)
-    wins = []
-
-    for i in win_percent:
-        wins += ['%s - %s' % (i[0], i[1].team_name)]
-
-    text = ['Last Week Win % League: '] + wins + [' ']
-
-    return '\n'.join(text)
-
-
-def expected_win_percent(league, week):
-    # This script gets power rankings, given an already-connected league and a week to look at. Requires espn_api
-
-    # Get what week most recently passed
-    lastWeek = league.current_week
-
-    if week:
-        lastWeek = week
-
-    # initialize dictionaries to stash the projected record/expected wins for each week, and to stash each team's score for each week
-    projRecDicts = {i: {x: None for x in league.teams} for i in range(lastWeek)}
-    teamScoreDicts = {i: {x: None for x in league.teams} for i in range(lastWeek)}
-
-    # initialize the dictionary for the final power ranking
-    powerRankingDict = {x: 0. for x in league.teams}
-
-    for i in range(lastWeek):  # for each week that has been played
-        weekNumber = i+1  # set the week
-        boxes = league.box_scores(weekNumber)  # pull box scores from that week
-        for box in boxes:  # for each boxscore
-            teamScoreDicts[i][box.home_team] = box.home_score  # plug the home team's score into the dict
-            teamScoreDicts[i][box.away_team] = box.away_score  # and the away team's
-
-        for team in teamScoreDicts[i].keys():  # for each team
-            wins = 0
-            losses = 0
-            ties = 0
-            oppCount = len(list(teamScoreDicts[i].keys()))-1
-            for opp in teamScoreDicts[i].keys():  # for each potential opponent
-                if team == opp:  # skip yourself
-                    continue
-                if teamScoreDicts[i][team] > teamScoreDicts[i][opp]:  # win case
-                    wins += 1
-                if teamScoreDicts[i][team] < teamScoreDicts[i][opp]:  # loss case
-                    losses += 1
-
-            if wins + losses != oppCount:  # in case of an unlikely tie
-                ties = oppCount - wins - losses
-
-            # store the team's projected record for that week
-            projRecDicts[i][team] = (float(wins) + (0.5*float(ties)))/float(oppCount)
-
-    for team in powerRankingDict.keys():  # for each team
-        # total up the expected wins from each week, divide by the number of weeks
-        powerRankingDict[team] = sum([projRecDicts[i][team] for i in range(lastWeek)])/float(lastWeek)
-
-    powerRankingDictSortedTemp = {k: v for k, v in sorted(powerRankingDict.items(
-    ), key=lambda item: item[1], reverse=True)}  # sort for presentation purposes
-    powerRankingDictSorted = {x: ('{:.2f}'.format(
-        powerRankingDictSortedTemp[x]*100)) for x in powerRankingDictSortedTemp.keys()}  # put into a prettier format
-    # return in the format that the bot expects
-    return [(powerRankingDictSorted[x], x) for x in powerRankingDictSorted.keys()]
-
 
 def get_trophies(league, week=None):
     # Gets trophies for highest score, lowest score, closest score, and biggest win
@@ -540,11 +473,6 @@ def bot_main(function):
         waiver_report = False
 
     try:
-        monitor_report = str_to_bool(os.environ["MONITOR_REPORT"])
-    except KeyError:
-        monitor_report = True
-
-    try:
         faab = str_to_bool(os.environ["FAAB"])
     except KeyError:
         faab = False
@@ -579,7 +507,7 @@ def bot_main(function):
     if function == "get_matchups":
         text = get_matchups(league, random_phrase)
         text = text + "\n\n" + get_projected_scoreboard(league)
-    elif monitor_report and function == "get_monitor":
+    elif function == "get_monitor":
         text = get_monitor(league)
     elif function == "get_scoreboard_short":
         text = get_scoreboard_short(league)
@@ -590,8 +518,6 @@ def bot_main(function):
         text = get_close_scores(league)
     elif function == "get_power_rankings":
         text = get_power_rankings(league)
-    # elif function=="get_expected_win":
-    #     text = get_expected_win(league)
     # elif function=="get_waiver_report":
     #     text = get_waiver_report(league)
     elif function == "get_trophies":
@@ -647,6 +573,11 @@ if __name__ == '__main__':
     except KeyError:
         daily_waiver = False
 
+    try:
+        monitor_report = str_to_bool(os.environ["MONITOR_REPORT"])
+    except KeyError:
+        monitor_report = True
+
     game_timezone = 'America/New_York'
     bot_main("init")
     sched = BlockingScheduler(job_defaults={'misfire_grace_time': 15*60})
@@ -684,9 +615,12 @@ if __name__ == '__main__':
     sched.add_job(bot_main, 'cron', ['get_scoreboard_short'], id='scoreboard1',
                   day_of_week='fri,mon', hour=7, minute=30, start_date=ff_start_date, end_date=ff_end_date,
                   timezone=my_timezone, replace_existing=True)
-    sched.add_job(bot_main, 'cron', ['get_monitor'], id='monitor',
-                  day_of_week='sun', hour=7, minute=30, start_date=ff_start_date, end_date=ff_end_date,
-                  timezone=my_timezone, replace_existing=True)
+
+    if monitor_report:
+        sched.add_job(bot_main, 'cron', ['get_monitor'], id='monitor',
+                    day_of_week='sun', hour=7, minute=30, start_date=ff_start_date, end_date=ff_end_date,
+                    timezone=my_timezone, replace_existing=True)
+
     sched.add_job(bot_main, 'cron', ['get_scoreboard_short'], id='scoreboard2',
                   day_of_week='sun', hour='16,20', start_date=ff_start_date, end_date=ff_end_date,
                   timezone=game_timezone, replace_existing=True)
