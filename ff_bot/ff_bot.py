@@ -93,7 +93,7 @@ class DiscordBot(object):
         if self.webhook_url not in (1, "1", ''):
             r = requests.post(self.webhook_url,
                               data=json.dumps(template), headers=headers)
-            print(r)
+
             if r.status_code != 204:
                 raise DiscordException(r.content)
 
@@ -521,7 +521,7 @@ def bot_main(function):
         function = "get_final"
         # bot.send_message("Testing")
         # slack_bot.send_message("Testing")
-        discord_bot.send_message("Testing")
+        # discord_bot.send_message("Testing")
 
     text = ''
     if function == "get_matchups":
