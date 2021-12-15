@@ -31,7 +31,7 @@ class GroupMeBot(object):
         # Sends a message to the chatroom
         template = {
             "bot_id": self.bot_id,
-            "text": text,
+            "text": text, #limit 1000 chars
             "attachments": []
         }
 
@@ -41,7 +41,7 @@ class GroupMeBot(object):
             r = requests.post("https://api.groupme.com/v3/bots/post",
                               data=json.dumps(template), headers=headers)
             if r.status_code != 202:
-                raise GroupMeException('Invalid BOT_ID')
+                raise GroupMeException(r.content)
 
             return r
 
@@ -58,7 +58,7 @@ class SlackBot(object):
         # Sends a message to the chatroom
         message = "```{0}```".format(text)
         template = {
-            "text": message
+            "text": message #limit 40000
         }
 
         headers = {'content-type': 'application/json'}
@@ -68,7 +68,7 @@ class SlackBot(object):
                               data=json.dumps(template), headers=headers)
 
             if r.status_code != 200:
-                raise SlackException('WEBHOOK_URL')
+                raise SlackException(r.content)
 
             return r
 
@@ -85,7 +85,7 @@ class DiscordBot(object):
         # Sends a message to the chatroom
         message = "```{0}```".format(text)
         template = {
-            "content": message
+            "content": message #limit 3000 chars
         }
 
         headers = {'content-type': 'application/json'}
@@ -95,7 +95,7 @@ class DiscordBot(object):
                               data=json.dumps(template), headers=headers)
 
             if r.status_code != 204:
-                raise DiscordException('WEBHOOK_URL')
+                raise DiscordException(r.content)
 
             return r
 
@@ -405,10 +405,29 @@ def get_trophies(league, week=None):
 def str_to_bool(check):
     return check.lower() in ("yes", "true", "t", "1")
 
+def str_limit_check(text,limit):
+    split_str=[]
+
+    if len(text)>limit:
+        part_one=text[:limit].split('\n')
+        part_one.pop()
+        part_one='\n'.join(part_one)
+
+        part_two=text[len(part_one)+1:]
+
+        split_str.append(part_one)
+        split_str.append(part_two)
+    else:
+        split_str.append(text)
+
+    return split_str
 
 def bot_main(function):
+    str_limit = 40000 #slack char limit
+
     try:
         bot_id = os.environ["BOT_ID"]
+        str_limit = 1000
     except KeyError:
         bot_id = 1
 
@@ -419,6 +438,7 @@ def bot_main(function):
 
     try:
         discord_webhook_url = os.environ["DISCORD_WEBHOOK_URL"]
+        str_limit = 3000
     except KeyError:
         discord_webhook_url = 1
 
@@ -543,9 +563,11 @@ def bot_main(function):
         text = "Something happened. HALP"
 
     if text != '' and not test:
-        bot.send_message(text)
-        slack_bot.send_message(text)
-        discord_bot.send_message(text)
+        messages=str_limit_check(text, str_limit)
+        for message in messages:
+            bot.send_message(message)
+            slack_bot.send_message(message)
+            discord_bot.send_message(message)
 
     if test:
         # print "get_final" function
