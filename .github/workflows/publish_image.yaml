@@ -27,6 +27,8 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ github.token }}
 
+      - run: echo '${{ github.event }}'
+
       - name: Set tag name for commits
         if: ${{ github.event == 'push' }}
         run: echo "TAG=ghcr.io/${GITHUB_REPOSITORY,,}:${{ github.sha }}" >>${GITHUB_ENV}
