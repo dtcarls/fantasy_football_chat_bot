@@ -17,7 +17,7 @@ env:
   TEST_TAG: user/test_build:test
 
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
 
     steps:

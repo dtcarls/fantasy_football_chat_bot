@@ -10,7 +10,7 @@ on:
       - published
 
 jobs:
-  docker:
+  push-image:
     runs-on: ubuntu-latest
     
     steps:
