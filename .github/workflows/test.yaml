@@ -41,6 +41,8 @@ jobs:
         with:
           push: false
           tags: test_build
+
+      - run: docker image ls
       
       - name: Run image against tests
         run: docker run test_build /usr/src/ff_bot/setup.py test
