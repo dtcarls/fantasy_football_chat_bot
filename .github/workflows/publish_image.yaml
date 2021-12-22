@@ -27,7 +27,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ github.token }}
 
-      - run: echo '${{ toJson(github.event) }}'
+      - run: echo '${{ github.event.release }}'
 
       - name: Set tag name for releases
         if: ${{ github.event.release == Object }}
