@@ -30,7 +30,7 @@ jobs:
       - run: echo '${{ github.event.release }}'
 
       - name: Set tag name for releases
-        if: ${{ github.event.release == Object }}
+        if: ${{ github.event.release != '' }}
         run: echo "TAG=ghcr.io/${GITHUB_REPOSITORY,,}:${GITHUB_REF##*/}" >>${GITHUB_ENV}
 
       - name: Set tag name for commits
