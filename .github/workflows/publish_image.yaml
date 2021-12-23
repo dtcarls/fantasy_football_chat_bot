@@ -27,14 +27,14 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ github.token }}
 
-      - run: echo '${{ github.event.release }}'
+      - run: echo '${{ github.event_name }}'
 
       - name: Set tag name for releases
-        if: ${{ github.event.release != '' }}
+        if: ${{ github.event_name == 'release' }}
         run: echo "TAG=ghcr.io/${GITHUB_REPOSITORY,,}:${GITHUB_REF##*/}" >>${GITHUB_ENV}
 
       - name: Set tag name for commits
-        if: ${{ github.event.release != Object }}
+        if: ${{ github.event_name == 'push' }}
         run: echo "TAG=ghcr.io/${GITHUB_REPOSITORY,,}:${{ github.sha }}" >>${GITHUB_ENV}      
 
       - name: Build image
