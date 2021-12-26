@@ -1,0 +1,38 @@
+name: Run tests on PRs and commits
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+    branches:
+      - main
+      - master
+  workflow_dispatch:
+
+env:
+  BOT_ID: 916ccfd76a7fda25c74d09e1d5
+  LEAGUE_ID: 164483
+  TEST_TAG: user/test_build:test
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Build container
+        uses: docker/build-push-action@v2
+        with:
+          push: false
+          context: .
+          load: true
+          tags: ${{ env.TEST_TAG }}
+
+      - name: Run image against tests
+        run: docker run ${{ env.TEST_TAG }} python /usr/src/ff_bot/setup.py test

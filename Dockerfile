@@ -1,4 +1,4 @@
-FROM python:latest
+FROM python:3.9.9-slim-bullseye
 
 # Install app
 ADD . /usr/src/ff_bot
