@@ -1,5 +1,5 @@
-[![Build Status](https://travis-ci.com/dtcarls/fantasy_football_chat_bot.svg?branch=master)](https://travis-ci.com/dtcarls/fantasy_football_chat_bot)
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/d8506396005d48d1a52dee114f2c05ae)](https://www.codacy.com/app/dtcarls/ff_bot?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=dtcarls/ff_bot&amp;utm_campaign=Badge_Grade)
+![Test workflow](https://github.com/dtcarls/fantasy_football_chat_bot/actions/workflows/ci.yaml/badge.svg)
+![Publish workflow](https://github.com/dtcarls/fantasy_football_chat_bot/actions/workflows/publish_image.yaml/badge.svg)
 
 For troubleshooting and release notifications, join the discord!
 
