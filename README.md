@@ -1,3 +1,4 @@
+[![GitHub release](https://img.shields.io/github/v/release/dtcarls/fantasy_football_chat_bot)](https://github.com/dtcarls/fantasy_football_chat_bot/releases/latest/)
 ![Test workflow](https://github.com/dtcarls/fantasy_football_chat_bot/actions/workflows/ci.yaml/badge.svg)
 ![Publish workflow](https://github.com/dtcarls/fantasy_football_chat_bot/actions/workflows/publish_image.yaml/badge.svg)
 
