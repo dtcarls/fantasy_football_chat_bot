@@ -21,7 +21,7 @@ class DiscordBot(object):
         #Sends a message to the chatroom
         message = ">>> {0} ".format(text)
         template = {
-                    "content":message
+                    "content":message #limit 3000 chars
                     }
 
         headers = {'content-type': 'application/json'}
@@ -31,7 +31,7 @@ class DiscordBot(object):
                               data=json.dumps(template), headers=headers)
 
             if r.status_code != 204:
-                raise DiscordException('WEBHOOK_URL')
+                raise DiscordException(r.content)
 
             return r
 
@@ -632,12 +632,140 @@ def test_users(league):
     text = ['**Users:** '] + message + [' '] + get_random_phrase()
     return '\n'.join(text)
 
+def season_mvp(league):
+    mvp_score_diff = -100
+    mvp_proj = -100
+    mvp_score = ''
+    mvp = ''
+    mvp_team = -1
+    mvp_emote = ''
+    mvp_week = 0
+
+    vmvp_score_diff = -100
+    vmvp_proj = -100
+    vmvp_score = ''
+    vmvp = ''
+    vmvp_team = -1
+    vmvp_emote = ''
+    vmvp_week = 0
+
+    lvp_score_diff = 999
+    lvp_proj = 999
+    lvp_score = ''
+    lvp = ''
+    lvp_team = -1
+    lvp_emote = ''
+    lvp_week = 0
+
+    vlvp_score_diff = 999
+    vlvp_proj = 999
+    vlvp_score = ''
+    vlvp = ''
+    vlvp_team = -1
+    vlvp_emote = ''
+    vlvp_week = 0
+
+    for team in league.teams:
+        for p in team.roster:
+            if p.projected_total_points > 0:
+                score_diff = (p.total_points - p.projected_total_points)/p.projected_total_points
+                proj_diff = p.total_points - p.projected_total_points
+                if (score_diff > vmvp_score_diff) or (score_diff == vmvp_score_diff and proj_diff > vmvp_proj):
+                    vmvp_score_diff = score_diff
+                    vmvp_proj = proj_diff
+                    vmvp_score = '%.2f points (%.2f proj, %.2f diff ratio)' % (p.total_points, p.projected_total_points, score_diff)
+                    vmvp = p.position + ' ' + p.name
+                    vmvp_team = team.team_abbrev
+                elif (score_diff < vlvp_score_diff) or (score_diff == vlvp_score_diff and proj_diff < vlvp_proj):
+                    vlvp_score_diff = score_diff
+                    vlvp_proj = proj_diff
+                    vlvp_score = '%.2f points (%.2f proj, %.2f diff ratio)' % (p.total_points, p.projected_total_points, score_diff)
+                    vlvp = p.position + ' ' + p.name
+                    vlvp_team = team.team_abbrev
+
+    z = 1
+    while z <= 18:
+        matchups = league.box_scores(week=z)
+        for i in matchups:
+            for p in i.home_lineup:
+                if p.slot_position != 'BE' and p.slot_position != 'IR' and p.position != 'D/ST' and p.projected_points > 0:
+                    score_diff = (p.points - p.projected_points)/p.projected_points
+                    proj_diff = p.points - p.projected_points
+                    if (score_diff > mvp_score_diff) or (score_diff == mvp_score_diff and proj_diff > mvp_proj):
+                        if p.name != "Garrett Gilbert" and p.name != "Josh Johnson":
+                            mvp_score_diff = score_diff
+                            mvp_proj = proj_diff
+                            mvp_score = '%.2f points (%.2f proj, %.2f diff ratio)' % (p.points, p.projected_points, score_diff)
+                            mvp = p.position + ' ' + p.name
+                            mvp_team = i.home_team.team_abbrev
+                            mvp_week = z
+                    elif (score_diff < lvp_score_diff) or (score_diff == lvp_score_diff and proj_diff < lvp_proj):
+                        if p.position != 'K':
+                            lvp_score_diff = score_diff
+                            lvp_proj = proj_diff
+                            lvp_score = '%.2f points (%.2f proj, %.2f diff ratio)' % (p.points, p.projected_points, score_diff)
+                            lvp = p.position + ' ' + p.name
+                            lvp_team = i.home_team.team_abbrev
+                            lvp_week = z
+
+            for p in i.away_lineup:
+                if p.slot_position != 'BE' and p.slot_position != 'IR' and p.position != 'D/ST' and p.projected_points > 0:
+                    score_diff = (p.points - p.projected_points)/p.projected_points
+                    proj_diff = p.points - p.projected_points
+                    if (score_diff > mvp_score_diff) or (score_diff == mvp_score_diff and proj_diff > mvp_proj):
+                        if p.name != "Garrett Gilbert" and p.name !="Josh Johnson":
+                            mvp_score_diff = score_diff
+                            mvp_proj = proj_diff
+                            mvp_score = '%.2f points (%.2f proj, %.2f diff ratio)' % (p.points, p.projected_points, score_diff)
+                            mvp = p.position + ' ' + p.name
+                            mvp_team = i.away_team.team_abbrev
+                            mvp_week = z
+                    elif (score_diff < lvp_score_diff) or (score_diff == lvp_score_diff and proj_diff < lvp_proj):
+                        if p.position != 'K':
+                            lvp_score_diff = score_diff
+                            lvp_proj = proj_diff
+                            lvp_score = '%.2f points (%.2f proj, %.2f diff ratio)' % (p.points, p.projected_points, score_diff)
+                            lvp = p.position + ' ' + p.name
+                            lvp_team = i.away_team.team_abbrev
+                            lvp_week = z
+        z = z+1
+
+    mvp_str = ['Season Best Performance: %s, Week %d, **%s** with %s' % (mvp, mvp_week, mvp_team, mvp_score)]
+    lvp_str = ['Season Worst Performance: %s, Week %d, **%s** with %s' % (lvp, lvp_week, lvp_team, lvp_score)]
+
+    vmvp_str = ['Season MVP: %s, **%s** with %s' % (vmvp, vmvp_team, vmvp_score)]
+    vlvp_str = ['Season LVP: %s, **%s** with %s' % (vlvp, vlvp_team, vlvp_score)]
+
+
+    text = lvp_str + mvp_str + vlvp_str + vmvp_str + [' ']
+    return '\n'.join(text)
+
 def str_to_bool(check):
   return check.lower() in ("yes", "true", "t", "1")
 
+def str_limit_check(text,limit):
+    split_str=[]
+
+    if len(text)>limit:
+        part_one=text[:limit].split('\n')
+        part_one.pop()
+        part_one='\n'.join(part_one)
+
+        part_two=text[len(part_one)+1:]
+
+        split_str.append(part_one)
+        split_str.append(part_two)
+    else:
+        split_str.append(text)
+
+    return split_str
+
 def bot_main(function):
+    str_limit = 4000
+
     try:
         discord_webhook_url = os.environ["DISCORD_WEBHOOK_URL"]
+        str_limit = 3000
     except KeyError:
         discord_webhook_url = 1
 
@@ -719,13 +847,14 @@ def bot_main(function):
         print(get_projected_scoreboard(league))
         print(get_close_scores(league))
         print(get_standings(league, top_half_scoring))
-        print(get_power_rankings(league))
-        print(get_sim_record(league))
+        # print(get_power_rankings(league))
+        # print(get_sim_record(league))
         print(combined_power_rankings(league))
         print(get_waiver_report(league, faab))
         print(get_matchups(league))
         print(get_heads_up(league))
         print(get_inactives(league))
+        # print(season_mvp(league))
         function="get_final"
         # print(test_users(league))
         # discord_bot.send_message("Testing")
@@ -770,7 +899,9 @@ def bot_main(function):
         text = "Something happened. HALP"
 
     if text != '' and not test:
-        discord_bot.send_message(text)
+        messages = str_limit_check(text, str_limit)
+        for message in messages:
+            discord_bot.send_message(message)
 
     if test:
         #print "get_final" function
