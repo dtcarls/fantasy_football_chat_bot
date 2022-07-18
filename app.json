@@ -1,4 +1,5 @@
 {
+  "stack": "heroku-22",
   "name": "Fantasy Football Chat Bot",
   "description": "ESPN Fantasy Football GroupMe, Slack, and Discord Chat Bot.",
   "keywords": [
@@ -34,7 +35,7 @@
     },
     "LEAGUE_YEAR": {
       "description": "ESPN League Year",
-      "value": "2021",
+      "value": "2022",
       "required": false
     },
     "TIMEZONE": {
@@ -44,12 +45,12 @@
     },
     "START_DATE": {
       "description": "Season Start Date",
-      "value": "2021-09-09",
+      "value": "2022-09-08",
       "required": false
     },
     "END_DATE": {
       "description": "Season End Date",
-      "value": "2022-01-04",
+      "value": "2023-01-04",
       "required": false
     },
     "INIT_MSG": {
