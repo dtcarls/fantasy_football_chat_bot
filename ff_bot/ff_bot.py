@@ -455,7 +455,7 @@ def bot_main(function):
     try:
         year = int(os.environ["LEAGUE_YEAR"])
     except KeyError:
-        year = 2021
+        year = 2022
 
     try:
         swid = os.environ["SWID"]
@@ -578,12 +578,12 @@ if __name__ == '__main__':
     try:
         ff_start_date = os.environ["START_DATE"]
     except KeyError:
-        ff_start_date = '2021-09-09'
+        ff_start_date = '2022-09-08'
 
     try:
         ff_end_date = os.environ["END_DATE"]
     except KeyError:
-        ff_end_date = '2022-01-04'
+        ff_end_date = '2023-01-04'
 
     try:
         my_timezone = os.environ["TIMEZONE"]
