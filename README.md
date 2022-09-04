@@ -146,10 +146,9 @@ Save the "Webhook URL" on this page
 
 ### Heroku setup
 
-Heroku is what we will be using to host the chat bot (for free)
+Heroku is what we will be using to host the chat bot.
 
-**You should not need to enter credit card information for this hosting service for our needs.**
-You **may** run out of free hours without a credit card linked. If you decide to link your credit card you will have enough free hours for the month for a single application since this more than doubles your available hours. We are not responsible for any charges associated with Heroku.
+**"Starting November 28, 2022, Heroku plans to stop offering free product plans and plans to start shutting down free dynos and data services."** I will be looking into alternative free hosting services.
 
 Go to https://id.heroku.com/login and sign up or login
 
