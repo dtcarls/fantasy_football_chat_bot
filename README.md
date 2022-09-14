@@ -4,7 +4,7 @@
 
 For troubleshooting and release notifications, join the discord!
 
-[![Discord Banner 2](https://discordapp.com/api/guilds/878995504225218620/widget.png?style=banner2)](https://discord.gg/bkShnqTTP8)
+[![Discord Banner 2](https://discordapp.com/api/guilds/878995504225218620/widget.png?style=banner2)](https://discord.gg/qHFsHkKC)
 
 Like the bot? Star the repository and consider making a donation to buy me a coffee
 ------
@@ -17,11 +17,11 @@ Like the bot? Star the repository and consider making a donation to buy me a cof
 
 # ESPN Fantasy Football GroupMe Slack and Discord Chat Bot
 
-This package creates a docker container that runs a GroupMe, Discord, or Slack chat bot to send
-ESPN Fantasy Football information to a GroupMe, Discord or Slack chat room.
+This repository runs a GroupMe, Discord, or Slack chat bot to send ESPN Fantasy Football information to a GroupMe, Discord or Slack chat room.
 
 **What does this do?**
 
+Schedule Link: https://www.gamedaybot.com/message-schedule/
 - Sends out the following messages on this schedule:
 - Close Scores - Mon - 18:30 east coast time (Games that are within 16 points of eachother to keep an eye on during the Monday night game)
 - Scoreboard - Mon,Tue,Fri - 7:30 local time (Current ESPN fantasy scoreboard)
@@ -51,6 +51,10 @@ Table of Contents
      * [Running without Docker](#running-without-docker)
      * [Running the tests](#running-the-tests)
 
+:cold_sweat::cold_sweat::cold_sweat:
+
+**All of this look too complicated and confusing? Don't know what a "Heroku" is? Consider checking out https://www.GameDayBot.com/ where I offer a hosting service and do my best to minimize complexity.**
+:cold_sweat::cold_sweat::cold_sweat:
 ## Setting up GroupMe, Discord, or Slack, and deploying app in Heroku
 
 **Do not deploy 2 of the same bot in the same chat. In general, you should let your commissioner do the setup**
@@ -148,7 +152,8 @@ Save the "Webhook URL" on this page
 
 Heroku is what we will be using to host the chat bot.
 
-**"Starting November 28, 2022, Heroku plans to stop offering free product plans and plans to start shutting down free dynos and data services."** I will be looking into alternative free hosting services.
+**"Starting November 28, 2022, Heroku plans to stop offering free product plans and plans to start shutting down free dynos and data services."**
+I offer a hosting service far lower than the new costs of Heroku at https://www.GameDayBot.com/
 
 Go to https://id.heroku.com/login and sign up or login
 
