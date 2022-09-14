@@ -54,6 +54,7 @@ Table of Contents
 :cold_sweat::cold_sweat::cold_sweat:
 
 **All of this look too complicated and confusing? Don't know what a "Heroku" is? Consider checking out https://www.GameDayBot.com/ where I offer a hosting service and do my best to minimize complexity.**
+
 :cold_sweat::cold_sweat::cold_sweat:
 ## Setting up GroupMe, Discord, or Slack, and deploying app in Heroku
 
