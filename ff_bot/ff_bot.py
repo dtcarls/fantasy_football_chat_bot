@@ -95,6 +95,7 @@ class DiscordBot(object):
                               data=json.dumps(template), headers=headers)
 
             if r.status_code != 204:
+                print(r.content)
                 raise DiscordException(r.content)
 
             return r
@@ -492,11 +493,6 @@ def bot_main(function):
     except KeyError:
         waiver_report = False
 
-    try:
-        faab = str_to_bool(os.environ["FAAB"])
-    except KeyError:
-        faab = False
-
     bot = GroupMeBot(bot_id)
     slack_bot = SlackBot(slack_webhook_url)
     discord_bot = DiscordBot(discord_webhook_url)
@@ -505,6 +501,8 @@ def bot_main(function):
         league = League(league_id=league_id, year=year)
     else:
         league = League(league_id=league_id, year=year, espn_s2=espn_s2, swid=swid)
+
+    faab = league.settings.faab
 
     if test:
         print(get_matchups(league, random_phrase))
