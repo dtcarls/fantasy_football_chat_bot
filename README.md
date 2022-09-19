@@ -188,7 +188,6 @@ Note: App will restart when you change any variable so your chat room may be sem
 - RANDOM_PHRASE: If set to True, when matchups are posted on Tuesday it will also include a random phrase
 - MONITOR_REPORT: If set to True, will provide a report of players in starting lineup that are Questionable, Doubtful, Out, or projected for less than 4 points
 - WAIVER_REPORT: If set to True, will provide a waiver report of add/drops. :warning: ESPN_S2 and SWID are required for this to work :warning:
-- FAAB: If set to True, will provide Free-Agent Acquisition Budget (FAAB) dollars to  the waiver report
 - DAILY_WAIVER: If set to True, will provide a waiver report of add/drops daily. :warning: ESPN_S2 and SWID are required for this to work :warning:
 - ESPN_S2: Used for private leagues. See [Private Leagues Section](#private-leagues) for documentation
 - SWID: Used for private leagues. (Can be defined with or without {}) See [Private Leagues Section](#private-leagues) for documentation
@@ -285,7 +284,6 @@ python3 setup.py install
 - RANDOM_PHRASE: If set to True, when matchups are posted on Tuesday it will also include a random phrase
 - MONITOR_REPORT: If set to True, will provide a report of players in starting lineup that are Questionable, Doubtful, Out, or projected for less than 4 points
 - WAIVER_REPORT: If set to True, will provide a waiver report of add/drops. :warning: ESPN_S2 and SWID are required for this to work :warning:
-- FAAB: If set to True, will provide Free-Agent Acquisition Budget (FAAB) dollars to  the waiver report
 - DAILY_WAIVER: If set to True, will provide a waiver report of add/drops daily. :warning: ESPN_S2 and SWID are required for this to work :warning:
 - ESPN_S2: Used for private leagues. See [Private Leagues Section](#private-leagues) for documentation
 - SWID: Used for private leagues. (Can be defined with or without {}) See [Private Leagues Section](#private-leagues) for documentation
