@@ -1,9 +1,9 @@
 from setuptools import setup
 
 setup(
-    name='ff_bot',
+    name='gamedaybot',
 
-    packages=['ff_bot'],
+    packages=['gamedaybot'],
 
     include_package_data=True,
 
