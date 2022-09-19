@@ -349,6 +349,50 @@ def get_power_rankings(league, week=None):
     text = ['Power Rankings (Playoff %)'] + score
     return '\n'.join(text)
 
+def get_luckys(league, week=None):
+    box_scores = league.box_scores()
+    weekly_scores = {}
+    for i in box_scores:
+        if i.home_score > i.away_score:
+            weekly_scores[i.home_team] = [i.home_score,'W']
+            weekly_scores[i.away_team] = [i.away_score,'L']
+        else:
+            weekly_scores[i.home_team] = [i.home_score,'L']
+            weekly_scores[i.away_team] = [i.away_score,'W']
+    weekly_scores = dict(sorted(weekly_scores.items(), key=lambda item: item[1], reverse=True))
+
+    # losses = 0
+    # for t in weekly_scores:
+    #     print(t.team_name + ': (' + str(len(weekly_scores)-1-losses) + '-' + str(losses) +')')
+    #     losses+=1
+
+    losses = 0
+    unlucky_team_name = ''
+    unlucky_record = ''
+    lucky_team_name = ''
+    lucky_record = ''
+    num_teams = len(weekly_scores)-1
+
+    for t in weekly_scores:
+        if weekly_scores[t][1] == 'L':
+            unlucky_team_name = t.team_name
+            unlucky_record = str(num_teams-losses) + '-' + str(losses)
+            break
+        losses += 1
+
+    wins = 0
+    weekly_scores = dict(sorted(weekly_scores.items(), key=lambda item: item[1]))
+    for t in weekly_scores:
+        if weekly_scores[t][1] == 'W':
+            lucky_team_name = t.team_name
+            lucky_record = str(wins) + '-' + str(num_teams - wins)
+            break
+        wins += 1
+
+    lucky_str = ['🍀 Lucky 🍀']+['%s was %s against the league, but still got the win' % (lucky_team_name, lucky_record)]
+    unlucky_str = ['😡 Unlucky 😡']+['%s was %s against the league, but still took an L' % (unlucky_team_name, unlucky_record)]
+    return(lucky_str + unlucky_str)
+
 def get_trophies(league, week=None):
     # Gets trophies for highest score, lowest score, closest score, and biggest win
     matchups = league.box_scores(week=week)
@@ -394,12 +438,12 @@ def get_trophies(league, week=None):
                 ownerer_team_name = i.away_team.team_name
                 blown_out_team_name = i.home_team.team_name
 
-    low_score_str = ['Low score: %s with %.2f points' % (low_team_name, low_score)]
-    high_score_str = ['High score: %s with %.2f points' % (high_team_name, high_score)]
-    close_score_str = ['%s barely beat %s by a margin of %.2f' % (close_winner, close_loser, closest_score)]
-    blowout_str = ['%s blown out by %s by a margin of %.2f' % (blown_out_team_name, ownerer_team_name, biggest_blowout)]
+    high_score_str = ['👑 High score 👑']+['%s with %.2f points' % (high_team_name, high_score)]
+    low_score_str = ['💩 Low score 💩']+['%s with %.2f points' % (low_team_name, low_score)]
+    close_score_str = ['😅 Close win 😅']+['%s barely beat %s by %.2f points' % (close_winner, close_loser, closest_score)]
+    blowout_str = ['😱 Blow out 😱']+['%s blew out %s by %.2f points' % (ownerer_team_name, blown_out_team_name, biggest_blowout)]
 
-    text = ['Trophies of the week:'] + low_score_str + high_score_str + close_score_str + blowout_str
+    text = ['Trophies of the week:'] + high_score_str + low_score_str + blowout_str + close_score_str + get_luckys(league)
     return '\n'.join(text)
 
 
