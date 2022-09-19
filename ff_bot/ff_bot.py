@@ -546,6 +546,10 @@ def bot_main(function):
     else:
         league = League(league_id=league_id, year=year, espn_s2=espn_s2, swid=swid)
 
+    if league.scoringPeriodId > len(league.settings.matchup_periods):
+        print("Not in active season")
+        return
+
     faab = league.settings.faab
 
     if test:
