@@ -1,105 +1,11 @@
-import requests
-import json
 import os
 import random
 from datetime import date
 from apscheduler.schedulers.blocking import BlockingScheduler
 from espn_api.football import League
-
-
-class GroupMeException(Exception):
-    pass
-
-
-class SlackException(Exception):
-    pass
-
-
-class DiscordException(Exception):
-    pass
-
-
-class GroupMeBot(object):
-    # Creates GroupMe Bot to send messages
-    def __init__(self, bot_id):
-        self.bot_id = bot_id
-
-    def __repr__(self):
-        return "GroupMeBot(%s)" % self.bot_id
-
-    def send_message(self, text):
-        # Sends a message to the chatroom
-        template = {
-            "bot_id": self.bot_id,
-            "text": text, #limit 1000 chars
-            "attachments": []
-        }
-
-        headers = {'content-type': 'application/json'}
-
-        if self.bot_id not in (1, "1", ''):
-            r = requests.post("https://api.groupme.com/v3/bots/post",
-                              data=json.dumps(template), headers=headers)
-            if r.status_code != 202:
-                raise GroupMeException(r.content)
-
-            return r
-
-
-class SlackBot(object):
-    # Creates GroupMe Bot to send messages
-    def __init__(self, webhook_url):
-        self.webhook_url = webhook_url
-
-    def __repr__(self):
-        return "Slack Webhook Url(%s)" % self.webhook_url
-
-    def send_message(self, text):
-        # Sends a message to the chatroom
-        message = "```{0}```".format(text)
-        template = {
-            "text": message #limit 40000
-        }
-
-        headers = {'content-type': 'application/json'}
-
-        if self.webhook_url not in (1, "1", ''):
-            r = requests.post(self.webhook_url,
-                              data=json.dumps(template), headers=headers)
-
-            if r.status_code != 200:
-                raise SlackException(r.content)
-
-            return r
-
-
-class DiscordBot(object):
-    # Creates Discord Bot to send messages
-    def __init__(self, webhook_url):
-        self.webhook_url = webhook_url
-
-    def __repr__(self):
-        return "Discord Webhook Url(%s)" % self.webhook_url
-
-    def send_message(self, text):
-        # Sends a message to the chatroom
-        message = "```{0}```".format(text)
-        template = {
-            "content": message #limit 3000 chars
-        }
-
-        headers = {'content-type': 'application/json'}
-
-        if self.webhook_url not in (1, "1", ''):
-            r = requests.post(self.webhook_url,
-                              data=json.dumps(template), headers=headers)
-
-            if r.status_code != 204:
-                print(r.content)
-                raise DiscordException(r.content)
-
-            return r
-
+from chat.groupme import GroupMe
+from chat.slack import Slack
+from chat.discord import Discord
 
 def get_random_phrase():
     phrases = ['I\'m dead inside',
@@ -537,9 +443,9 @@ def bot_main(function):
     except KeyError:
         waiver_report = False
 
-    bot = GroupMeBot(bot_id)
-    slack_bot = SlackBot(slack_webhook_url)
-    discord_bot = DiscordBot(discord_webhook_url)
+    bot = GroupMe(bot_id)
+    slack_bot = Slack(slack_webhook_url)
+    discord_bot = Discord(discord_webhook_url)
 
     if swid == '{1}' or espn_s2 == '1':
         league = League(league_id=league_id, year=year)
