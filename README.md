@@ -4,7 +4,7 @@
 
 For troubleshooting and release notifications, join the discord!
 
-[![Discord Banner 2](https://discordapp.com/api/guilds/878995504225218620/widget.png?style=banner2)](https://discord.gg/qHFsHkKC)
+[![Discord Banner 2](https://discordapp.com/api/guilds/878995504225218620/widget.png?style=banner2)](https://discord.gg/VFXSkcgjxh)
 
 Like the bot? Star the repository and consider making a donation to buy me a coffee
 ------
@@ -54,6 +54,7 @@ Table of Contents
 :cold_sweat::cold_sweat::cold_sweat:
 
 **All of this look too complicated and confusing? Don't know what a "Heroku" is? Consider checking out https://www.GameDayBot.com/ where I offer a hosting service and do my best to minimize complexity.**
+
 :cold_sweat::cold_sweat::cold_sweat:
 ## Setting up GroupMe, Discord, or Slack, and deploying app in Heroku
 
