@@ -1,17 +1,12 @@
 import unittest
-
-
 import requests_mock
-
-
-from ff_bot.ff_bot import (GroupMeBot, GroupMeException, )
-
+from gamedaybot.chat.groupme import (GroupMe, GroupMeException, )
 
 class GroupMeBotTestCase(unittest.TestCase):
     '''Test GroupMeBot class'''
 
     def setUp(self):
-        self.test_bot = GroupMeBot("123456")
+        self.test_bot = GroupMe("123456")
         self.test_text = "This is a test."
 
     @requests_mock.Mocker()
