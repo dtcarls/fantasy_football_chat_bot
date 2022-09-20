@@ -6,4 +6,4 @@ WORKDIR /usr/src/gamedaybot
 RUN python3 setup.py install
 
 # Launch app
-CMD ["python3", "gamedaybot/ff_bot.py"]
+CMD ["python3", "gamedaybot/espn/espn_bot.py"]

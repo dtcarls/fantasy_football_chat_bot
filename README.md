@@ -199,7 +199,7 @@ You should see something like below. Click the pencil on the right and toggle th
 
 You're done! You now have a fully featured GroupMe/Slack/Discord chat bot for ESPN leagues! If you have an INIT_MSG you will see it exclaimed in your GroupMe, Discord, or Slack chat room.
 
-Unfortunately to do auto deploys of the latest version you need admin access to the repository on git. You can check for updates on the github page (https://github.com/dtcarls/ff_bot/commits/master) and click the deploy button again; however, this will deploy a new instance and the variables will need to be edited again.
+Unfortunately to do auto deploys of the latest version you need admin access to the repository on git. You can check for updates on the github page (https://github.com/dtcarls/fantasy_football_chat_bot/commits/master) and click the deploy button again; however, this will deploy a new instance and the variables will need to be edited again.
 
 #### Private Leagues
 
@@ -252,19 +252,19 @@ on your local machine for development and testing purposes.
 ### Installing for development
 With Docker:
 ```bash
-git clone https://github.com/dtcarls/ff_bot
+git clone https://github.com/dtcarls/fantasy_football_chat_bot
 
-cd ff_bot
+cd fantasy_football_chat_bot
 
-docker build -t ff_bot .
+docker build -t fantasy_football_chat_bot .
 ```
 
 Without Docker:
 
 ```bash
-git clone https://github.com/dtcarls/ff_bot
+git clone https://github.com/dtcarls/fantasy_football_chat_bot
 
-cd ff_bot
+cd fantasy_football_chat_bot
 
 python3 setup.py install
 ```
@@ -297,12 +297,12 @@ Use BOT_ID if using Groupme, DISCORD_WEBHOOK_URL if using Discord, and SLACK_WEB
 >>> export WEBHOOK_URL=[enter your Webhook URL]
 >>> export LEAGUE_ID=[enter ESPN league ID]
 >>> export LEAGUE_YEAR=[enter league year]
->>> cd ff_bot
+>>> cd fantasy_football_chat_bot
 >>> docker run --rm=True \
 -e BOT_ID=$BOT_ID \
 -e LEAGUE_ID=$LEAGUE_ID \
 -e LEAGUE_YEAR=$LEAGUE_YEAR \
-ff_bot
+fantasy_football_chat_bot
 ```
 
 ### Running without Docker
@@ -314,14 +314,14 @@ Use BOT_ID if using Groupme, DISCORD_WEBHOOK_URL if using Discord, and SLACK_WEB
 >>> export WEBHOOK_URL=[enter your Webhook URL]
 >>> export LEAGUE_ID=[enter ESPN league ID]
 >>> export LEAGUE_YEAR=[enter league year]
->>> cd ff_bot
->>> python3 ff_bot/ff_bot.py
+>>> cd gamedaybot
+>>> python3 gamedaybot/gamedaybot.py
 ```
 
 ### Running the tests
 
 Automated tests for this package are included in the `tests` directory. After installation,
-you can run these tests by changing the directory to the `ff_bot` directory and running the following:
+you can run these tests by changing the directory to the `gamedaybot` directory and running the following:
 
 ```python3
 python3 setup.py test
