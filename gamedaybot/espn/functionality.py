@@ -4,7 +4,7 @@ import gamedaybot.utils as utils
 def get_scoreboard_short(league, week=None):
     # Gets current week's scoreboard
     box_scores = league.box_scores(week=week)
-    score = ['%s %.2f - %.2f %s' % (i.home_team.team_abbrev, i.home_score,
+    score = ['%4s %6.2f - %6.2f %4s' % (i.home_team.team_abbrev, i.home_score,
                                     i.away_score, i.away_team.team_abbrev) for i in box_scores
              if i.away_team]
     text = ['Score Update'] + score
@@ -14,7 +14,7 @@ def get_scoreboard_short(league, week=None):
 def get_projected_scoreboard(league, week=None):
     # Gets current week's scoreboard projections
     box_scores = league.box_scores(week=week)
-    score = ['%s %.2f - %.2f %s' % (i.home_team.team_abbrev, get_projected_total(i.home_lineup),
+    score = ['%4s %6.2f - %6.2f %4s' % (i.home_team.team_abbrev, get_projected_total(i.home_lineup),
                                     get_projected_total(i.away_lineup), i.away_team.team_abbrev) for i in box_scores
              if i.away_team]
     text = ['Approximate Projected Scores'] + score
@@ -166,7 +166,7 @@ def get_close_scores(league, week=None):
         if i.away_team:
             diffScore = i.away_score - i.home_score
             if (-16 < diffScore <= 0 and not all_played(i.away_lineup)) or (0 <= diffScore < 16 and not all_played(i.home_lineup)):
-                score += ['%s %.2f - %.2f %s' % (i.home_team.team_abbrev, i.home_score,
+                score += ['%4s %6.2f - %6.2f %4s' % (i.home_team.team_abbrev, i.home_score,
                                                  i.away_score, i.away_team.team_abbrev)]
     if not score:
         return('')
