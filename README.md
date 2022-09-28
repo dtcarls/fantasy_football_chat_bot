@@ -315,7 +315,7 @@ Use BOT_ID if using Groupme, DISCORD_WEBHOOK_URL if using Discord, and SLACK_WEB
 >>> export LEAGUE_ID=[enter ESPN league ID]
 >>> export LEAGUE_YEAR=[enter league year]
 >>> cd gamedaybot
->>> python3 gamedaybot/gamedaybot.py
+>>> python3 gamedaybot/espn/espn_bot.py
 ```
 
 ### Running the tests
