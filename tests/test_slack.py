@@ -1,18 +1,13 @@
 import unittest
-
-
 import requests_mock
-
-
-from ff_bot.ff_bot import (SlackBot, SlackException, )
-
+from gamedaybot.chat.slack import (Slack, SlackException, )
 
 class SlackTestCase(unittest.TestCase):
     '''Test SlackBot class'''
 
     def setUp(self):
         self.url = "https://hooks.slack.com/services/A1B2C3/ABC1ABC2/abcABC1abcABC2"
-        self.test_bot = SlackBot(self.url)
+        self.test_bot = Slack(self.url)
         self.test_text = "This is a test."
 
     @requests_mock.Mocker()

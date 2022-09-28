@@ -1,18 +1,13 @@
 import unittest
-
-
 import requests_mock
-
-
-from ff_bot.ff_bot import (DiscordBot, DiscordException, )
-
+from gamedaybot.chat.discord import (Discord, DiscordException, )
 
 class DiscordTestCase(unittest.TestCase):
     '''Test DiscordBot class'''
 
     def setUp(self):
         self.url = "https://discordapp.com/api/webhooks/123/abc"
-        self.test_bot = DiscordBot(self.url)
+        self.test_bot = Discord(self.url)
         self.test_text = "This is a test."
 
     @requests_mock.Mocker()
