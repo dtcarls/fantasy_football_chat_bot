@@ -277,6 +277,36 @@ def get_luckys(league, week=None):
     unlucky_str = ['😡 Unlucky 😡']+['%s was %s against the league, but still took an L' % (unlucky_team_name, unlucky_record)]
     return(lucky_str + unlucky_str)
 
+def get_achievers(league, week=None):
+    """
+    Get the team with biggest difference from projection
+    """
+    box_scores = league.box_scores(week=week)
+    over_achiever = ''
+    under_achiever = ''
+    best_performance = 0
+    worst_performance = 0
+    for i in box_scores:
+        home_performance = i.home_score - i.home_projected
+        away_performance = i.away_score - i.away_projected
+
+        if home_performance > best_performance:
+            best_performance = home_performance
+            over_achiever = i.home_team.team_name
+        if home_performance < worst_performance:
+            worst_performance = home_performance
+            under_achiever = i.home_team.team_name
+        if away_performance > best_performance:
+            best_performance = away_performance
+            over_achiever = i.away_team.team_name
+        if away_performance < worst_performance:
+            worst_performance = away_performance
+            under_achiever = i.away_team.team_name
+
+    high_achiever_str = ['📈 Overachiever 📈']+['%s was %.2f points over their projection' % (over_achiever, best_performance)]
+    low_achiever_str = ['📉 Underachiever 📉']+['%s was %.2f points under their projection' % (under_achiever, abs(worst_performance))]
+    return(high_achiever_str + low_achiever_str)
+
 def get_trophies(league, week=None):
     # Gets trophies for highest score, lowest score, closest score, and biggest win
     matchups = league.box_scores(week=week)
@@ -327,5 +357,5 @@ def get_trophies(league, week=None):
     close_score_str = ['😅 Close win 😅']+['%s barely beat %s by %.2f points' % (close_winner, close_loser, closest_score)]
     blowout_str = ['😱 Blow out 😱']+['%s blew out %s by %.2f points' % (ownerer_team_name, blown_out_team_name, biggest_blowout)]
 
-    text = ['Trophies of the week:'] + high_score_str + low_score_str + blowout_str + close_score_str + get_luckys(league, week)
+    text = ['Trophies of the week:'] + high_score_str + low_score_str + blowout_str + close_score_str + get_luckys(league, week) + get_achievers(league, week)
     return '\n'.join(text)
