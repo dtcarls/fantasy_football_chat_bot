@@ -279,13 +279,15 @@ def get_luckys(league, week=None):
 
 def get_achievers(league, week=None):
     """
-    Get the team with biggest difference from projection
+    Get the teams with biggest difference from projection
     """
     box_scores = league.box_scores(week=week)
     over_achiever = ''
     under_achiever = ''
-    best_performance = 0
-    worst_performance = 0
+    high_achiever_str = ['📈 Overachiever 📈']
+    low_achiever_str = ['📉 Underachiever 📉']
+    best_performance = -9999
+    worst_performance = 9999
     for i in box_scores:
         home_performance = i.home_score - i.home_projected
         away_performance = i.away_score - i.away_projected
@@ -303,8 +305,16 @@ def get_achievers(league, week=None):
             worst_performance = away_performance
             under_achiever = i.away_team.team_name
 
-    high_achiever_str = ['📈 Overachiever 📈']+['%s was %.2f points over their projection' % (over_achiever, best_performance)]
-    low_achiever_str = ['📉 Underachiever 📉']+['%s was %.2f points under their projection' % (under_achiever, abs(worst_performance))]
+    if best_performance > 0:
+        high_achiever_str +=['%s was %.2f points over their projection' % (over_achiever, best_performance)]
+    else:
+        high_achiever_str += 'No team out performed their projection'
+
+    if worst_performance < 0:
+        low_achiever_str += ['%s was %.2f points under their projection' % (under_achiever, abs(worst_performance))]
+    else:
+        low_achiever_str += 'No team was worse than their projection'
+
     return(high_achiever_str + low_achiever_str)
 
 def get_trophies(league, week=None):
