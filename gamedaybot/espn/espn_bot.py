@@ -1,3 +1,7 @@
+import sys
+import os
+sys.path.insert(1, os.path.abspath('.'))
+import json
 from gamedaybot.espn.env_vars import get_env_vars
 import gamedaybot.espn.functionality as espn
 from gamedaybot.chat.groupme import GroupMe
