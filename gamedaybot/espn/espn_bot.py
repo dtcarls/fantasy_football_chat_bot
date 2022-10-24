@@ -4,6 +4,7 @@ sys.path.insert(1, os.path.abspath('.'))
 import json
 from gamedaybot.espn.env_vars import get_env_vars
 import gamedaybot.espn.functionality as espn
+import gamedaybot.utils as utils
 from gamedaybot.chat.groupme import GroupMe
 from gamedaybot.chat.slack import Slack
 from gamedaybot.chat.discord import Discord
@@ -90,7 +91,7 @@ def espn_bot(function):
         text = "Something happened. HALP"
 
     if text != '' and not test:
-        messages=espn.str_limit_check(text, data['str_limit'])
+        messages=utils.str_limit_check(text, data['str_limit'])
         for message in messages:
             bot.send_message(message)
             slack_bot.send_message(message)
