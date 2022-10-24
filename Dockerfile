@@ -1,9 +1,9 @@
 FROM python:3.9.9-slim-bullseye
 
 # Install app
-ADD . /usr/src/ff_bot
-WORKDIR /usr/src/ff_bot
+ADD . /usr/src/gamedaybot
+WORKDIR /usr/src/gamedaybot
 RUN python3 setup.py install
 
 # Launch app
-CMD ["python3", "ff_bot/ff_bot.py"]
+CMD ["python3", "gamedaybot/espn/espn_bot.py"]

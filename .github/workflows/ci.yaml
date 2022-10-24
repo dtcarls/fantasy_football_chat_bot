@@ -35,4 +35,4 @@ jobs:
           tags: ${{ env.TEST_TAG }}
 
       - name: Run image against tests
-        run: docker run ${{ env.TEST_TAG }} python /usr/src/ff_bot/setup.py test
+        run: docker run ${{ env.TEST_TAG }} python /usr/src/gamedaybot/setup.py test
