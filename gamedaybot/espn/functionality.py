@@ -277,6 +277,79 @@ def get_luckys(league, week=None):
     unlucky_str = ['😡 Unlucky 😡']+['%s was %s against the league, but still took an L' % (unlucky_team_name, unlucky_record)]
     return(lucky_str + unlucky_str)
 
+def get_starter_counts(league):
+    week = league.current_week - 1
+    box_scores = league.box_scores(week=week)
+    starters = {}
+    for i in box_scores:
+        for player in i.home_lineup:
+            if (player.slot_position != 'BE' and player.slot_position != 'IR'):
+                try:
+                    starters[player.slot_position] = starters[player.slot_position]+1
+                except KeyError:
+                    starters[player.slot_position] = 1
+        return starters
+
+def best_lineup_score(lineup, starter_counts):
+    best_lineup = {}
+    position_players = {}
+
+    for position in starter_counts:
+        position_players[position] = {}
+        score = 0
+        for player in lineup:
+            if player.position == position:
+                position_players[position][player.name] = player.points
+            if player.slot_position not in ['BE', 'IR']:
+                score += player.points
+        position_players[position] = {k: v for k, v in sorted(position_players[position].items(), key=lambda item: item[1], reverse=True)}
+        best_lineup[position] = dict(list(position_players[position].items())[:starter_counts[position]])
+
+    # flexes. need to figure out best in other positions first
+    for position in starter_counts:
+        if 'D/ST' not in position and '/' in position:
+            flex = position.split('/')
+            for player in lineup:
+                if player.position in flex and player.name not in best_lineup[player.position]:
+                    position_players[position][player.name] = player.points
+        position_players[position] = {k: v for k, v in sorted(position_players[position].items(), key=lambda item: item[1], reverse=True)}
+        best_lineup[position] = dict(list(position_players[position].items())[:starter_counts[position]])
+
+    best_score = 0
+    for position in best_lineup:
+        # print(sum(best_lineup[position].values()))
+        best_score += sum(best_lineup[position].values())
+
+    score_pct = (score / best_score) * 100
+    return (best_score, score, best_score - score, score_pct)
+
+def best_possible_scores(league, week=None):
+    if not week:
+        week = league.current_week - 1
+    box_scores = league.box_scores(week=week)
+    results = []
+    best_scores = {}
+    starter_counts = get_starter_counts(league)
+
+    for i in box_scores:
+        best_scores[i.home_team] = best_lineup_score(i.home_lineup, starter_counts)
+        best_scores[i.away_team] = best_lineup_score(i.away_lineup, starter_counts)
+
+    best_scores = {key: value for key, value in sorted(best_scores.items(), key=lambda item: item[1][3], reverse=True)}
+
+    i = 1
+    for score in best_scores:
+        s = ['%d: %s: %.2f (%.2f - %.2f%%)' % (i, score.team_name, best_scores[score][0], best_scores[score][1], best_scores[score][3])]
+        results += s
+        i += 1
+
+    if not results:
+        return ('')
+
+    text = ['Best Possible Scores:  (Actual Score - % of possible)'] + results
+
+    return '\n'.join(text)
+
 def get_achievers(league, week=None):
     """
     Get the teams with biggest difference from projection

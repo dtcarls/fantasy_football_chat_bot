@@ -46,6 +46,7 @@ def espn_bot(function):
         if waiver_report and swid != '{1}' and espn_s2 != '1':
             print(espn.get_waiver_report(league, faab))
         function = "get_final"
+        print(espn.best_possible_scores(league))
         # bot.send_message("Testing")
         # slack_bot.send_message("Testing")
         # discord_bot.send_message("Testing")
