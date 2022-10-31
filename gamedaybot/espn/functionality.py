@@ -286,8 +286,22 @@ def optimal_team_scores(league, week=None, full_report=False):
         text = ['Optimal Scores:  (Actual - % of optimal)'] + results
         return '\n'.join(text)
     else:
+        num_teams = 0
+        team_names = ''
+        for score in best_scores:
+            if best_scores[score][3] > 99.8:
+                num_teams += 1
+                team_names += score.team_name + ', '
+            else:
+                break
+            # s = ['%2d: %4s: %.2f (%.2f - %.2f%%)' % (i, score.team_abbrev, best_scores[score][0], best_scores[score][1], best_scores[score][3])]
+
+        if num_teams <= 1:
         best = next(iter(best_scores.items()))
         best_mgr_str = ['🤖 Best Manager 🤖'] + ['%s scored %.2f%% of their optimal score!' % (best[0].team_name, best[1][3])]
+        else:
+            team_names = team_names[:-2]
+            best_mgr_str = ['🤖 Best Managers 🤖'] + [f'{team_names} scored their optimal score!']
 
         worst = best_scores.popitem()
         worst_mgr_str = ['🤡 Worst Manager 🤡'] + ['%s left %.2f points on their bench. Only scoring %.2f%% of their optimal score.' % (worst[0].team_name, worst[1][0]-worst[1][1], worst[1][3])]
