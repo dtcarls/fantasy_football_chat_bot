@@ -217,15 +217,31 @@ def get_power_rankings(league, week=None):
 def get_starter_counts(league):
     week = league.current_week - 1
     box_scores = league.box_scores(week=week)
-    starters = {}
+    h_starters = {}
+    h_starter_count = 0
+    a_starters = {}
+    a_starter_count = 0
     for i in box_scores:
         for player in i.home_lineup:
             if (player.slot_position != 'BE' and player.slot_position != 'IR'):
+                h_starter_count += 1
                 try:
-                    starters[player.slot_position] = starters[player.slot_position]+1
+                    h_starters[player.slot_position] = h_starters[player.slot_position]+1
                 except KeyError:
-                    starters[player.slot_position] = 1
-        return starters
+                    h_starters[player.slot_position] = 1
+        # in the rare case when someone has an empty slot we need to check the other team as well
+        for player in i.away_lineup:
+            if (player.slot_position != 'BE' and player.slot_position != 'IR'):
+                a_starter_count += 1
+                try:
+                    a_starters[player.slot_position] = a_starters[player.slot_position]+1
+                except KeyError:
+                    a_starters[player.slot_position] = 1
+
+        if a_starter_count > h_starter_count:
+            return a_starters
+        else:
+            return h_starters
 
 
 def optimal_lineup_score(lineup, starter_counts):
@@ -277,9 +293,9 @@ def optimal_team_scores(league, week=None, full_report=False):
     best_scores = {key: value for key, value in sorted(best_scores.items(), key=lambda item: item[1][3], reverse=True)}
 
     if full_report:
-    i = 1
-    for score in best_scores:
-            s = ['%2d: %4s: %.2f (%.2f - %.2f%%)' % (i, score.team_abbrev, best_scores[score][0], best_scores[score][1], best_scores[score][3])]
+        i = 1
+        for score in best_scores:
+            s = ['%2d: %4s: %6.2f (%6.2f - %.2f%%)' % (i, score.team_abbrev, best_scores[score][0], best_scores[score][1], best_scores[score][3])]
         results += s
         i += 1
 
@@ -297,8 +313,8 @@ def optimal_team_scores(league, week=None, full_report=False):
             # s = ['%2d: %4s: %.2f (%.2f - %.2f%%)' % (i, score.team_abbrev, best_scores[score][0], best_scores[score][1], best_scores[score][3])]
 
         if num_teams <= 1:
-        best = next(iter(best_scores.items()))
-        best_mgr_str = ['🤖 Best Manager 🤖'] + ['%s scored %.2f%% of their optimal score!' % (best[0].team_name, best[1][3])]
+            best = next(iter(best_scores.items()))
+            best_mgr_str = ['🤖 Best Manager 🤖'] + ['%s scored %.2f%% of their optimal score!' % (best[0].team_name, best[1][3])]
         else:
             team_names = team_names[:-2]
             best_mgr_str = ['🤖 Best Managers 🤖'] + [f'{team_names} scored their optimal score!']
