@@ -36,18 +36,18 @@ def espn_bot(function):
     faab = league.settings.faab
 
     if test:
-        print(espn.get_matchups(league, random_phrase))
         print(espn.get_scoreboard_short(league))
         print(espn.get_projected_scoreboard(league))
+        print(espn.get_standings(league))
+        print(espn.get_standings(league, True))
         print(espn.get_close_scores(league))
-        print(espn.get_power_rankings(league))
-        print(espn.get_scoreboard_short(league))
-        print(espn.get_standings(league, top_half_scoring))
         print(espn.get_monitor(league))
+        print(espn.get_matchups(league))
+        print(espn.get_power_rankings(league))
+        print(espn.get_trophies(league))
+        print(espn.optimal_team_scores(league, full_report=True))
         if waiver_report and swid != '{1}' and espn_s2 != '1':
             print(espn.get_waiver_report(league, faab))
-        function = "get_final"
-        print(espn.best_possible_scores(league))
         # bot.send_message("Testing")
         # slack_bot.send_message("Testing")
         # discord_bot.send_message("Testing")
@@ -94,10 +94,6 @@ def espn_bot(function):
             bot.send_message(message)
             slack_bot.send_message(message)
             discord_bot.send_message(message)
-
-    if test:
-        # print "get_final" function
-        print(text)
 
 
 if __name__ == '__main__':
