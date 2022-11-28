@@ -4,7 +4,7 @@ import gamedaybot.utils as utils
 def get_scoreboard_short(league, week=None):
     # Gets current week's scoreboard
     box_scores = league.box_scores(week=week)
-    score = ['%4s %6.2f - %6.2f %4s' % (i.home_team.team_abbrev, i.home_score,
+    score = ['%4s %6.2f - %6.2f %s' % (i.home_team.team_abbrev, i.home_score,
                                     i.away_score, i.away_team.team_abbrev) for i in box_scores
              if i.away_team]
     text = ['Score Update'] + score
@@ -14,7 +14,7 @@ def get_scoreboard_short(league, week=None):
 def get_projected_scoreboard(league, week=None):
     # Gets current week's scoreboard projections
     box_scores = league.box_scores(week=week)
-    score = ['%4s %6.2f - %6.2f %4s' % (i.home_team.team_abbrev, get_projected_total(i.home_lineup),
+    score = ['%4s %6.2f - %6.2f %s' % (i.home_team.team_abbrev, get_projected_total(i.home_lineup),
                                     get_projected_total(i.away_lineup), i.away_team.team_abbrev) for i in box_scores
              if i.away_team]
     text = ['Approximate Projected Scores'] + score
@@ -45,7 +45,7 @@ def get_standings(league, top_half_scoring=False, week=None):
         standings = sorted(standings, key=lambda tup: tup[0], reverse=True)
         standings_txt = [f"{pos + 1:2}: {team_name} ({wins}-{losses}) (+{top_half_totals[team_name]})" for
                          pos, (wins, losses, team_name) in enumerate(standings)]
-    text = ["Current Standings:"] + standings_txt
+    text = ["Current Standings"] + standings_txt
 
     return "\n".join(text)
 
@@ -92,7 +92,7 @@ def get_monitor(league):
         monitor += scan_roster(i.away_lineup, i.away_team)
 
     if monitor:
-        text = ['Starting Players to Monitor: '] + monitor
+        text = ['Starting Players to Monitor'] + monitor
     else:
         text = ['No Players to Monitor this week. Good Luck!']
     return '\n'.join(text)
@@ -127,30 +127,34 @@ def get_matchups(league, random_phrase=False, week=None):
     # Gets current week's Matchups
     matchups = league.box_scores(week=week)
 
-    score = ['%4s (%s-%s) vs (%s-%s) %s' % (i.home_team.team_abbrev, i.home_team.wins, i.home_team.losses,
+    full_names = ['%s vs %s' % (i.home_team.team_name, i.away_team.team_name) for i in matchups if i.away_team]
+
+    abbrevs = ['%4s (%s-%s) vs (%s-%s) %s' % (i.home_team.team_abbrev, i.home_team.wins, i.home_team.losses,
                                          i.away_team.wins, i.away_team.losses, i.away_team.team_abbrev) for i in matchups
              if i.away_team]
 
-    text = ['Matchups'] + score
-    if random_phrase:
-        text = text + utils.get_random_phrase()
+    text = ['Matchups'] + full_names + [''] + abbrevs
     return '\n'.join(text)
 
 
 def get_close_scores(league, week=None):
-    # Gets current closest scores (15.999 points or closer)
-    matchups = league.box_scores(week=week)
+    # Gets current projected closest scores (15.999 points or closer)
+    box_scores = league.box_scores(week=week)
     score = []
 
-    for i in matchups:
+    for i in box_scores:
         if i.away_team:
-            diffScore = i.away_score - i.home_score
+            # diffScore = i.away_score - i.home_score
+            away_projected = get_projected_total(i.away_lineup)
+            home_projected = get_projected_total(i.home_lineup)
+            diffScore = away_projected - home_projected
+
             if (-16 < diffScore <= 0 and not all_played(i.away_lineup)) or (0 <= diffScore < 16 and not all_played(i.home_lineup)):
-                score += ['%4s %6.2f - %6.2f %4s' % (i.home_team.team_abbrev, i.home_score,
-                                                 i.away_score, i.away_team.team_abbrev)]
+                score += ['%4s %6.2f - %6.2f %s' % (i.home_team.team_abbrev, i.home_projected,
+                                                 i.away_projected, i.away_team.team_abbrev)]
     if not score:
         return('')
-    text = ['Close Scores'] + score
+    text = ['Projected Close Scores'] + score
     return '\n'.join(text)
 
 
@@ -248,6 +252,7 @@ def optimal_lineup_score(lineup, starter_counts):
     best_lineup = {}
     position_players = {}
 
+    score = 0
     for position in starter_counts:
         position_players[position] = {}
         score = 0

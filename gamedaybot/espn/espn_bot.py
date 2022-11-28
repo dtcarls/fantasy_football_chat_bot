@@ -67,20 +67,17 @@ def espn_bot(function):
         text = espn.get_close_scores(league)
     elif function == "get_power_rankings":
         text = espn.get_power_rankings(league)
-    # elif function=="get_waiver_report":
-    #     text = get_waiver_report(league)
     elif function == "get_trophies":
         text = espn.get_trophies(league)
     elif function == "get_standings":
         text = espn.get_standings(league, top_half_scoring)
-        if waiver_report and swid != '{1}' and espn_s2 != '1':
-            text += '\n\n' + espn.get_waiver_report(league, faab)
     elif function == "get_final":
         # on Tuesday we need to get the scores of last week
         week = league.current_week - 1
         text = "Final " + espn.get_scoreboard_short(league, week=week)
         text = text + "\n\n" + espn.get_trophies(league, week=week)
     elif function == "get_waiver_report" and swid != '{1}' and espn_s2 != '1':
+        faab = league.settings.faab
         text = espn.get_waiver_report(league, faab)
     elif function == "init":
         try:
