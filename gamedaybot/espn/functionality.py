@@ -4,7 +4,7 @@ import gamedaybot.utils as utils
 def get_scoreboard_short(league, week=None):
     # Gets current week's scoreboard
     box_scores = league.box_scores(week=week)
-    score = ['%4s %6.2f - %6.2f %4s' % (i.home_team.team_abbrev, i.home_score,
+    score = ['%4s %6.2f - %6.2f %s' % (i.home_team.team_abbrev, i.home_score,
                                     i.away_score, i.away_team.team_abbrev) for i in box_scores
              if i.away_team]
     text = ['Score Update'] + score
@@ -14,22 +14,24 @@ def get_scoreboard_short(league, week=None):
 def get_projected_scoreboard(league, week=None):
     # Gets current week's scoreboard projections
     box_scores = league.box_scores(week=week)
-    score = ['%4s %6.2f - %6.2f %4s' % (i.home_team.team_abbrev, get_projected_total(i.home_lineup),
+    score = ['%4s %6.2f - %6.2f %s' % (i.home_team.team_abbrev, get_projected_total(i.home_lineup),
                                     get_projected_total(i.away_lineup), i.away_team.team_abbrev) for i in box_scores
              if i.away_team]
     text = ['Approximate Projected Scores'] + score
     return '\n'.join(text)
 
 
-def get_standings(league, top_half_scoring, week=None):
+def get_standings(league, top_half_scoring=False, week=None):
     standings_txt = ''
     teams = league.teams
     standings = []
     if not top_half_scoring:
         standings = league.standings()
-        standings_txt = [f"{pos + 1}: {team.team_name} ({team.wins}-{team.losses})" for
+        standings_txt = [f"{pos + 1:2}: ({team.wins}-{team.losses}) {team.team_name} " for
                          pos, team in enumerate(standings)]
     else:
+        # top half scoring can be enabled by default in ESPN now.
+        # this should generally not be used
         top_half_totals = {t.team_name: 0 for t in teams}
         if not week:
             week = league.current_week
@@ -41,9 +43,9 @@ def get_standings(league, top_half_scoring, week=None):
             standings.append((wins, t.losses, t.team_name))
 
         standings = sorted(standings, key=lambda tup: tup[0], reverse=True)
-        standings_txt = [f"{pos + 1}: {team_name} ({wins}-{losses}) (+{top_half_totals[team_name]})" for
+        standings_txt = [f"{pos + 1:2}: {team_name} ({wins}-{losses}) (+{top_half_totals[team_name]})" for
                          pos, (wins, losses, team_name) in enumerate(standings)]
-    text = ["Current Standings:"] + standings_txt
+    text = ["Current Standings"] + standings_txt
 
     return "\n".join(text)
 
@@ -90,7 +92,7 @@ def get_monitor(league):
         monitor += scan_roster(i.away_lineup, i.away_team)
 
     if monitor:
-        text = ['Starting Players to Monitor: '] + monitor
+        text = ['Starting Players to Monitor'] + monitor
     else:
         text = ['No Players to Monitor this week. Good Luck!']
     return '\n'.join(text)
@@ -121,60 +123,42 @@ def scan_roster(lineup, team):
     return report
 
 
-def scan_inactives(lineup, team):
-    count = 0
-    players = []
-    for i in lineup:
-        if (i.slot_position != 'BE' and i.slot_position != 'IR') \
-            and (i.injuryStatus == 'OUT' or i.injuryStatus == 'DOUBTFUL' or i.projected_points <= 0) \
-                and i.game_played == 0:
-                    count += 1
-                    players += ['%s %s - %s, %d pts' %
-                                (i.position, i.name, i.injuryStatus.title().replace('_', ' '), i.projected_points)]
-
-    inactive_list = ""
-    inactives = ""
-    for p in players:
-        inactive_list += p + "\n"
-    if count > 0:
-        s = '%s likely inactive starting player(s): \n%s \n' % (team.team_name, inactive_list[:-1])
-        inactives = [s.lstrip()]
-
-    return inactives
-
-
-def get_matchups(league, random_phrase, week=None):
+def get_matchups(league, random_phrase=False, week=None):
     # Gets current week's Matchups
     matchups = league.box_scores(week=week)
 
-    score = ['%s(%s-%s) vs %s(%s-%s)' % (i.home_team.team_name, i.home_team.wins, i.home_team.losses,
-                                         i.away_team.team_name, i.away_team.wins, i.away_team.losses) for i in matchups
+    full_names = ['%s vs %s' % (i.home_team.team_name, i.away_team.team_name) for i in matchups if i.away_team]
+
+    abbrevs = ['%4s (%s-%s) vs (%s-%s) %s' % (i.home_team.team_abbrev, i.home_team.wins, i.home_team.losses,
+                                         i.away_team.wins, i.away_team.losses, i.away_team.team_abbrev) for i in matchups
              if i.away_team]
 
-    text = ['Matchups'] + score
-    if random_phrase:
-        text = text + utils.get_random_phrase()
+    text = ['Matchups'] + full_names + [''] + abbrevs
     return '\n'.join(text)
 
 
 def get_close_scores(league, week=None):
-    # Gets current closest scores (15.999 points or closer)
-    matchups = league.box_scores(week=week)
+    # Gets current projected closest scores (15.999 points or closer)
+    box_scores = league.box_scores(week=week)
     score = []
 
-    for i in matchups:
+    for i in box_scores:
         if i.away_team:
-            diffScore = i.away_score - i.home_score
+            # diffScore = i.away_score - i.home_score
+            away_projected = get_projected_total(i.away_lineup)
+            home_projected = get_projected_total(i.home_lineup)
+            diffScore = away_projected - home_projected
+
             if (-16 < diffScore <= 0 and not all_played(i.away_lineup)) or (0 <= diffScore < 16 and not all_played(i.home_lineup)):
-                score += ['%4s %6.2f - %6.2f %4s' % (i.home_team.team_abbrev, i.home_score,
-                                                 i.away_score, i.away_team.team_abbrev)]
+                score += ['%4s %6.2f - %6.2f %s' % (i.home_team.team_abbrev, i.home_projected,
+                                                 i.away_projected, i.away_team.team_abbrev)]
     if not score:
         return('')
-    text = ['Close Scores'] + score
+    text = ['Projected Close Scores'] + score
     return '\n'.join(text)
 
 
-def get_waiver_report(league, faab):
+def get_waiver_report(league, faab=False):
     activities = league.recent_activity(50)
     report = []
     today = date.today().strftime('%Y-%m-%d')
@@ -228,12 +212,165 @@ def get_power_rankings(league, week=None):
     # It's weighted 80/15/5 respectively
     power_rankings = league.power_rankings(week=week)
 
-    score = ['%s (%.1f) - %s' % (i[0], i[1].playoff_pct, i[1].team_name) for i in power_rankings
+    score = ['%6s (%.1f) - %s' % (i[0], i[1].playoff_pct, i[1].team_name) for i in power_rankings
             if i]
     text = ['Power Rankings (Playoff %)'] + score
     return '\n'.join(text)
 
-def get_luckys(league, week=None):
+
+def get_starter_counts(league):
+    week = league.current_week - 1
+    box_scores = league.box_scores(week=week)
+    h_starters = {}
+    h_starter_count = 0
+    a_starters = {}
+    a_starter_count = 0
+    for i in box_scores:
+        for player in i.home_lineup:
+            if (player.slot_position != 'BE' and player.slot_position != 'IR'):
+                h_starter_count += 1
+                try:
+                    h_starters[player.slot_position] = h_starters[player.slot_position]+1
+                except KeyError:
+                    h_starters[player.slot_position] = 1
+        # in the rare case when someone has an empty slot we need to check the other team as well
+        for player in i.away_lineup:
+            if (player.slot_position != 'BE' and player.slot_position != 'IR'):
+                a_starter_count += 1
+                try:
+                    a_starters[player.slot_position] = a_starters[player.slot_position]+1
+                except KeyError:
+                    a_starters[player.slot_position] = 1
+
+        if a_starter_count > h_starter_count:
+            return a_starters
+        else:
+            return h_starters
+
+
+def optimal_lineup_score(lineup, starter_counts):
+    best_lineup = {}
+    position_players = {}
+
+    score = 0
+    for position in starter_counts:
+        position_players[position] = {}
+        score = 0
+        for player in lineup:
+            if player.position == position:
+                position_players[position][player.name] = player.points
+            if player.slot_position not in ['BE', 'IR']:
+                score += player.points
+        position_players[position] = {k: v for k, v in sorted(position_players[position].items(), key=lambda item: item[1], reverse=True)}
+        best_lineup[position] = dict(list(position_players[position].items())[:starter_counts[position]])
+
+    # flexes. need to figure out best in other positions first
+    for position in starter_counts:
+        if 'D/ST' not in position and '/' in position:
+            flex = position.split('/')
+            for player in lineup:
+                if player.position in flex and player.name not in best_lineup[player.position]:
+                    position_players[position][player.name] = player.points
+        position_players[position] = {k: v for k, v in sorted(position_players[position].items(), key=lambda item: item[1], reverse=True)}
+        best_lineup[position] = dict(list(position_players[position].items())[:starter_counts[position]])
+
+    best_score = 0
+    for position in best_lineup:
+        # print(sum(best_lineup[position].values()))
+        best_score += sum(best_lineup[position].values())
+
+    score_pct = (score / best_score) * 100
+    return (best_score, score, best_score - score, score_pct)
+
+
+def optimal_team_scores(league, week=None, full_report=False):
+    if not week:
+        week = league.current_week - 1
+    box_scores = league.box_scores(week=week)
+    results = []
+    best_scores = {}
+    starter_counts = get_starter_counts(league)
+
+    for i in box_scores:
+        best_scores[i.home_team] = optimal_lineup_score(i.home_lineup, starter_counts)
+        best_scores[i.away_team] = optimal_lineup_score(i.away_lineup, starter_counts)
+
+    best_scores = {key: value for key, value in sorted(best_scores.items(), key=lambda item: item[1][3], reverse=True)}
+
+    if full_report:
+        i = 1
+        for score in best_scores:
+            s = ['%2d: %4s: %6.2f (%6.2f - %.2f%%)' % (i, score.team_abbrev, best_scores[score][0], best_scores[score][1], best_scores[score][3])]
+        results += s
+        i += 1
+
+        text = ['Optimal Scores:  (Actual - % of optimal)'] + results
+        return '\n'.join(text)
+    else:
+        num_teams = 0
+        team_names = ''
+        for score in best_scores:
+            if best_scores[score][3] > 99.8:
+                num_teams += 1
+                team_names += score.team_name + ', '
+            else:
+                break
+            # s = ['%2d: %4s: %.2f (%.2f - %.2f%%)' % (i, score.team_abbrev, best_scores[score][0], best_scores[score][1], best_scores[score][3])]
+
+        if num_teams <= 1:
+            best = next(iter(best_scores.items()))
+            best_mgr_str = ['🤖 Best Manager 🤖'] + ['%s scored %.2f%% of their optimal score!' % (best[0].team_name, best[1][3])]
+        else:
+            team_names = team_names[:-2]
+            best_mgr_str = ['🤖 Best Managers 🤖'] + [f'{team_names} scored their optimal score!']
+
+        worst = best_scores.popitem()
+        worst_mgr_str = ['🤡 Worst Manager 🤡'] + ['%s left %.2f points on their bench. Only scoring %.2f%% of their optimal score.' % (worst[0].team_name, worst[1][0]-worst[1][1], worst[1][3])]
+        return(best_mgr_str + worst_mgr_str)
+
+
+def get_achievers_trophy(league, week=None):
+    """
+    Get the teams with biggest difference from projection
+    """
+    box_scores = league.box_scores(week=week)
+    over_achiever = ''
+    under_achiever = ''
+    high_achiever_str = ['📈 Overachiever 📈']
+    low_achiever_str = ['📉 Underachiever 📉']
+    best_performance = -9999
+    worst_performance = 9999
+    for i in box_scores:
+        home_performance = i.home_score - i.home_projected
+        away_performance = i.away_score - i.away_projected
+
+        if home_performance > best_performance:
+            best_performance = home_performance
+            over_achiever = i.home_team.team_name
+        if home_performance < worst_performance:
+            worst_performance = home_performance
+            under_achiever = i.home_team.team_name
+        if away_performance > best_performance:
+            best_performance = away_performance
+            over_achiever = i.away_team.team_name
+        if away_performance < worst_performance:
+            worst_performance = away_performance
+            under_achiever = i.away_team.team_name
+
+    if best_performance > 0:
+        high_achiever_str +=['%s was %.2f points over their projection' % (over_achiever, best_performance)]
+    else:
+        high_achiever_str += ['No team out performed their projection']
+
+    if worst_performance < 0:
+        low_achiever_str += ['%s was %.2f points under their projection' % (under_achiever, abs(worst_performance))]
+    else:
+        low_achiever_str += ['No team was worse than their projection']
+
+    return(high_achiever_str + low_achiever_str)
+
+
+def get_lucky_trophy(league, week=None):
     box_scores = league.box_scores(week=week)
     weekly_scores = {}
     for i in box_scores:
@@ -277,45 +414,6 @@ def get_luckys(league, week=None):
     unlucky_str = ['😡 Unlucky 😡']+['%s was %s against the league, but still took an L' % (unlucky_team_name, unlucky_record)]
     return(lucky_str + unlucky_str)
 
-def get_achievers(league, week=None):
-    """
-    Get the teams with biggest difference from projection
-    """
-    box_scores = league.box_scores(week=week)
-    over_achiever = ''
-    under_achiever = ''
-    high_achiever_str = ['📈 Overachiever 📈']
-    low_achiever_str = ['📉 Underachiever 📉']
-    best_performance = -9999
-    worst_performance = 9999
-    for i in box_scores:
-        home_performance = i.home_score - i.home_projected
-        away_performance = i.away_score - i.away_projected
-
-        if home_performance > best_performance:
-            best_performance = home_performance
-            over_achiever = i.home_team.team_name
-        if home_performance < worst_performance:
-            worst_performance = home_performance
-            under_achiever = i.home_team.team_name
-        if away_performance > best_performance:
-            best_performance = away_performance
-            over_achiever = i.away_team.team_name
-        if away_performance < worst_performance:
-            worst_performance = away_performance
-            under_achiever = i.away_team.team_name
-
-    if best_performance > 0:
-        high_achiever_str +=['%s was %.2f points over their projection' % (over_achiever, best_performance)]
-    else:
-        high_achiever_str += 'No team out performed their projection'
-
-    if worst_performance < 0:
-        low_achiever_str += ['%s was %.2f points under their projection' % (under_achiever, abs(worst_performance))]
-    else:
-        low_achiever_str += 'No team was worse than their projection'
-
-    return(high_achiever_str + low_achiever_str)
 
 def get_trophies(league, week=None):
     # Gets trophies for highest score, lowest score, closest score, and biggest win
@@ -367,5 +465,5 @@ def get_trophies(league, week=None):
     close_score_str = ['😅 Close win 😅']+['%s barely beat %s by %.2f points' % (close_winner, close_loser, closest_score)]
     blowout_str = ['😱 Blow out 😱']+['%s blew out %s by %.2f points' % (ownerer_team_name, blown_out_team_name, biggest_blowout)]
 
-    text = ['Trophies of the week:'] + high_score_str + low_score_str + blowout_str + close_score_str + get_luckys(league, week) + get_achievers(league, week)
+    text = ['Trophies of the week:'] + high_score_str + low_score_str + blowout_str + close_score_str + get_lucky_trophy(league, week) + get_achievers_trophy(league, week) + optimal_team_scores(league, week)
     return '\n'.join(text)
