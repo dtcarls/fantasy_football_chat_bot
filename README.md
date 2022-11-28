@@ -150,11 +150,12 @@ Save the "Webhook URL" on this page
 </details>
 
 ### Heroku setup
+**"November 28, 2022, Heroku stopped offering free product plans"**
 
-Heroku is what we will be using to host the chat bot.
-
-**"Starting November 28, 2022, Heroku plans to stop offering free product plans and plans to start shutting down free dynos and data services."**
 I offer a hosting service far lower than the new costs of Heroku at https://www.GameDayBot.com/
+<details>
+  <summary>Click to expand!</summary>
+Heroku is what you can use to host the chat bot.
 
 Go to https://id.heroku.com/login and sign up or login
 
@@ -175,23 +176,7 @@ Now you will need to setup your environment variables so that it works for your 
 Now we will need to edit these variables (click the pencil to the right of the variable to modify)
 Note: App will restart when you change any variable so your chat room may be semi-spammed with the init message of "Hi" you can change the INIT_MSG variable to be blank to have no init message. It should also be noted that Heroku seems to restart the app about once a day
 
-- BOT_ID: This is your Bot ID from the GroupMe developers page (REQUIRED IF USING GROUPME)
-- SLACK_WEBHOOK_URL: This is your Webhook URL from the Slack App page (REQUIRED IF USING SLACK)
-- DISCORD_WEBHOOK_URL: This is your Webhook URL from the Discord Settings page (REQUIRED IF USING DISCORD)
-- LEAGUE_ID: This is your ESPN league id (REQUIRED)
-- START_DATE: This is when the bot will start paying attention and sending messages to your chat. (2020-09-10 by default)
-- END_DATE: This is when the bot will stop paying attention and stop sending messages to your chat. (2020-12-30 by default)
-- LEAGUE_YEAR: ESPN League year to look at (2020 by default)
-- TIMEZONE: The timezone that the messages will look to send in. (America/New_York by default)
-- INIT_MSG: The message that the bot will say when it is started (can be blank or deleted for no message)
-- TOP_HALF_SCORING: If set to True, when standings are posted on Wednesday it will also include being in the top half of your league for points and you receive an additional "win" for it.
-- RANDOM_PHRASE: If set to True, when matchups are posted on Tuesday it will also include a random phrase
-- MONITOR_REPORT: If set to True, will provide a report of players in starting lineup that are Questionable, Doubtful, Out, or projected for less than 4 points
-- WAIVER_REPORT: If set to True, will provide a waiver report of add/drops. :warning: ESPN_S2 and SWID are required for this to work :warning:
-- DAILY_WAIVER: If set to True, will provide a waiver report of add/drops daily. :warning: ESPN_S2 and SWID are required for this to work :warning:
-- ESPN_S2: Used for private leagues. See [Private Leagues Section](#private-leagues) for documentation
-- SWID: Used for private leagues. (Can be defined with or without {}) See [Private Leagues Section](#private-leagues) for documentation
-
+See [Environment Variables Section](#environment-variables) for documentation
 
 After you have setup your variables you will need to turn it on. Navigate to the "Resources" tab of your Heroku app Dashboard.
 You should see something like below. Click the pencil on the right and toggle the buton so it is blue like depicted and click "Confirm."
@@ -200,45 +185,6 @@ You should see something like below. Click the pencil on the right and toggle th
 You're done! You now have a fully featured GroupMe/Slack/Discord chat bot for ESPN leagues! If you have an INIT_MSG you will see it exclaimed in your GroupMe, Discord, or Slack chat room.
 
 Unfortunately to do auto deploys of the latest version you need admin access to the repository on git. You can check for updates on the github page (https://github.com/dtcarls/fantasy_football_chat_bot/commits/master) and click the deploy button again; however, this will deploy a new instance and the variables will need to be edited again.
-
-#### Private Leagues
-
-For private league you will need to get your swid and espn_s2.
-You can find these two values after logging into your espn fantasy football account on espn's website.
-(Chrome Browser)
-Right click anywhere on the website and click inspect option.
-From there click Application on the top bar.
-On the left under Storage section click Cookies then http://fantasy.espn.com.
-From there you should be able to find your swid and espn_s2 variables and values.
-
-## Troubleshooting / FAQ
-
-**League must be full.**
-
-The bot isn't working
-Did you miss a step in the instructions? Try doing it from scratch again. If still no luck, open an issue (https://github.com/dtcarls/fantasy_football_chat_bot/issues) or hop into the discord (link at the top of readme) so the answer can be shared with others.
-
-How are power ranks calculated?
-They are calculated using 2 step dominance, as well as a combination of points scored and margin of victory. Weighted 80/15/5 respectively. I wouldn't so much pay attention to the actual number but more of the gap between teams. Full source of the calculations can be seen here: https://github.com/cwendt94/espn-api/pull/12/files. If you want a tutorial on dominance matrices: https://www.youtube.com/watch?v=784TmwaHPOw
-
-Is there a version of this for Yahoo/CBS/NFL/[insert other site]?
-No, this would require a significant rework for other sites.
-
-I'm not getting the init message
-Are you sure you flipped the switch in Heroku to activate the worker (the toggle should be blue)? The other common mistake is misconfigured environment variables.
-
-I keep getting the init message.
-Remove your init message and it will stop. The init message is really for first setup to ensure it is working.
-
-How do I set another timezone?
-Specify your variable https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List
-
-Is there a version of this for Messenger/WhatsApp/[insert other chat]?
-No, but I am open to pull requests implementing their API for additional cross platform support.
-
-My Standings look wrong. I have weird (+1) in it.
-TOP_HALF_SCORING: If set to True, when standings are posted on Wednesday it will also include top half scoring wins
-Top half wins is being in the top half of your league for points and you receive an additional "win" for it. The number in parenthesis (+1) tells you how many added wins over the season for top half wins.
 </details>
 
 ## Getting Started for development and testing
@@ -270,23 +216,24 @@ python3 setup.py install
 ```
 
 ### Environment Variables
-
-- BOT_ID: This is your Bot ID from the GroupMe developers page (REQUIRED IF USING GROUPME)
-- SLACK_WEBHOOK_URL: This is your Webhook URL from the Slack App page (REQUIRED IF USING SLACK)
-- DISCORD_WEBHOOK_URL: This is your Webhook URL from the Discord Settings page (REQUIRED IF USING DISCORD)
-- LEAGUE_ID: This is your ESPN league id (REQUIRED)
-- START_DATE: This is when the bot will start paying attention and sending messages to your chat. (2020-09-10 by default)
-- END_DATE: This is when the bot will stop paying attention and stop sending messages to your chat. (2020-12-30 by default)
-- LEAGUE_YEAR: ESPN League year to look at (2020 by default)
-- TIMEZONE: The timezone that the messages will look to send in. (America/New_York by default)
-- INIT_MSG: The message that the bot will say when it is started (can be blank or deleted for no message)
-- TOP_HALF_SCORING: If set to True, when standings are posted on Wednesday it will also include being in the top half of your league for points and you receive an additional "win" for it.
-- RANDOM_PHRASE: If set to True, when matchups are posted on Tuesday it will also include a random phrase
-- MONITOR_REPORT: If set to True, will provide a report of players in starting lineup that are Questionable, Doubtful, Out, or projected for less than 4 points
-- WAIVER_REPORT: If set to True, will provide a waiver report of add/drops. :warning: ESPN_S2 and SWID are required for this to work :warning:
-- DAILY_WAIVER: If set to True, will provide a waiver report of add/drops daily. :warning: ESPN_S2 and SWID are required for this to work :warning:
-- ESPN_S2: Used for private leagues. See [Private Leagues Section](#private-leagues) for documentation
-- SWID: Used for private leagues. (Can be defined with or without {}) See [Private Leagues Section](#private-leagues) for documentation
+|Var|Type|Required|Default|Description|
+|---|----|--------|-------|-----------|
+|BOT_ID|String|For GroupMe|None|This is your Bot ID from the GroupMe developers page|
+|SLACK_WEBHOOK_URL|String|For Slack|None|This is your Webhook URL from the Slack App page|
+|DISCORD_WEBHOOK_URL|String|For Discord|None|This is your Webhook URL from the Discord Settings page|
+|LEAGUE_ID|String|Yes|None|This is your ESPN league id|
+|START_DATE|Date|Yes|Start of current season (YYYY-MM-DD)|This is when the bot will start paying attention and sending messages to your chat.|
+|END_DATE|Date|Yes|End of current season (YYYY-MM-DD)|This is when the bot will stop paying attention and stop sending messages to your chat.|
+|LEAGUE_YEAR|String|Yes|Currernt Year (YYYY)|ESPN League year to look at|
+|TIMEZONE|String|Yes|America/New_York|The timezone that the messages will look to send in.|
+|INIT_MSG|String|No|None|The message that the bot will say when it is started.|
+|TOP_HALF_SCORING|Bool|No|False|If set to True, when standings are posted on Wednesday it will also include being in the top half of your league for points and you receive an additional "win" for it.|
+|RANDOM_PHRASE|Bool|No|False|If set to True, when matchups are posted on Tuesday it will also include a random phrase|
+|MONITOR_REPORT|Bool|No|False|If set to True, will provide a report of players in starting lineup that are Questionable, Doubtful, Out, or projected for less than 4 points|
+|WAIVER_REPORT|Bool|No|False|If set to True, will provide a waiver report of add/drops. :warning: ESPN_S2 and SWID are required for this to work :warning:|
+|DAILY_WAIVER|Bool|No|False|If set to True, will provide a waiver report of add/drops daily. :warning: ESPN_S2 and SWID are required for this to work :warning:|
+|ESPN_S2|String|For Private leagues|None|Used for private leagues. See [Private Leagues Section](#private-leagues) for documentation|
+|SWID|String|For Private leagues|None|Used for private leagues. (Can be defined with or without {}) See [Private Leagues Section](#private-leagues) for documentation|
 
 ### Running with Docker
 
@@ -326,4 +273,43 @@ you can run these tests by changing the directory to the `gamedaybot` directory 
 ```python3
 python3 setup.py test
 ```
+</details>
+
+#### Private Leagues
+
+For private league you will need to get your swid and espn_s2.
+You can find these two values after logging into your espn fantasy football account on espn's website.
+(Chrome Browser)
+Right click anywhere on the website and click inspect option.
+From there click Application on the top bar.
+On the left under Storage section click Cookies then http://fantasy.espn.com.
+From there you should be able to find your swid and espn_s2 variables and values.
+## FAQ
+
+**League must be full.**
+
+The bot isn't working
+
+* Did you miss a step in the instructions? Try doing it from scratch again. If still no luck, open an issue (https://github.com/dtcarls/fantasy_football_chat_bot/issues) or hop into the discord (link at the top of readme) so the answer can be shared with others.
+
+How are power ranks calculated?
+
+* They are calculated using 2 step dominance, as well as a combination of points scored and margin of victory. Weighted 80/15/5 respectively. I wouldn't so much pay attention to the actual number but more of the gap between teams. Full source of the calculations can be seen here: https://github.com/cwendt94/espn-api/pull/12/files. If you want a tutorial on dominance matrices: https://www.youtube.com/watch?v=784TmwaHPOw
+
+Is there a version of this for Yahoo/CBS/NFL/[insert other site]?
+
+* No, this would require a significant rework for other sites.
+
+How do I set another timezone?
+
+* Specify your variable https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List
+
+Is there a version of this for Messenger/WhatsApp/[insert other chat]?
+
+* No, but I am open to pull requests implementing their API for additional cross platform support.
+
+My Standings look wrong. I have weird (+1) in it.
+
+* TOP_HALF_SCORING: If set to True, when standings are posted on Wednesday it will also include top half scoring wins
+* Top half wins is being in the top half of your league for points and you receive an additional "win" for it. The number in parenthesis (+1) tells you how many added wins over the season for top half wins.
 </details>
