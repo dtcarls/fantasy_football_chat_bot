@@ -1,5 +1,4 @@
 from datetime import date
-import gamedaybot.utils as utils
 
 def get_scoreboard_short(league, week=None):
     # Gets current week's scoreboard
@@ -269,8 +268,13 @@ def optimal_lineup_score(lineup, starter_counts):
         if 'D/ST' not in position and '/' in position:
             flex = position.split('/')
             for player in lineup:
-                if player.position in flex and player.name not in best_lineup[player.position]:
-                    position_players[position][player.name] = player.points
+                if player.position in flex:
+                    try:
+                        if player.name not in best_lineup[player.position]:
+                            position_players[position][player.name] = player.points
+                    except KeyError:
+                        position_players[position][player.name] = player.points
+
         position_players[position] = {k: v for k, v in sorted(position_players[position].items(), key=lambda item: item[1], reverse=True)}
         best_lineup[position] = dict(list(position_players[position].items())[:starter_counts[position]])
 
@@ -301,8 +305,8 @@ def optimal_team_scores(league, week=None, full_report=False):
         i = 1
         for score in best_scores:
             s = ['%2d: %4s: %6.2f (%6.2f - %.2f%%)' % (i, score.team_abbrev, best_scores[score][0], best_scores[score][1], best_scores[score][3])]
-        results += s
-        i += 1
+            results += s
+            i += 1
 
         text = ['Optimal Scores:  (Actual - % of optimal)'] + results
         return '\n'.join(text)
