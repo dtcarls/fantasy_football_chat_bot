@@ -247,40 +247,71 @@ def get_starter_counts(league):
             return h_starters
 
 
+def best_flex(flexes, player_pool, num):
+    pool = {}
+    for flex_position in flexes:
+        try:
+            pool = pool|player_pool[flex_position]
+        except:
+            pass
+    pool = {k: v for k, v in sorted(pool.items(), key=lambda item: item[1], reverse=True)}
+    best = dict(list(pool.items())[:num])
+    for pos in player_pool:
+        for p in best:
+            if p in player_pool[pos]:
+                player_pool[pos].pop(p)
+    return best, player_pool
+
+
 def optimal_lineup_score(lineup, starter_counts):
     best_lineup = {}
     position_players = {}
 
+    #get all players and points
     score = 0
-    for position in starter_counts:
-        position_players[position] = {}
-        score = 0
-        for player in lineup:
-            if player.position == position:
-                position_players[position][player.name] = player.points
+    for player in lineup:
+            try:
+                position_players[player.position][player.name] = player.points
+            except KeyError:
+                position_players[player.position] = {}
+                position_players[player.position][player.name] = player.points
             if player.slot_position not in ['BE', 'IR']:
                 score += player.points
-        position_players[position] = {k: v for k, v in sorted(position_players[position].items(), key=lambda item: item[1], reverse=True)}
-        best_lineup[position] = dict(list(position_players[position].items())[:starter_counts[position]])
 
-    # flexes. need to figure out best in other positions first
+    #sort players by position for points
     for position in starter_counts:
+        try:
+            position_players[position] = {k: v for k, v in sorted(position_players[position].items(), key=lambda item: item[1], reverse=True)}
+            best_lineup[position] = dict(list(position_players[position].items())[:starter_counts[position]])
+            position_players[position] = dict(list(position_players[position].items())[starter_counts[position]:])
+        except KeyError:
+            best_lineup[position] = {}
+
+    # flexes. need to figure out best in other single positions first
+    for position in starter_counts:
+        #flex
         if 'D/ST' not in position and '/' in position:
             flex = position.split('/')
-            for player in lineup:
-                if player.position in flex:
-                    try:
-                        if player.name not in best_lineup[player.position]:
-                            position_players[position][player.name] = player.points
-                    except KeyError:
-                        position_players[position][player.name] = player.points
+            result = best_flex(flex, position_players, starter_counts[position])
+            best_lineup[position] = result[0]
+            position_players = result[1]
 
-        position_players[position] = {k: v for k, v in sorted(position_players[position].items(), key=lambda item: item[1], reverse=True)}
-        best_lineup[position] = dict(list(position_players[position].items())[:starter_counts[position]])
+    # Offensive Player. need to figure out best in other positions first
+    if 'OP' in starter_counts:
+        flex = ['RB', 'WR', 'TE', 'QB']
+        result = best_flex(flex, position_players,starter_counts['OP'])
+        best_lineup['OP'] = result[0]
+        position_players = result[1]
+
+    # Defensive Player. need to figure out best in other positions first
+    if 'DP' in starter_counts:
+        flex = ['DT', 'DE', 'LB', 'CB', 'S']
+        result = best_flex(flex, position_players,starter_counts['DP'])
+        best_lineup['DP'] = result[0]
+        position_players = result[1]
 
     best_score = 0
     for position in best_lineup:
-        # print(sum(best_lineup[position].values()))
         best_score += sum(best_lineup[position].values())
 
     score_pct = (score / best_score) * 100
