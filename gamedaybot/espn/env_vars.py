@@ -2,6 +2,7 @@ import os
 import gamedaybot.espn.functionality as espn
 import gamedaybot.utils as utils
 
+
 def get_env_vars():
     data = {}
     try:
@@ -39,7 +40,7 @@ def get_env_vars():
 
     data['monitor_report'] = monitor_report
 
-    str_limit = 40000 #slack char limit
+    str_limit = 40000  # slack char limit
 
     try:
         bot_id = os.environ["BOT_ID"]
