@@ -4,11 +4,22 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+
 class GroupMeException(Exception):
     pass
 
+
 class GroupMe(object):
-    # Creates GroupMe Bot to send messages
+    """
+    Creates a GroupMe bot to send messages to a specified chatroom.
+
+    Parameters:
+    bot_id (str): The unique bot ID for the GroupMe chatroom.
+
+    Attributes:
+    bot_id (str): The unique bot ID for the GroupMe chatroom.
+    """
+
     def __init__(self, bot_id):
         self.bot_id = bot_id
 
@@ -16,10 +27,18 @@ class GroupMe(object):
         return "GroupMeBot(%s)" % self.bot_id
 
     def send_message(self, text):
-        # Sends a message to the chatroom
+        """
+        Sends a message to the specified GroupMe chatroom.
+
+        Parameters:
+        text (str): The message to be sent to the chatroom. Limit 1000 characters.
+
+        Returns:
+        r (requests.Response): The response from the GroupMe API.
+        """
         template = {
             "bot_id": self.bot_id,
-            "text": text, #limit 1000 chars
+            "text": text,
             "attachments": []
         }
 

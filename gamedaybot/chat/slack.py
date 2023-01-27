@@ -4,22 +4,60 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+
 class SlackException(Exception):
     pass
 
-class Slack(object):
-    # Creates GroupMe Bot to send messages
-    def __init__(self, webhook_url):
+
+class Slack:
+    """
+    A class used to send messages to a Slack channel through a webhook.
+
+    Parameters
+    ----------
+    webhook_url : str
+        The URL of the Slack webhook to send messages to.
+
+    Attributes
+    ----------
+    webhook_url : str
+        The URL of the Slack webhook to send messages to.
+
+    Methods
+    -------
+    send_message(text: str)
+        Sends a message to the Slack channel.
+    """
+
+    def __init__(self, webhook_url: str):
         self.webhook_url = webhook_url
 
     def __repr__(self):
         return "Slack Webhook Url(%s)" % self.webhook_url
 
-    def send_message(self, text):
-        # Sends a message to the chatroom
+    def send_message(self, text: str):
+        """
+        Sends a message to the Slack channel.
+
+        Parameters
+        ----------
+        text : str
+            The message to be sent to the Slack channel.
+
+        Returns
+        -------
+        r : requests.Response
+            The response object of the POST request.
+
+        Raises
+        ------
+        SlackException
+            If there is an error with the POST request.
+        """
+
         message = "```{0}```".format(text)
         template = {
-            "text": message #limit 40000
+            "text": message  # limit 40000
         }
 
         headers = {'content-type': 'application/json'}
