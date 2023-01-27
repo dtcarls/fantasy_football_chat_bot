@@ -1,24 +1,26 @@
-import unittest
-import requests_mock
+import pytest
+import sys
+import os
+sys.path.insert(1, os.path.abspath('.'))
 from gamedaybot.chat.slack import (Slack, SlackException, )
 
-class SlackTestCase(unittest.TestCase):
+
+@pytest.mark.usefixtures("mock_requests")
+class TestSlack:
     '''Test SlackBot class'''
 
-    def setUp(self):
+    def setup_method(self):
         self.url = "https://hooks.slack.com/services/A1B2C3/ABC1ABC2/abcABC1abcABC2"
         self.test_bot = Slack(self.url)
         self.test_text = "This is a test."
 
-    @requests_mock.Mocker()
-    def test_send_message(self, m):
+    def test_send_message(self, mock_requests):
         '''Does the message send successfully?'''
-        m.post(self.url, status_code=200)
-        self.assertEqual(self.test_bot.send_message(self.test_text).status_code, 200)
+        mock_requests.post(self.url, status_code=200)
+        assert self.test_bot.send_message(self.test_text).status_code == 200
 
-    @requests_mock.Mocker()
-    def test_bad_bot_id(self, m):
+    def test_bad_bot_id(self, mock_requests):
         '''Does the expected error raise when a bot id is incorrect?'''
-        m.post(self.url, status_code=404)
-        with self.assertRaises(SlackException):
+        mock_requests.post(self.url, status_code=404)
+        with pytest.raises(SlackException):
             self.test_bot.send_message(self.test_text)

@@ -1,24 +1,26 @@
-import unittest
-import requests_mock
+import pytest
+import sys
+import os
+sys.path.insert(1, os.path.abspath('.'))
 from gamedaybot.chat.discord import (Discord, DiscordException, )
 
-class DiscordTestCase(unittest.TestCase):
+
+@pytest.mark.usefixtures("mock_requests")
+class TestDiscord:
     '''Test DiscordBot class'''
 
-    def setUp(self):
+    def setup_method(self):
         self.url = "https://discordapp.com/api/webhooks/123/abc"
         self.test_bot = Discord(self.url)
         self.test_text = "This is a test."
 
-    @requests_mock.Mocker()
-    def test_send_message(self, m):
+    def test_send_message(self, mock_requests):
         '''Does the message send successfully?'''
-        m.post(self.url, status_code=204)
-        self.assertEqual(self.test_bot.send_message(self.test_text).status_code, 204)
+        mock_requests.post(self.url, status_code=204)
+        assert self.test_bot.send_message(self.test_text).status_code == 204
 
-    @requests_mock.Mocker()
-    def test_bad_bot_id(self, m):
+    def test_bad_bot_id(self, mock_requests):
         '''Does the expected error raise when a bot id is incorrect?'''
-        m.post(self.url, status_code=404)
-        with self.assertRaises(DiscordException):
+        mock_requests.post(self.url, status_code=404)
+        with pytest.raises(DiscordException):
             self.test_bot.send_message(self.test_text)
