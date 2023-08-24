@@ -64,8 +64,7 @@ def get_env_vars():
             len(str(discord_webhook_url)) <= 1):
         # Ensure that there's info for at least one messaging platform,
         # use length of str in case of blank but non null env variable
-        raise Exception("No messaging platform info provided. Be sure one of BOT_ID,\
-                        SLACK_WEBHOOK_URL, or DISCORD_WEBHOOK_URL env variables are set")
+        raise Exception("No messaging platform info provided. Be sure one of BOT_ID, SLACK_WEBHOOK_URL, or DISCORD_WEBHOOK_URL env variables are set")
 
     data['str_limit'] = str_limit
     data['bot_id'] = bot_id
