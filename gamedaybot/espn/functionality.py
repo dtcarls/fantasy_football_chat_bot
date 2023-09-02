@@ -1,4 +1,5 @@
 from datetime import date
+import random
 
 def get_scoreboard_short(league, week=None):
     # Gets current week's scoreboard
@@ -502,3 +503,24 @@ def get_trophies(league, week=None):
 
     text = ['Trophies of the week:'] + high_score_str + low_score_str + blowout_str + close_score_str + get_lucky_trophy(league, week) + get_achievers_trophy(league, week) + optimal_team_scores(league, week)
     return '\n'.join(text)
+
+def get_weekly_side_bet():
+    side_bets = [
+        'Highest aggregate score from the NFL teams your fantasy team is comprised of. Multiple players from the same team are additive',
+        'Most negative yard plays from starting RB/QB/WR',
+        'Highest NFL team diversity in squad (starters and bench), tie breaker is points scored by best starting player combination from unique teams',
+        'Best combined score from lowest scoring 2 players on team, excluding DEF/K',
+        'Highest combined score for DEF + K',
+        'Most injured players on bench after Monday night football, tie break for aggregate total number of weeks injured prior, not including week injury occured',
+        'Biggest bomb caught',
+        'Biggest bomb thrown',
+        'Highest scoring player picked up and played this week',
+        'Highest kicker score (tie-breaker is longest field goal)',
+        'Most kicks made over 50 yards',
+        'Most made extra points',
+        'Lowest bench score',
+        'Highest scoring team'
+    ]
+
+    side_bet_choice = random.choice(side_bets)
+    return 'This week\'s side bet is: \n' + side_bet_choice
