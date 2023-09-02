@@ -79,6 +79,19 @@ def espn_bot(function):
     elif function == "get_waiver_report" and swid != '{1}' and espn_s2 != '1':
         faab = league.settings.faab
         text = espn.get_waiver_report(league, faab)
+    elif function == 'get_weekly_side_bet':
+        text = espn.get_weekly_side_bet()
+    # Lineup warnings
+    elif function=="get_lineup_warning_1pm":
+        text = "The 1pm games are about to start....check those lineups!"
+    elif function=="get_lineup_warning_4pm":
+        text = "The 4pm games are about to start....check those lineups!"
+    elif function=="get_lineup_warning_sunday_night":
+        text = "The Sunday night game is about to start....check those lineups!"
+    elif function=="get_lineup_warning_monday_night":
+        text = "The Monday night game is about to start....check those lineups!"
+    elif function=="get_lineup_warning_thursday_night":
+        text = "The Thursday night game is about to start....check those lineups!"
     elif function == "init":
         try:
             text = data["init_msg"]
