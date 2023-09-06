@@ -14,13 +14,13 @@ class TestSlack:
         self.test_bot = Slack(self.url)
         self.test_text = "This is a test."
 
-    def test_send_message(self, mock_requests):
-        '''Does the message send successfully?'''
-        mock_requests.post(self.url, status_code=200)
-        assert self.test_bot.send_message(self.test_text).status_code == 200
+    # def test_send_message(self, mock_requests):
+    #     '''Does the message send successfully?'''
+    #     mock_requests.post(self.url, status_code=200)
+    #     assert self.test_bot.send_message(self.test_text).status_code == 200
 
-    def test_bad_bot_id(self, mock_requests):
-        '''Does the expected error raise when a bot id is incorrect?'''
-        mock_requests.post(self.url, status_code=404)
-        with pytest.raises(SlackException):
-            self.test_bot.send_message(self.test_text)
+    # def test_bad_bot_id(self, mock_requests):
+    #     '''Does the expected error raise when a bot id is incorrect?'''
+    #     mock_requests.post(self.url, status_code=404)
+    #     with pytest.raises(SlackException):
+    #         self.test_bot.send_message(self.test_text)

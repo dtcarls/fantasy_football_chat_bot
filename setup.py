@@ -19,7 +19,7 @@ setup(
 
     test_suite='nose.collector',
 
-    tests_require=['nose', 'requests_mock'],
+    tests_require=['nose', 'requests_mock', 'pytest'],
 
     url='https://github.com/dtcarls/fantasy_football_chat_bot',
 
