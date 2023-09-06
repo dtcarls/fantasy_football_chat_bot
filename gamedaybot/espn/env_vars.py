@@ -2,19 +2,20 @@ import os
 import gamedaybot.espn.functionality as espn
 import gamedaybot.utils as utils
 
+
 def get_env_vars():
     data = {}
     try:
         ff_start_date = os.environ["START_DATE"]
     except KeyError:
-        ff_start_date = '2022-09-08'
+        ff_start_date = '2023-09-07'
 
     data['ff_start_date'] = ff_start_date
 
     try:
         ff_end_date = os.environ["END_DATE"]
     except KeyError:
-        ff_end_date = '2023-01-04'
+        ff_end_date = '2024-01-09'
 
     data['ff_end_date'] = ff_end_date
 
@@ -39,7 +40,7 @@ def get_env_vars():
 
     data['monitor_report'] = monitor_report
 
-    str_limit = 40000 #slack char limit
+    str_limit = 40000  # slack char limit
 
     try:
         bot_id = os.environ["BOT_ID"]
@@ -63,8 +64,7 @@ def get_env_vars():
             len(str(discord_webhook_url)) <= 1):
         # Ensure that there's info for at least one messaging platform,
         # use length of str in case of blank but non null env variable
-        raise Exception("No messaging platform info provided. Be sure one of BOT_ID,\
-                        SLACK_WEBHOOK_URL, or DISCORD_WEBHOOK_URL env variables are set")
+        raise Exception("No messaging platform info provided. Be sure one of BOT_ID, SLACK_WEBHOOK_URL, or DISCORD_WEBHOOK_URL env variables are set")
 
     data['str_limit'] = str_limit
     data['bot_id'] = bot_id
@@ -76,7 +76,7 @@ def get_env_vars():
     try:
         year = int(os.environ["LEAGUE_YEAR"])
     except KeyError:
-        year = 2022
+        year = 2023
 
     data['year'] = year
 

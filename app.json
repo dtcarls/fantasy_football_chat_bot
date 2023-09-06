@@ -35,7 +35,7 @@
     },
     "LEAGUE_YEAR": {
       "description": "ESPN League Year",
-      "value": "2022",
+      "value": "2023",
       "required": false
     },
     "TIMEZONE": {
@@ -45,12 +45,12 @@
     },
     "START_DATE": {
       "description": "Season Start Date",
-      "value": "2022-09-08",
+      "value": "2023-09-07",
       "required": false
     },
     "END_DATE": {
       "description": "Season End Date",
-      "value": "2023-01-04",
+      "value": "2024-01-09",
       "required": false
     },
     "INIT_MSG": {
