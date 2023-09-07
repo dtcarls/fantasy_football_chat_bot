@@ -29,7 +29,7 @@ def espn_bot(function):
     else:
         league = League(league_id=league_id, year=year, espn_s2=espn_s2, swid=swid)
 
-    if league.scoringPeriodId > len(league.settings.matchup_periods):
+    if league.scoringPeriodId > len(league.settings.matchup_periods) and not test:
         print("Not in active season")
         return
 
