@@ -55,7 +55,7 @@ class Discord(object):
             If there is an error with the POST request.
         """
 
-        message = "```@everyone {0}```".format(text)
+        message = "@everyone {0}".format(text)
         template = {
             "content": message  # limit 3000 chars
         }
