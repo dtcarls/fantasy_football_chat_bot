@@ -54,7 +54,7 @@ def scheduler():
                   day_of_week='thu', hour=21, minute=42, start_date=ff_start_date, end_date=ff_end_date,
                   timezone=game_timezone, replace_existing=True)
     sched.add_job(espn_bot, 'cron', ['get_scoreboard_short'], id='scoreboard1',
-                  day_of_week='fri,mon', hour=7, minute=30, start_date=ff_start_date, end_date=ff_end_date,
+                  day_of_week='thu,fri,mon', hour=21, minute=55, start_date=ff_start_date, end_date=ff_end_date,
                   timezone=my_timezone, replace_existing=True)
 
     if data['monitor_report']:
