@@ -272,7 +272,8 @@ Automated tests for this package are included in the `tests` directory. After in
 you can run these tests by changing the directory to the `gamedaybot` directory and running the following:
 
 ```python3
-python3 setup.py test
+pip install -r requirements-test.txt
+pytest
 ```
 </details>
 
