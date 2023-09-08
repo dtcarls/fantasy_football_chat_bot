@@ -54,7 +54,7 @@ def espn_bot(function):
 
     text = ''
     if function == "get_matchups":
-        text = espn.get_matchups(league, random_phrase)
+        text = espn.get_matchups(league)
         text = text + "\n\n" + espn.get_projected_scoreboard(league)
     elif function == "get_monitor":
         text = espn.get_monitor(league)
