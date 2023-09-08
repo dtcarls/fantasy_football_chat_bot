@@ -51,7 +51,7 @@ def scheduler():
             end_date=ff_end_date, timezone=my_timezone, replace_existing=True)
 
     sched.add_job(espn_bot, 'cron', ['get_matchups'], id='matchups',
-                  day_of_week='thu', hour=19, minute=51, start_date=ff_start_date, end_date=ff_end_date,
+                  day_of_week='thu', hour=21, minute=42, start_date=ff_start_date, end_date=ff_end_date,
                   timezone=game_timezone, replace_existing=True)
     sched.add_job(espn_bot, 'cron', ['get_scoreboard_short'], id='scoreboard1',
                   day_of_week='fri,mon', hour=7, minute=30, start_date=ff_start_date, end_date=ff_end_date,
@@ -66,7 +66,7 @@ def scheduler():
                   day_of_week='sun', hour='16,20', start_date=ff_start_date, end_date=ff_end_date,
                   timezone=game_timezone, replace_existing=True)
     
-    sched.add_job(espn_bot, 'cron', ['get_weekly_side_bet'], id='matchups',
+    sched.add_job(espn_bot, 'cron', ['get_weekly_side_bet'], id='side_bet',
                   day_of_week='thu', hour=19, minute=35, start_date=ff_start_date, end_date=ff_end_date,
                   timezone=game_timezone, replace_existing=True)
     
