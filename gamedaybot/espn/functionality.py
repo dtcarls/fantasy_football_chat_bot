@@ -694,7 +694,7 @@ def get_achievers_trophy(league, week=None):
                 over_achiever = i.home_team.team_name
             if home_performance < worst_performance:
                 worst_performance = home_performance
-            under_achiever = i.home_team.team_name
+                under_achiever = i.home_team.team_name
         if i.away_team != 0:
             if away_performance > best_performance:
                 best_performance = away_performance
