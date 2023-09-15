@@ -26,7 +26,7 @@ def scheduler():
     # power rankings:                     tuesday evening at 6:30pm local time.
     # trophies:                           tuesday morning at 7:30am local time.
     # standings:                          wednesday morning at 7:30am local time.
-    # waiver report:                      wednesday morning at 7:30am local time. (optional)
+    # waiver report:                      wednesday morning at 7:31am local time. (optional)
     # matchups:                           thursday evening at 7:30pm east coast time.
     # score update:                       friday, monday, and tuesday morning at 7:30am local time.
     # player monitor report:              sunday morning at 7:30am local time.
@@ -44,6 +44,10 @@ def scheduler():
     sched.add_job(espn_bot, 'cron', ['get_standings'], id='standings',
                   day_of_week='wed', hour=7, minute=30, start_date=ff_start_date, end_date=ff_end_date,
                   timezone=my_timezone, replace_existing=True)
+    sched.add_job(espn_bot, 'cron', ['get_waiver_report'], id='waiver_report',
+                  day_of_week='wed', hour=7, minute=31, start_date=ff_start_date, end_date=ff_end_date,
+                  timezone=my_timezone, replace_existing=True)
+
     if data['daily_waiver']:
         sched.add_job(
             espn_bot, 'cron', ['get_waiver_report'],
