@@ -136,3 +136,4 @@ dmypy.json
 gamedaybot/ids.txt
 *.sh
 *.ipynb
+.DS_STORE
