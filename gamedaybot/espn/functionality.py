@@ -848,21 +848,16 @@ def get_trophies(league, week=None):
 
 def get_weekly_side_bet():
     side_bets = [
-        'Highest aggregate score from the NFL teams your fantasy team is comprised of. Multiple players from the same team are additive',
-        'Best combined score from lowest scoring 2 players on team, excluding DEF/K',
-        'Highest combined score for DEF + K',
-        'Biggest bomb caught',
-        'Biggest bomb thrown',
-        'Longest run',
-        'Longest kick made (tie-breaker is most kicks made, including PATs)',
-        'Highest scoring player picked up and played this week',
-        'Highest kicker score (tie-breaker is longest field goal)',
-        'Most kicks made over 50 yards (tie-breaker is most kicks made, including PATs)',
-        'Most made extra points',
-        'Lowest bench score',
         'Highest scoring team',
-        'Highest total skill positions\' score (WR/RB/TE)',
-        'Non-QB player involved in the most touchdowns (throw/catch/run)'
+        'Biggest blowout winner',
+        'Best manager (as deemed by Awesom-O)',
+        'Overachiever (as deemed by Awesom-O)',
+        'Luckiest manager (as deemed by Awesom-O)',
+        'Most points (starters + bench)',
+        'Most touchdowns by starters (passing, rushing, receiving, defense/ST)',
+        'Highest single RB score (RB or FLEX player)',
+        'Highest single WR score (WR or FLEX player)',
+        'Highest QB score'
     ]
 
     side_bet_choice = random.choice(side_bets)
