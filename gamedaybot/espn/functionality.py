@@ -269,7 +269,7 @@ def get_matchups(league, week=None):
 
 def get_close_scores(league, week=None):
     """
-    Retrieve the projected closest scores (10.999 points or closer) for a given week in a fantasy football league.
+    Retrieve the projected closest scores (15 points or closer) for a given week in a fantasy football league.
 
     Parameters
     ----------
@@ -284,7 +284,7 @@ def get_close_scores(league, week=None):
         A string containing the projected closest scores for the given week, formatted as a list of team names and abbreviation.
     """
 
-    # Gets current projected closest scores (10.999 points or closer)
+    # Gets current projected closest scores (15 points or closer)
     box_scores = league.box_scores(week=week)
     score = []
 
@@ -294,7 +294,7 @@ def get_close_scores(league, week=None):
             home_projected = get_projected_total(i.home_lineup)
             diffScore = away_projected - home_projected
 
-            if (-11 < diffScore <= 0 and not all_played(i.away_lineup)) or (0 <= diffScore < 11 and not all_played(i.home_lineup)):
+            if (abs(diffScore) <= 15 and (not all_played(i.away_lineup) or not all_played(i.home_lineup))):
                 score += ['%4s %6.2f - %6.2f %s' % (i.home_team.team_abbrev, i.home_projected,
                                                     i.away_projected, i.away_team.team_abbrev)]
 
