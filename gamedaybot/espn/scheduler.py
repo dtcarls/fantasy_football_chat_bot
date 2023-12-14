@@ -35,15 +35,19 @@ def scheduler():
     sched.add_job(espn_bot, 'cron', ['get_close_scores'], id='close_scores',
                   day_of_week='mon', hour=18, minute=30, start_date=ff_start_date, end_date=ff_end_date,
                   timezone=game_timezone, replace_existing=True)
+    """
     sched.add_job(espn_bot, 'cron', ['get_power_rankings'], id='power_rankings',
                   day_of_week='tue', hour=18, minute=30, start_date=ff_start_date, end_date=ff_end_date,
                   timezone=my_timezone, replace_existing=True)
+    """
     sched.add_job(espn_bot, 'cron', ['get_final'], id='final',
                   day_of_week='tue', hour=7, minute=30, start_date=ff_start_date, end_date=ff_end_date,
                   timezone=my_timezone, replace_existing=True)
+    """
     sched.add_job(espn_bot, 'cron', ['get_standings'], id='standings',
                   day_of_week='wed', hour=7, minute=30, start_date=ff_start_date, end_date=ff_end_date,
                   timezone=my_timezone, replace_existing=True)
+    """
     sched.add_job(espn_bot, 'cron', ['get_waiver_report'], id='waiver_report',
                   day_of_week='wed', hour=7, minute=35, start_date=ff_start_date, end_date=ff_end_date,
                   timezone=my_timezone, replace_existing=True)
@@ -70,11 +74,11 @@ def scheduler():
     sched.add_job(espn_bot, 'cron', ['get_scoreboard_short'], id='scoreboard2',
                   day_of_week='sun', hour='16,20', start_date=ff_start_date, end_date=ff_end_date,
                   timezone=game_timezone, replace_existing=True)
-    
+    """
     sched.add_job(espn_bot, 'cron', ['get_weekly_side_bet'], id='side_bet',
                   day_of_week='thu', hour=19, minute=35, start_date=ff_start_date, end_date=ff_end_date,
                   timezone=game_timezone, replace_existing=True)
-    
+    """
     # Lineup Warnings
     sched.add_job(espn_bot, 'cron', ['get_lineup_warning_1pm'], id='lineup_warning_1pm',
         day_of_week='sun', hour=12, minute=20, start_date=ff_start_date, end_date=ff_end_date,
