@@ -224,6 +224,13 @@ def scan_roster(lineup, team):
             player = i.position + ' ' + i.name + ' - ' + i.injuryStatus.title().replace('_', ' ')
             players += [player]
 
+        if i.slot_position == 'IR' and \
+            i.injuryStatus != 'INJURY_RESERVE' and i.injuryStatus != 'OUT':
+
+            count += 1
+            player = i.position + ' ' + i.name + ' - Not IR eligible'
+            players += [player]
+
     list = ""
     report = ""
 
