@@ -393,7 +393,8 @@ def get_waiver_report(league, faab=False):
 
 def get_power_rankings(league, week=None):
     """
-    This function returns the power rankings of the teams in the league for a specific week.
+    This function returns the power rankings of the teams in the league for a specific week,
+    along with the change in power ranking number and playoff percentage from the previous week.
     If the week is not provided, it defaults to the current week.
     The power rankings are determined using a 2 step dominance algorithm,
     as well as a combination of points scored and margin of victory.
@@ -409,20 +410,40 @@ def get_power_rankings(league, week=None):
     Returns
     -------
     str
-        A string representing the power rankings
+        A string representing the power rankings with changes from the previous week
     """
 
     # Check if the week is provided, if not use the current week
     if not week:
         week = league.current_week
-    # Get the power rankings for the provided week
-    power_rankings = league.power_rankings(week=week)
 
-    # Create a list of strings representing the power rankings
-    score = ['%6s (%.1f) - %s' % (i[0], i[1].playoff_pct, i[1].team_name) for i in power_rankings
-             if i]
-    text = ['Power Rankings (Playoff %)'] + score
-    return '\n'.join(text)
+    p_rank_up_emoji = "🟢"
+    p_rank_down_emoji = "🔻"#"🔴"
+
+    # Get the power rankings for the current and previous week
+    current_rankings = league.power_rankings(week=week)
+    previous_rankings = league.power_rankings(week=week-1) if week > 1 else [None] * len(current_rankings)
+
+    # Prepare the output string
+    rankings_text = []
+    for current, previous in zip(current_rankings, previous_rankings):
+        # Handle the case for the first week or missing data
+        if not previous or week == 1:
+            rankings_text.append(f"{current[0]} ({current[1].playoff_pct}) - {current[1].team_name}")
+        else:
+            # Calculate the percent changes
+            rank_change_percent = ((float(current[0]) - float(previous[0])) / float(previous[0])) * 100
+
+            # Use emojis for displaying change
+            rank_change_emoji = p_rank_up_emoji if rank_change_percent > 0 else p_rank_down_emoji if rank_change_percent < 0 else ""
+
+            # Append emoji with the absolute value of change
+            rank_change_text = f"{rank_change_emoji}{abs(rank_change_percent):4.1f}%"
+
+            rankings_text.append(f"{current[0]}[{rank_change_text}] ({current[1].playoff_pct}) - {current[1].team_abbrev}")
+
+    rankings_text = ['Power Rankings (Playoff %)'] + rankings_text
+    return '\n'.join(rankings_text)
 
 
 def get_starter_counts(league):
