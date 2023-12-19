@@ -621,7 +621,7 @@ def optimal_lineup_score(lineup, starter_counts):
     return (best_score, score, best_score - score, score_pct)
 
 
-def optimal_team_scores(league, week=None, full_report=False):
+def optimal_team_scores(league, week=None, full_report=False, recap=False):
     """
     This function returns the optimal team scores or managers.
 
@@ -639,7 +639,6 @@ def optimal_team_scores(league, week=None, full_report=False):
     str or tuple
         If full_report is True, a string representing the full report of the optimal team scores.
         If full_report is False, a tuple containing the best and worst manager strings.
-
     """
 
     if not week:
@@ -686,12 +685,16 @@ def optimal_team_scores(league, week=None, full_report=False):
             best_mgr_str = ['🤖 Best Managers 🤖'] + [f'{team_names} scored their optimal score!']
 
         worst = best_scores.popitem()
+        if recap:
+            return worst[0].team_abbrev
+
         worst_mgr_str = ['🤡 Worst Manager 🤡'] + ['%s left %.2f points on their bench. Only scoring %.2f%% of their optimal score.' %
                                                  (worst[0].team_name, worst[1][0] - worst[1][1], worst[1][3])]
+
         return (best_mgr_str + worst_mgr_str)
 
 
-def get_achievers_trophy(league, week=None):
+def get_achievers_trophy(league, week=None, recap=False):
     """
     This function returns the overachiever and underachiever of the league
     based on the difference between the projected score and the actual score.
@@ -710,8 +713,6 @@ def get_achievers_trophy(league, week=None):
     """
 
     box_scores = league.box_scores(week=week)
-    over_achiever = ''
-    under_achiever = ''
     high_achiever_str = ['📈 Overachiever 📈']
     low_achiever_str = ['📉 Underachiever 📉']
     best_performance = -9999
@@ -723,42 +724,35 @@ def get_achievers_trophy(league, week=None):
         if i.home_team != 0:
             if home_performance > best_performance:
                 best_performance = home_performance
-                over_achiever = i.home_team.team_name
+                over_achiever = i.home_team
             if home_performance < worst_performance:
                 worst_performance = home_performance
-                under_achiever = i.home_team.team_name
+                under_achiever = i.home_team
         if i.away_team != 0:
             if away_performance > best_performance:
                 best_performance = away_performance
-                over_achiever = i.away_team.team_name
+                over_achiever = i.away_team
             if away_performance < worst_performance:
                 worst_performance = away_performance
-                under_achiever = i.away_team.team_name
+                under_achiever = i.away_team
+
+    if recap:
+        return over_achiever.team_abbrev, under_achiever.team_abbrev
 
     if best_performance > 0:
-        high_achiever_str += ['%s was %.2f points over their projection' % (over_achiever, best_performance)]
+        high_achiever_str += ['%s was %.2f points over their projection' % (over_achiever.team_name, best_performance)]
     else:
         high_achiever_str += ['No team out performed their projection']
 
     if worst_performance < 0:
-        low_achiever_str += ['%s was %.2f points under their projection' % (under_achiever, abs(worst_performance))]
+        low_achiever_str += ['%s was %.2f points under their projection' % (under_achiever.team_name, abs(worst_performance))]
     else:
         low_achiever_str += ['No team was worse than their projection']
 
     return (high_achiever_str + low_achiever_str)
 
 
-def get_lucky_trophy(league, week=None):
-    """
-    This function takes in a league object and an optional week parameter. It retrieves the box scores for the specified league and week, and creates a dictionary with the weekly scores for each team. The teams are sorted in descending order by their scores, and the team with the highest score is determined to be the lucky team for the week. The team with the lowest score is determined to be the unlucky team for the week. The function returns a list containing the lucky and unlucky teams, along with their records for the week.
-
-    Parameters:
-    league (object): A league object containing information about the league and its teams.
-    week (int, optional): The week for which the box scores should be retrieved. If no week is specified, the current week will be used.
-
-    Returns:
-    list: A list containing the lucky and unlucky teams, along with their records for the week.
-    """
+def get_weekly_score_with_win_loss(league, week=None):
     box_scores = league.box_scores(week=week)
     weekly_scores = {}
     for i in box_scores:
@@ -769,23 +763,27 @@ def get_lucky_trophy(league, week=None):
             else:
                 weekly_scores[i.home_team] = [i.home_score, 'L']
                 weekly_scores[i.away_team] = [i.away_score, 'W']
-    weekly_scores = dict(sorted(weekly_scores.items(), key=lambda item: item[1], reverse=True))
+    return dict(sorted(weekly_scores.items(), key=lambda item: item[1], reverse=True))
 
-    # losses = 0
-    # for t in weekly_scores:
-    #     print(t.team_name + ': (' + str(len(weekly_scores)-1-losses) + '-' + str(losses) +')')
-    #     losses+=1
 
+def get_lucky_trophy(league, week=None, recap=False):
+    """
+    This function takes in a league object and an optional week parameter. It retrieves the box scores for the specified league and week, and creates a dictionary with the weekly scores for each team. The teams are sorted in descending order by their scores, and the team with the lowest score and won is determined to be the lucky team for the week. The team with the highest score and lost is determined to be the unlucky team for the week. The function returns a list containing the lucky and unlucky teams, along with their records for the week.
+    Parameters:
+    league (object): A league object containing information about the league and its teams.
+    week (int, optional): The week for which the box scores should be retrieved. If no week is specified, the current week will be used.
+    Returns:
+    list: A list containing the lucky and unlucky teams, along with their records for the week.
+    """
+    weekly_scores = get_weekly_score_with_win_loss(league, week=week)
     losses = 0
-    unlucky_team_name = ''
     unlucky_record = ''
-    lucky_team_name = ''
     lucky_record = ''
     num_teams = len(weekly_scores) - 1
 
     for t in weekly_scores:
         if weekly_scores[t][1] == 'L':
-            unlucky_team_name = t.team_name
+            unlucky_team = t
             unlucky_record = str(num_teams - losses) + '-' + str(losses)
             break
         losses += 1
@@ -794,17 +792,20 @@ def get_lucky_trophy(league, week=None):
     weekly_scores = dict(sorted(weekly_scores.items(), key=lambda item: item[1]))
     for t in weekly_scores:
         if weekly_scores[t][1] == 'W':
-            lucky_team_name = t.team_name
+            lucky_team = t
             lucky_record = str(wins) + '-' + str(num_teams - wins)
             break
         wins += 1
 
-    lucky_str = ['🍀 Lucky 🍀'] + ['%s was %s against the league, but still got the win' % (lucky_team_name, lucky_record)]
-    unlucky_str = ['😡 Unlucky 😡'] + ['%s was %s against the league, but still took an L' % (unlucky_team_name, unlucky_record)]
+    if recap:
+        return lucky_team.team_abbrev, unlucky_team.team_abbrev, weekly_scores
+
+    lucky_str = ['🍀 Lucky 🍀']+['%s was %s against the league, but still got the win' % (lucky_team.team_name, lucky_record)]
+    unlucky_str = ['😡 Unlucky 😡']+['%s was %s against the league, but still took an L' % (unlucky_team.team_name, unlucky_record)]
     return (lucky_str + unlucky_str)
 
 
-def get_trophies(league, week=None):
+def get_trophies(league, week=None, recap=False):
     """
     Returns trophies for the highest score, lowest score, closest score, and biggest win.
 
@@ -820,59 +821,58 @@ def get_trophies(league, week=None):
     str
         A string representing the trophies
     """
+    if not week:
+        week = league.current_week - 1
 
-    # Gets trophies for highest score, lowest score, closest score, and biggest win
     matchups = league.box_scores(week=week)
     low_score = 9999
-    low_team_name = ''
     high_score = -1
-    high_team_name = ''
     closest_score = 9999
-    close_winner = ''
-    close_loser = ''
     biggest_blowout = -1
-    blown_out_team_name = ''
-    ownerer_team_name = ''
 
     for i in matchups:
         if i.home_team != 0:
             if i.home_score > high_score:
                 high_score = i.home_score
-                high_team_name = i.home_team.team_name
+                high_team = i.home_team
             if i.home_score < low_score:
                 low_score = i.home_score
-                low_team_name = i.home_team.team_name
+                low_team = i.home_team
         if i.away_team != 0:
             if i.away_score > high_score:
                 high_score = i.away_score
-                high_team_name = i.away_team.team_name
+                high_team = i.away_team
             if i.away_score < low_score:
                 low_score = i.away_score
-                low_team_name = i.away_team.team_name
+                low_team = i.away_team
 
         if i.away_team != 0 and i.home_team != 0:
             if i.away_score - i.home_score != 0 and \
                     abs(i.away_score - i.home_score) < closest_score:
                 closest_score = abs(i.away_score - i.home_score)
                 if i.away_score - i.home_score < 0:
-                    close_winner = i.home_team.team_name
-                    close_loser = i.away_team.team_name
+                    close_winner = i.home_team
+                    close_loser = i.away_team
                 else:
-                    close_winner = i.away_team.team_name
-                    close_loser = i.home_team.team_name
+                    close_winner = i.away_team
+                    close_loser = i.home_team
             if abs(i.away_score - i.home_score) > biggest_blowout:
                 biggest_blowout = abs(i.away_score - i.home_score)
                 if i.away_score - i.home_score < 0:
-                    ownerer_team_name = i.home_team.team_name
-                    blown_out_team_name = i.away_team.team_name
+                    ownerer = i.home_team
+                    blown_out = i.away_team
                 else:
-                    ownerer_team_name = i.away_team.team_name
-                    blown_out_team_name = i.home_team.team_name
+                    ownerer = i.away_team
+                    blown_out = i.home_team
 
-    high_score_str = ['👑 High score 👑'] + ['%s with %.2f points' % (high_team_name, high_score)]
-    low_score_str = ['💩 Low score 💩'] + ['%s with %.2f points' % (low_team_name, low_score)]
-    close_score_str = ['😅 Close win 😅'] + ['%s barely beat %s by %.2f points' % (close_winner, close_loser, closest_score)]
-    blowout_str = ['😱 Blow out 😱'] + ['%s blew out %s by %.2f points' % (ownerer_team_name, blown_out_team_name, biggest_blowout)]
+    if (recap):
+        return high_team.team_abbrev, low_team.team_abbrev, blown_out.team_abbrev, close_winner.team_abbrev
+
+    high_score_str = ['👑 High score 👑']+['%s with %.2f points' % (high_team.team_name, high_score)]
+    low_score_str = ['💩 Low score 💩']+['%s with %.2f points' % (low_team.team_name, low_score)]
+    close_score_str = ['😅 Close win 😅']+['%s barely beat %s by %.2f points' %
+                                         (close_winner.team_name, close_loser.team_name, closest_score)]
+    blowout_str = ['😱 Blow out 😱']+['%s blew out %s by %.2f points' % (ownerer.team_name, blown_out.team_name, biggest_blowout)]
 
     text = ['Trophies of the week:'] + high_score_str + low_score_str + blowout_str + close_score_str + \
         get_lucky_trophy(league, week) + get_achievers_trophy(league, week) + optimal_team_scores(league, week)
