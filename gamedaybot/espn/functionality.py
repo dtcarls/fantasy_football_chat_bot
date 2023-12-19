@@ -567,6 +567,9 @@ def optimal_lineup_score(lineup, starter_counts):
 
     # get all players and points
     score = 0
+    score_pct = 0
+    best_score = 0
+
     for player in lineup:
         try:
             position_players[player.position][player.name] = player.points
@@ -609,11 +612,12 @@ def optimal_lineup_score(lineup, starter_counts):
         best_lineup['DP'] = result[0]
         position_players = result[1]
 
-    best_score = 0
     for position in best_lineup:
         best_score += sum(best_lineup[position].values())
 
-    score_pct = (score / best_score) * 100
+    if best_score != 0:
+        score_pct = (score / best_score) * 100
+
     return (best_score, score, best_score - score, score_pct)
 
 
