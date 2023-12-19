@@ -461,10 +461,8 @@ def get_starter_counts(league):
         A dictionary containing the number of players at each position within the starting lineup.
     """
 
-    # Get the current week -1 to get the last week's box scores
-    week = league.current_week - 1
-    # Get the box scores for the specified week
-    box_scores = league.box_scores(week=week)
+    # Get the box scores for last week
+    box_scores = league.box_scores(week=league.current_week - 1)
     # Initialize a dictionary to store the home team's starters and their positions
     h_starters = {}
     # Initialize a variable to keep track of the number of home team starters
@@ -496,10 +494,12 @@ def get_starter_counts(league):
                 except KeyError:
                     a_starters[player.slot_position] = 1
 
-        if a_starter_count > h_starter_count:
-            return a_starters
-        else:
-            return h_starters
+        # if statement for the ultra rare case of a matchup with both entire teams (or one with a bye) on the bench
+        if a_starter_count!=0 and h_starter_count != 0:
+            if a_starter_count > h_starter_count:
+                return a_starters
+            else:
+                return h_starters
 
 
 def best_flex(flexes, player_pool, num):
