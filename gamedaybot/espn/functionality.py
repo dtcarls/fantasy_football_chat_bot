@@ -413,36 +413,47 @@ def get_power_rankings(league, week=None):
         A string representing the power rankings with changes from the previous week
     """
 
-    # Check if the week is provided, if not use the current week
+    # Check if the week is provided, if not use the previous week
     if not week:
-        week = league.current_week
+        week = league.current_week - 1
 
     p_rank_up_emoji = "🟢"
-    p_rank_down_emoji = "🔻"#"🔴"
+    p_rank_down_emoji = "🔻"
+    p_rank_same_emoji = "🟰"
 
-    # Get the power rankings for the current and previous week
+    # Get the power rankings for the previous 2 weeks
     current_rankings = league.power_rankings(week=week)
-    previous_rankings = league.power_rankings(week=week-1) if week > 1 else [None] * len(current_rankings)
+    previous_rankings = league.power_rankings(week=week-1) if week > 1 else []
+
+    # Normalize the scores
+    def normalize_rankings(rankings):
+        if not rankings:
+            return []
+        max_score = max(float(score) for score, _ in rankings)
+        return [(f"{99.99 * float(score) / max_score:.2f}", team) for score, team in rankings]
+
+
+    normalized_current_rankings = normalize_rankings(current_rankings)
+    normalized_previous_rankings = normalize_rankings(previous_rankings)
+
+    # Convert normalized previous rankings to a dictionary for easy lookup
+    previous_rankings_dict = {team.team_abbrev: score for score, team in normalized_previous_rankings}
 
     # Prepare the output string
-    rankings_text = []
-    for current, previous in zip(current_rankings, previous_rankings):
-        # Handle the case for the first week or missing data
-        if not previous or week == 1:
-            rankings_text.append(f"{current[0]} ({current[1].playoff_pct}) - {current[1].team_name}")
-        else:
-            # Calculate the percent changes
-            rank_change_percent = ((float(current[0]) - float(previous[0])) / float(previous[0])) * 100
+    rankings_text = ['Power Rankings (Playoff %)']
+    for normalized_current_score, current_team in normalized_current_rankings:
+        team_abbrev = current_team.team_abbrev
+        rank_change_text = ''
 
-            # Use emojis for displaying change
-            rank_change_emoji = p_rank_up_emoji if rank_change_percent > 0 else p_rank_down_emoji if rank_change_percent < 0 else ""
+        # Check if the team was present in the normalized previous rankings
+        if team_abbrev in previous_rankings_dict:
+            previous_score = previous_rankings_dict[team_abbrev]
+            rank_change_percent = ((float(normalized_current_score) - float(previous_score)) / float(previous_score)) * 100
+            rank_change_emoji = p_rank_up_emoji if rank_change_percent > 0 else p_rank_down_emoji if rank_change_percent < 0 else p_rank_same_emoji
+            rank_change_text = f"[{rank_change_emoji}{abs(rank_change_percent):4.1f}%]"
 
-            # Append emoji with the absolute value of change
-            rank_change_text = f"{rank_change_emoji}{abs(rank_change_percent):4.1f}%"
+        rankings_text.append(f"{normalized_current_score}{rank_change_text} ({current_team.playoff_pct:4.1f}) - {team_abbrev}")
 
-            rankings_text.append(f"{current[0]}[{rank_change_text}] ({current[1].playoff_pct}) - {current[1].team_abbrev}")
-
-    rankings_text = ['Power Rankings (Playoff %)'] + rankings_text
     return '\n'.join(rankings_text)
 
 
