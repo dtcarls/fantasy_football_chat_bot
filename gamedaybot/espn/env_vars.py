@@ -1,6 +1,6 @@
 import os
 import gamedaybot.espn.functionality as espn
-import gamedaybot.utils as utils
+import gamedaybot.utils.util as utils
 
 
 def get_env_vars():
