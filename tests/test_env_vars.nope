@@ -1,0 +1,102 @@
+import pytest
+from gamedaybot.utils import get_env_vars
+from unittest.mock import patch
+
+def test_get_env_vars(monkeypatch):
+    monkeypatch.setenv("START_DATE", "2023-09-07")
+    monkeypatch.setenv("END_DATE", "2024-01-09")
+    monkeypatch.setenv("TIMEZONE", "America/New_York")
+    monkeypatch.setenv("DAILY_WAIVER", "False")
+    monkeypatch.setenv("MONITOR_REPORT", "True")
+    monkeypatch.setenv("BOT_ID", "123")
+    monkeypatch.setenv("SLACK_WEBHOOK_URL", "http://slack.example.com")
+    monkeypatch.setenv("DISCORD_WEBHOOK_URL", "http://discord.example.com")
+    monkeypatch.setenv("LEAGUE_ID", "123")
+    monkeypatch.setenv("LEAGUE_YEAR", "2023")
+    monkeypatch.setenv("SWID", "{1}")
+    monkeypatch.setenv("ESPN_S2", "1")
+    monkeypatch.setenv("TEST", "False")
+    monkeypatch.setenv("TOP_HALF_SCORING", "False")
+    monkeypatch.setenv("RANDOM_PHRASE", "False")
+    monkeypatch.setenv("WAIVER_REPORT", "False")
+    monkeypatch.setenv("INIT_MSG", "Hello")
+
+    expected_data = {
+        'ff_start_date': '2023-09-07',
+        'ff_end_date': '2024-01-09',
+        'my_timezone': 'America/New_York',
+        'daily_waiver': False,
+        'monitor_report': True,
+        'str_limit': 1000,
+        'bot_id': '123',
+        'slack_webhook_url': 'http://slack.example.com',
+        'discord_webhook_url': 'http://discord.example.com',
+        'league_id': '123',
+        'year': 2023,
+        'swid': '{1}',
+        'espn_s2': '1',
+        'test': False,
+        'top_half_scoring': False,
+        'random_phrase': False,
+        'waiver_report': False,
+        'init_msg': 'Hello'
+    }
+
+    result = env_vars.get_env_vars()
+    assert result == expected_data
+
+def test_missing_all_env_vars(monkeypatch):
+    # Test when all env vars are missing
+    monkeypatch.delenv("START_DATE", raising=False)
+    monkeypatch.delenv("END_DATE", raising=False)
+    monkeypatch.delenv("TIMEZONE", raising=False)
+    monkeypatch.delenv("DAILY_WAIVER", raising=False)
+    monkeypatch.delenv("MONITOR_REPORT", raising=False)
+    monkeypatch.delenv("BOT_ID", raising=False)
+    monkeypatch.delenv("SLACK_WEBHOOK_URL", raising=False)
+    monkeypatch.delenv("DISCORD_WEBHOOK_URL", raising=False)
+    monkeypatch.delenv("LEAGUE_ID", raising=False)
+    monkeypatch.delenv("LEAGUE_YEAR", raising=False)
+    monkeypatch.delenv("SWID", raising=False)
+    monkeypatch.delenv("ESPN_S2", raising=False)
+    monkeypatch.delenv("TEST", raising=False)
+    monkeypatch.delenv("TOP_HALF_SCORING", raising=False)
+    monkeypatch.delenv("RANDOM_PHRASE", raising=False)
+    monkeypatch.delenv("WAIVER_REPORT", raising=False)
+    monkeypatch.delenv("INIT_MSG", raising=False)
+
+    with pytest.raises(Exception):
+        get_env_vars()
+
+def test_invalid_SWID(monkeypatch):
+    # Test for an invalid SWID format
+    monkeypatch.setenv("SWID", "invalid_swid")
+    monkeypatch.setenv("BOT_ID", "123")
+
+    result = get_env_vars()
+    assert result['swid'] == "{invalid_swid}"
+
+def test_str_limit_set_by_platform(monkeypatch):
+    # Test str_limit based on messaging platform
+    monkeypatch.setenv("BOT_ID", "123")
+    monkeypatch.setenv("DISCORD_WEBHOOK_URL", "http://discord.example.com")
+
+    result = get_env_vars()
+    assert result['str_limit'] == 3000
+
+def test_invalid_league_year(monkeypatch):
+    # Test for an invalid LEAGUE_YEAR
+    monkeypatch.setenv("LEAGUE_YEAR", "invalid_year")
+    monkeypatch.setenv("BOT_ID", "123")
+
+    with patch("gamedaybot.utils.util.int", side_effect=ValueError):
+        result = get_env_vars()
+        assert result['year'] == 2023  # should default to 2023
+
+def test_missing_init_msg(monkeypatch):
+    # Test for missing INIT_MSG
+    monkeypatch.setenv("BOT_ID", "123")
+    result = get_env_vars()
+    assert 'init_msg' not in result
+
+# You can add more edge case tests similar to these.

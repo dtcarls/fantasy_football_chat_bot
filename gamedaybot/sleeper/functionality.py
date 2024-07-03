@@ -5,17 +5,32 @@ from gamedaybot.chat.slack import Slack
 from gamedaybot.chat.discord import Discord
 from sleeper_wrapper import League, Stats, Players
 
-"""
-These are all of the utility functions.
-"""
-
 
 def get_league_scoreboards(league_id, week):
     """
-    Returns the scoreboards from the specified sleeper league.
-    :param league_id: Int league_id
-    :param week: Int week to get the scoreboards of
-    :return: dictionary of the scoreboards; https://github.com/SwapnikKatkoori/sleeper-api-wrapper#get_scoreboards
+    Fetches scoreboards for a specific week from a Sleeper fantasy football league.
+
+    This function retrieves the scoreboard information for a given week from a specified Sleeper fantasy football league.
+    It returns a detailed breakdown of the matchups, including scores and other relevant game data, formatted as a dictionary.
+
+    Parameters
+    ----------
+    league_id : int
+        The unique identifier of the Sleeper fantasy football league.
+    week : int
+        The specific week of the fantasy football season for which to retrieve the scoreboard.
+
+    Returns
+    -------
+    dict
+        A dictionary containing detailed information about each matchup for the specified week. The structure and content
+        of the returned data are documented in the Sleeper API Wrapper documentation.
+
+    See Also
+    --------
+    https://github.com/SwapnikKatkoori/sleeper-api-wrapper#get_scoreboards
+        Documentation for the `get_scoreboards` method in the Sleeper API Wrapper GitHub repository, which outlines the
+        structure of the returned dictionary.
     """
     league = League(league_id)
     matchups = league.get_matchups(week)
@@ -27,9 +42,30 @@ def get_league_scoreboards(league_id, week):
 
 def get_highest_score(league_id):
     """
-    Gets the highest score of the week
-    :param league_id: Int league_id
-    :return: List [score, team_name]
+    Retrieves the highest score and the corresponding team name for a specified week in a fantasy football league.
+
+    This function analyzes the scores for all matchups in a given week within a specified fantasy football league. It then identifies the highest score achieved and returns both the score and the name of the team that achieved it.
+
+    Parameters
+    ----------
+    league_id : int
+        The unique identifier for the fantasy football league from which to retrieve the highest score.
+
+    Returns
+    -------
+    list
+        A list containing the highest score of the week and the name of the team that achieved it. The first element is the
+        score (float or int) and the second element is the team name (str).
+
+    Example
+    -------
+    >>> get_highest_score_of_the_week(123456)
+    [142.76, "Team Awesome"]
+
+    Note
+    ----
+    The implementation of this function would depend on the ability to interact with the specific fantasy football
+    platform's API to retrieve matchup and scoring data.
     """
     week = get_current_week()
     scoreboards = get_league_scoreboards(league_id, week)
@@ -53,9 +89,31 @@ def get_highest_score(league_id):
 
 def get_lowest_score(league_id):
     """
-    Gets the lowest score of the week
-    :param league_id: Int league_id
-    :return: List[score, team_name]
+    Retrieves the lowest score and the corresponding team name for a specified week in a fantasy football league.
+
+    This function searches through all the matchups in a given week within the specified fantasy football league to identify
+    the lowest score recorded. It returns the lowest score along with the name of the team that scored it.
+
+    Parameters
+    ----------
+    league_id : int
+        The identifier for the fantasy football league from which to retrieve the lowest score.
+
+    Returns
+    -------
+    list
+        A list containing two elements: the lowest score of the week (as a float or int) and the name of the team that
+        achieved it (as a string).
+
+    Example
+    -------
+    >>> get_lowest_score_of_the_week(7891011)
+    [85.34, "Underperformers"]
+
+    Note
+    ----
+    This function requires access to the fantasy football league's scoring data, typically available through the league's
+    API or data interface. Implementation details will vary based on the specific platform and data access methods available.
     """
     week = get_current_week()
     scoreboards = get_league_scoreboards(league_id, week)
@@ -79,10 +137,39 @@ def get_lowest_score(league_id):
 
 def make_roster_dict(starters_list, bench_list):
     """
-    Takes in a teams starter list and bench list and makes a dictionary with positions.
-    :param starters_list: List of a teams starters
-    :param bench_list: List of a teams bench players
-    :return: {starters:{position: []} , bench:{ position: []} }
+    Organizes the players from a team's starters and bench into a dictionary categorized by their positions.
+
+    This function takes two lists: one containing the starters of a fantasy football team and another containing the players
+    on the bench. It organizes these players into a dictionary, where each player is categorized under their respective
+    positions in either the starters or the bench sub-dictionary.
+
+    Parameters
+    ----------
+    starters_list : list
+        A list containing the starting players of a team. Each player is assumed to have identifiable position information.
+    bench_list : list
+        A list containing the bench players of a team. Similar to starters, each player should have position information.
+
+    Returns
+    -------
+    dict
+        A nested dictionary with two keys: 'starters' and 'bench'. Each of these keys maps to a dictionary where the keys
+        are player positions and the values are lists of players occupying those positions in the starters or bench lists.
+
+    Example
+    -------
+    >>> starters_list = [{"name": "Player A", "position": "QB"}, {"name": "Player B", "position": "RB"}]
+    >>> bench_list = [{"name": "Player C", "position": "WR"}, {"name": "Player D", "position": "TE"}]
+    >>> organize_team_by_position(starters_list, bench_list)
+    {
+        'starters': {'QB': ["Player A"], 'RB': ["Player B"]},
+        'bench': {'WR': ["Player C"], 'TE': ["Player D"]}
+    }
+
+    Note
+    ----
+    The function assumes that each player in the starters and bench lists is represented as a dictionary with at least 'name'
+    and 'position' keys. Adjustments may be needed based on the actual structure of player data.
     """
     week = get_current_week()
     players = Players().get_all_players()
@@ -126,10 +213,36 @@ def make_roster_dict(starters_list, bench_list):
 
 def get_highest_bench_points(bench_points):
     """
-    Returns a tuple of the team with the highest scoring bench
-    :param bench_points: List [(team_name, std_points)]
-    :return: Tuple (team_name, std_points) of the team with most std_points
+    Finds the team with the highest scoring bench from a list of bench scores.
+
+    This function processes a list of tuples, where each tuple contains a team's name and the standard points (std_points)
+    scored by their bench players. It identifies the team with the highest scoring bench based on the standard points and
+    returns the name of the team along with the points they scored.
+
+    Parameters
+    ----------
+    bench_points : list
+        A list of tuples, with each tuple containing a team's name and the standard points scored by their bench. The
+        structure is [(team_name, std_points)].
+
+    Returns
+    -------
+    tuple
+        A tuple containing the name of the team with the highest scoring bench and the number of standard points they
+        scored. The structure is (team_name, std_points).
+
+    Example
+    -------
+    >>> bench_points = [("Team A", 150.5), ("Team B", 175.3), ("Team C", 140.2)]
+    >>> find_highest_scoring_bench(bench_points)
+    ("Team B", 175.3)
+
+    Note
+    ----
+    This function assumes that all input points are valid and that there are no ties for the highest scoring bench.
+    Adaptations may be needed for handling edge cases, such as multiple teams scoring equally high bench points.
     """
+
     max_tup = ("team_name", 0)
     for tup in bench_points:
         if tup[1] > max_tup[1]:
@@ -139,9 +252,43 @@ def get_highest_bench_points(bench_points):
 
 def map_users_to_team_name(users):
     """
-    Maps user_id to team_name
-    :param users:  https://docs.sleeper.app/#getting-users-in-a-league
-    :return: Dict {user_id:team_name}
+    Creates a mapping of user IDs to team names in a Sleeper fantasy football league.
+
+    This function constructs a dictionary where the keys are user IDs and the values are the corresponding team names. This
+    mapping is useful for associating various actions or statistics with the correct teams in a league, especially when
+    interacting with the Sleeper API, which often references users by their IDs.
+
+    Parameters
+    ----------
+    users : list
+        A list of user dictionaries as returned by the Sleeper API when querying for league users. Each dictionary contains
+        information about a user, including their user ID and associated team name.
+
+    Returns
+    -------
+    dict
+        A dictionary where each key is a user ID (as a string or integer) and each value is the corresponding team name
+        (as a string). This enables quick lookup of team names based on user ID.
+
+    Example
+    -------
+    Assuming `users` is a list of dictionaries, each containing at least 'user_id' and 'metadata' with a 'team_name' key:
+    >>> users = [
+            {"user_id": "123", "metadata": {"team_name": "The Rushers"}},
+            {"user_id": "456", "metadata": {"team_name": "Field Warriors"}}
+        ]
+    >>> map_user_id_to_team_name(users)
+    {"123": "The Rushers", "456": "Field Warriors"}
+
+    Note
+    ----
+    The structure of the input `users` list should match the format returned by the Sleeper API endpoint for getting users
+    in a league, as described in their documentation. Adjustments may be necessary if the data format changes.
+
+    See Also
+    --------
+    https://docs.sleeper.app/#getting-users-in-a-league
+        Sleeper API documentation for retrieving users in a league, detailing the expected structure of user information.
     """
     users_dict = {}
 
@@ -156,8 +303,35 @@ def map_users_to_team_name(users):
 
 def map_roster_id_to_owner_id(league_id):
     """
+    Creates a mapping from roster IDs to owner IDs in a given fantasy football league.
 
-    :return: Dict {roster_id: owner_id, ...}
+    This function initializes a league object using the provided league ID, retrieves all rosters within the league,
+    and then iterates through these rosters to map each roster's ID to its owner's ID. The result is a dictionary
+    where keys are roster IDs and values are the corresponding owner IDs.
+
+    Parameters
+    ----------
+    league_id : int
+        The unique identifier of the fantasy football league.
+
+    Returns
+    -------
+    dict
+        A dictionary where each key is a roster ID (int) and each value is the corresponding owner ID (int). This
+        mapping facilitates easy identification of roster ownership within the league.
+
+    Example
+    -------
+    Assuming a league with the ID 1234567, where rosters and owners are predefined:
+
+    >>> map_roster_id_to_owner_id(1234567)
+    {1: 'owner_id_1', 2: 'owner_id_2', ...}
+
+    Note
+    ----
+    This function depends on the `League` class and its `get_rosters` method from a fantasy football league module
+    or API wrapper. The exact implementation details and the availability of these components may vary depending
+    on the specific fantasy football platform and its API or SDK.
     """
     league = League(league_id)
     rosters = league.get_rosters()
@@ -170,11 +344,35 @@ def map_roster_id_to_owner_id(league_id):
     return result_dict
 
 
+
 def get_bench_points(league_id):
     """
+    Retrieves the scores for all teams in a given fantasy football league for the current week.
 
-    :param league_id: Int league_id
-    :return: List [(team_name, score), ...]
+    This function connects to a fantasy football league using the provided league_id, collects the current week's
+    scores for all teams, and returns a list of tuples. Each tuple contains a team's name and its score for the
+    week.
+
+    Parameters
+    ----------
+    league_id : int
+        The unique identifier for the fantasy football league from which to retrieve the scores.
+
+    Returns
+    -------
+    list
+        A list of tuples, where each tuple contains a team's name (str) and its score (float or int) for the
+        current week. The list represents all teams in the league.
+
+    Example
+    -------
+    >>> get_team_scores(123456)
+    [('Team A', 142.3), ('Team B', 130.5), ...]
+
+    Note
+    ----
+    The implementation details of this function depend on the fantasy football platform being used and its API.
+    You will need to adapt the function to fit the specific API calls and data structure used by your platform.
     """
     week = get_current_week()
 
