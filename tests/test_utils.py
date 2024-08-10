@@ -3,7 +3,7 @@ import pytest
 import sys
 import os
 sys.path.insert(1, os.path.abspath('.'))
-from gamedaybot import utils as util
+import gamedaybot.utils.util as util
 
 
 class TestStringToBool:
