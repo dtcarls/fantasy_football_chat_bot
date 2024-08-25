@@ -76,6 +76,9 @@ class TestStringToBool:
     def test_str_to_bool_trailing_whitespace(self):
         assert util.str_to_bool("true ") == True
 
+    def test_str_to_bool_no_string(self):
+        assert util.str_to_bool(True) == False
+
 class TestStringLimitCheck:
     ############ For `str_limit_check`
     def test_str_limit_check_within_limit(self):

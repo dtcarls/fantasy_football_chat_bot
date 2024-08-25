@@ -1,4 +1,4 @@
-FROM python:3.9.9-slim-bullseye
+FROM python:3.12.5-slim-bullseye
 
 # Install app
 ADD . /usr/src/gamedaybot
