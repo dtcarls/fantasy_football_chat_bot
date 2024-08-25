@@ -1,3 +1,3 @@
-pytest
-sleeper-api-wrapper
 requests>=2.0.0,<3.0.0
+apscheduler>=3.3.0,<4.0.0
+sleeper>=1.7.3

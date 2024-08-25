@@ -46,8 +46,7 @@ jobs:
         run: |
           docker run ${{ env.TAG }} /bin/sh -c "\
           python -m pip install --upgrade pip && \
-          pip install -r requirements.txt && \
-          pip install -r requirements-test.txt && \
+          pip install -r tests/requirements-test.txt && \
           pytest"
 
       - name: Push image to registry

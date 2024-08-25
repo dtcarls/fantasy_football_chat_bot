@@ -212,9 +212,7 @@ git clone https://github.com/dtcarls/fantasy_football_chat_bot
 
 cd fantasy_football_chat_bot
 
-pip install -r requirements.txt
-# or
-#python3 setup.py install
+pip install -r gamedaybot/<league_type>/requirements.txt
 ```
 
 ### Environment Variables
@@ -272,7 +270,7 @@ Automated tests for this package are included in the `tests` directory. After in
 you can run these tests by changing the directory to the `gamedaybot` directory and running the following:
 
 ```python3
-pip install -r requirements-test.txt
+pip install -r gamedaybot/tests/requirements-test.txt
 pytest
 ```
 </details>
