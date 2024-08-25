@@ -87,7 +87,7 @@ def get_standings():
     # Print the standings
     output = ["League Standings"]
     for index, team in enumerate(standings, 1):
-        output.append(f"{index:2}. ({team['wins']}-{team['losses']}) {team['team_name'][:9].ljust(9)}")
+        output.append(f"{index:2}. ({str(team['wins']).rjust(2)}-{str(team['losses']).ljust(2)}) {team['team_name'][:9].ljust(9)}")
         # output.append(f"{index:2}. ({team['wins']}-{team['losses']}) {team['team_name'][:9].ljust(9)} | Pts: {team['points_for']:.2f}")
 
     return '\n'.join(output)
@@ -157,10 +157,10 @@ def get_matchups():
             team_1_record = standings.get(team_1_name, (0, 0))
             team_2_record = standings.get(team_2_name, (0, 0))
 
-            team_1_wl = f"({team_1_record[0]}-{team_1_record[1]})"
-            team_2_wl = f"({team_2_record[0]}-{team_2_record[1]})"
+            team_1_wl = f"{str(team_1_record[0]).rjust(2)}-{str(team_1_record[1]).ljust(2)}"
+            team_2_wl = f"{str(team_2_record[0]).rjust(2)}-{str(team_2_record[1]).ljust(2)}"
 
-            matchup_line = f"{team_1_name[:9].rjust(9)} {team_1_wl} vs {team_2_wl} {team_2_name[:9].ljust(9)}"
+            matchup_line = f"{team_1_name[:9].rjust(9)} ({team_1_wl}) vs ({team_2_wl}) {team_2_name[:9].ljust(9)}"
             matchups_output.append(matchup_line)
 
     # Return the formatted matchups as a single string
