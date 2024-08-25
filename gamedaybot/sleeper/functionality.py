@@ -16,6 +16,8 @@ rosters = {}
 players = {}
 user_id_to_name = {}
 roster_id_to_user_id = {}
+all_matchup_data = {}
+league_id = None
 
 def current_week():
     week = 1
@@ -38,8 +40,7 @@ def get_matchup_results(_matchups=None):
         points = matchup.points
         matchup_id = matchup.matchup_id
 
-        user_id = roster_id_to_user_id.get(roster_id, 'Unknown')
-        team_name = user_id_to_name.get(user_id, 'Unknown')
+        team_name = get_team_name_from_roster_id(roster_id)
 
         if matchup_id not in matchup_results:
             matchup_results[matchup_id] = []
@@ -47,6 +48,33 @@ def get_matchup_results(_matchups=None):
         matchup_results[matchup_id].append((team_name, points, roster_id))
 
     return matchup_results
+
+
+def get_matchup_data(_roster_id: int, _matchups=None):
+    '''
+    Retrieve the matchup details for a specific team in a specific week.
+    '''
+    # If matchups aren't provided, retrieve them for the given week
+    if not _matchups:
+        _matchups = matchups
+
+    # Utilize the existing get_matchup_results function
+    matchup_results = get_matchup_results(_matchups)
+
+    # Find the specific matchup for the given team
+    for matchup_id, teams in matchup_results.items():
+        for team_name, points, roster_id in teams:
+            if roster_id == _roster_id:
+                # Find the opponent team in the same matchup
+                for opponent_name, opponent_points, opponent_roster_id in teams:
+                    if opponent_roster_id != _roster_id:
+                        return {
+                            'score': points,
+                            'mov': points - opponent_points,  # Margin of Victory
+                            'opponent_roster_id': opponent_roster_id
+                        }
+
+    return None  # If the team or matchup isn't found
 
 
 def get_scoreboard():
@@ -64,6 +92,7 @@ def get_scoreboard():
 
 # def get_projected_scoreboard(league_id, week):
 ## Difficult
+## https://github.com/joeyagreco/sleeper/blob/main/sleeper/api/unofficial/UPlayerAPIClient.py
 
 def get_standings():
     standings = []
@@ -104,20 +133,24 @@ def get_monitor():
 
         # Check each starting player
         for player_id in roster.starters:
-            player = players[player_id]
-            # projected_score = player.get('projected_points', 0)
-            position = player.fantasy_positions[0].value
-            status = player.injury_status.value
+            try:
+                player = players[player_id]
+                # projected_score = player.get('projected_points', 0)
+                position = player.fantasy_positions[0].value
+                status = player.injury_status.value
 
-            # Flag players with 0 projected score or questionable/injured status
-            if status != 'NA':
-                if team_name not in flagged_players:
-                    flagged_players[team_name] = []
-                flagged_players[team_name].append({
-                    'player_position': position,
-                    'player_name': player.last_name ,
-                    'status': status
-                })
+                # Flag players with 0 projected score or questionable/injured status
+                if status != 'NA':
+                    if team_name not in flagged_players:
+                        flagged_players[team_name] = []
+                    flagged_players[team_name].append({
+                        'player_position': position,
+                        'player_name': player.last_name ,
+                        'status': status
+                    })
+            except KeyError:
+                #do nothing
+                pass
 
     # Output flagged players
     output = []
@@ -134,7 +167,7 @@ def get_monitor():
     return '\n'.join(output)
 
 
-def get_matchups():
+def get_upcoming_matchups():
     # Step 1: Get standings data
     standings = {}
     for roster in rosters:
@@ -312,9 +345,147 @@ def get_trophies():
     return '\n'.join(text)
 
 
+def get_all_matchups(week=None):
+    if not week:
+        week = current_week()
+
+    # Fetch all matchup data for all weeks up to the specified week
+    for w in range(1, week + 1):
+        all_matchup_data[w] = LeagueAPIClient.get_matchups_for_week(league_id=league_id, week=w)
+
+
+def power_points(dominance, teams, week):
+    '''Returns list of power points'''
+    power_points = []
+    for i, team in zip(dominance, teams.values()):
+        avg_score = sum(team['score'][:week]) / week
+        avg_mov = sum(team['mov'][:week]) / week
+
+        power = '{0:.2f}'.format((int(i)*0.8) + (int(avg_score)*0.15) +
+                                 (int(avg_mov)*0.05))
+        power_points.append(power)
+    power_tup = [(i, j) for (i, j) in zip(power_points, teams)]
+    return sorted(power_tup, key=lambda tup: float(tup[0]), reverse=True)
+
+
+def power_rankings(league_id: str=league_id, week: int=None):
+    '''Return power rankings for any week in Sleeper'''
+
+    # If week is not specified or invalid, use the current week
+    if not week or week <= 0:
+        week = current_week()
+
+    # Fetch teams data from Sleeper API
+    teams_data = rosters
+    teams_sorted = sorted(teams_data, key=lambda x: x.roster_id, reverse=False)
+
+    if not all_matchup_data:
+        get_all_matchups(week)
+
+    win_matrix = []
+    teams_data = {}
+
+    for team in teams_sorted:
+        wins = [0] * len(teams_sorted)
+        for w in range(1, week+1):
+            matchup_data = get_matchup_data(team.roster_id, _matchups=all_matchup_data[w])
+            if matchup_data:
+                score = matchup_data['score']
+                mov = matchup_data['mov']
+                opponent_roster_id = matchup_data['opponent_roster_id']
+
+                if team.roster_id not in teams_data:
+                    teams_data[team.roster_id] = {'score': [], 'mov': []}
+
+                teams_data[team.roster_id]['score'].append(score)
+                teams_data[team.roster_id]['mov'].append(mov)
+
+                if mov > 0:
+                    opp_index = next(index for (index, d) in enumerate(teams_sorted) if d.roster_id == opponent_roster_id)
+                    wins[opp_index] += 1
+        win_matrix.append(wins)
+
+    dominance_matrix = two_step_dominance(win_matrix)
+    power_rank = power_points(dominance_matrix, teams_data, week)
+    return power_rank
+
+
+def print_power_rankings(week=None):
+    """
+    This function returns the power rankings of the teams in the league for a specific week,
+    along with the change in power ranking number and playoff percentage from the previous week.
+    If the week is not provided, it defaults to the current week.
+    The power rankings are determined using a 2 step dominance algorithm,
+    as well as a combination of points scored and margin of victory.
+    It's weighted 80/15/5 respectively.
+
+    Parameters
+    ----------
+    week : int, optional
+        The week for which the power rankings are to be returned (default is current week)
+
+    Returns
+    -------
+    str
+        A string representing the power rankings with changes from the previous week
+    """
+
+    # Check if the week is provided, if not use the previous week
+    # if not week:
+    #     week = league.current_week - 1
+
+    p_rank_up_emoji = "🟢"
+    p_rank_down_emoji = "🔻"
+    p_rank_same_emoji = "🟰"
+
+    # Get the power rankings for the previous 2 weeks
+    current_rankings = power_rankings(week=week)
+    previous_rankings = power_rankings(week=week-1) if week > 1 else []
+
+    # Normalize the scores
+    def normalize_rankings(rankings):
+        if not rankings:
+            return []
+        max_score = max(float(score) for score, _ in rankings)
+        return [(f"{99.99 * float(score) / max_score:.2f}", team) for score, team in rankings]
+
+
+    normalized_current_rankings = normalize_rankings(current_rankings)
+    normalized_previous_rankings = normalize_rankings(previous_rankings)
+
+
+
+    # Convert normalized previous rankings to a dictionary for easy lookup
+    previous_rankings_dict = {get_team_name_from_roster_id(team): score for score, team in normalized_previous_rankings}
+
+    # Prepare the output string
+    rankings_text = ['Power Rankings [% change]']
+    for normalized_current_score, current_team in normalized_current_rankings:
+        team_abbrev = get_team_name_from_roster_id(current_team)
+        rank_change_text = ''
+
+        # Check if the team was present in the normalized previous rankings
+        if team_abbrev in previous_rankings_dict:
+            previous_score = previous_rankings_dict[team_abbrev]
+            rank_change_percent = ((float(normalized_current_score) - float(previous_score)) / float(previous_score)) * 100
+            rank_change_emoji = p_rank_up_emoji if rank_change_percent > 0 else p_rank_down_emoji if rank_change_percent < 0 else p_rank_same_emoji
+            rank_change_text = f"[{rank_change_emoji}{abs(rank_change_percent):4.1f}%]"
+
+        rankings_text.append(f"{normalized_current_score}{rank_change_text} - {team_abbrev}")
+
+    return '\n'.join(rankings_text)
+
+
+def get_team_name_from_roster_id(roster_id: int):
+    user_id = roster_id_to_user_id.get(roster_id, 'Unknown')
+    return user_id_to_name.get(user_id, 'Unknown') #team name
+
+
 if __name__ == "__main__":
-    league_id = 992179861063786496
-    week = 5
+    # league_id = 992179861063786496 #4 man
+    # league_id = 932291846812827648 # 10 man, no median
+    league_id = 916114371233808384 # includes top half wins
+    week = 1
 
     matchups = LeagueAPIClient.get_matchups_for_week(league_id=league_id, week=week)
     users = LeagueAPIClient.get_users_in_league(league_id=league_id)
@@ -327,9 +498,9 @@ if __name__ == "__main__":
     # Create a mapping of roster_id to user_id
     roster_id_to_user_id = {roster.roster_id: roster.owner_id for roster in rosters}
 
-    print(get_scoreboard() + '\n')
-    print(get_standings() + '\n')
-    print(get_monitor() + '\n')
-    print(get_matchups() + '\n')
-    print(get_trophies() + '\n')
-    # print(power_rankings(1) + '\n')
+    # print(get_scoreboard() + '\n')
+    # print(get_standings() + '\n')
+    # print(get_monitor() + '\n')
+    # print(get_upcoming_matchups() + '\n')
+    # print(get_trophies() + '\n')
+    print(print_power_rankings(2) + '\n')
