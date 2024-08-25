@@ -8,6 +8,7 @@ from gamedaybot.chat.discord import Discord
 from sleeper.api import LeagueAPIClient
 from sleeper.api import PlayerAPIClient
 from sleeper.enum import Sport
+from gamedaybot.utils.util import two_step_dominance
 
 matchups = {}
 users = {}
@@ -16,13 +17,23 @@ players = {}
 user_id_to_name = {}
 roster_id_to_user_id = {}
 
+def current_week():
+    week = 1
+    nfl_state = LeagueAPIClient.get_sport_state(sport=Sport.NFL)
 
-def get_results():
-    # Create a dictionary to hold the matchup data
+    if nfl_state.leg > 0 :
+        week = nfl_state.leg #week of regular season
+    return week
+
+
+def get_matchup_results(_matchups=None):
+    if not _matchups:
+        _matchups = matchups
+
     matchup_results = {}
 
     # Collect data into a dictionary with matchup_id as the key
-    for matchup in matchups:
+    for matchup in _matchups:
         roster_id = matchup.roster_id
         points = matchup.points
         matchup_id = matchup.matchup_id
@@ -33,21 +44,20 @@ def get_results():
         if matchup_id not in matchup_results:
             matchup_results[matchup_id] = []
 
-        matchup_results[matchup_id].append((team_name, points))
+        matchup_results[matchup_id].append((team_name, points, roster_id))
 
     return matchup_results
 
 
 def get_scoreboard():
-    matchup_results = get_results()
+    matchup_results = get_matchup_results()
 
     # Print matchups with team names and scores
     score=[]
     for matchup_id, teams in matchup_results.items():
         if len(teams) == 2:
-            team_1_name, team_1_points = teams[0]
-            team_2_name, team_2_points = teams[1]
-            # print('%9s %6.2f - %6.2f %s' % (team_1_name[:9], team_1_points, team_2_points, team_2_name[:9]))
+            team_1_name, team_1_points, roster_id_1 = teams[0]
+            team_2_name, team_2_points, roster_id_2 = teams[1]
             score += ['%9s %6.2f - %6.2f %s' % (team_1_name[:9], team_1_points, team_2_points, team_2_name[:9])]
     text = ['Score Update'] + score
     return '\n'.join(text)
@@ -135,7 +145,7 @@ def get_matchups():
         standings[team_name] = (wins, losses)
 
     # Step 2: Get scoreboard data (team names for matchups)
-    matchup_results = get_results()
+    matchup_results = get_matchup_results()
 
     # Step 3: Format the matchups with win-loss records
     matchups_output = ['Matchups:']
@@ -159,7 +169,7 @@ def get_matchups():
 
 # TODO: Need reliable way of getting projected points in order to calculate achievers
 def get_achievers_trophy():
-    matchup_results = get_results()
+    matchup_results = get_matchup_results()
     high_achiever_str = ['📈 Overachiever 📈']
     low_achiever_str = ['📉 Underachiever 📉']
     best_performance = -9999
@@ -200,12 +210,12 @@ def get_achievers_trophy():
 
 
 def get_weekly_score_with_win_loss():
-    matchup_results = get_results()
+    matchup_results = get_matchup_results()
     weekly_scores = {}
     for matchup_id, teams in matchup_results.items():
         if len(teams) == 2:
-            team_1_name, team_1_points = teams[0]
-            team_2_name, team_2_points = teams[1]
+            team_1_name, team_1_points, roster_id = teams[0]
+            team_2_name, team_2_points, roster_id = teams[1]
             if team_1_name != 0 and team_2_name != 0:
                 if team_1_points > team_2_points:
                     weekly_scores[team_1_name] = [team_1_points, 'W']
@@ -245,7 +255,7 @@ def get_lucky_trophy():
 
 
 def get_trophies():
-    matchup_results = get_results()
+    matchup_results = get_matchup_results()
 
     low_score = 9999
     high_score = -1
@@ -254,8 +264,8 @@ def get_trophies():
 
     for matchup_id, teams in matchup_results.items():
         if len(teams) == 2:
-            team_1_name, team_1_points = teams[0]
-            team_2_name, team_2_points = teams[1]
+            team_1_name, team_1_points, roster_id = teams[0]
+            team_2_name, team_2_points, roster_id = teams[1]
 
             if team_1_name:
                 if team_1_points > high_score:
@@ -304,7 +314,7 @@ def get_trophies():
 
 if __name__ == "__main__":
     league_id = 992179861063786496
-    week = 1
+    week = 5
 
     matchups = LeagueAPIClient.get_matchups_for_week(league_id=league_id, week=week)
     users = LeagueAPIClient.get_users_in_league(league_id=league_id)
@@ -322,3 +332,4 @@ if __name__ == "__main__":
     print(get_monitor() + '\n')
     print(get_matchups() + '\n')
     print(get_trophies() + '\n')
+    # print(power_rankings(1) + '\n')
