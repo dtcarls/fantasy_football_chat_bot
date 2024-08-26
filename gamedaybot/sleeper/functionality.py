@@ -59,7 +59,7 @@ def get_matchup_results(_matchups=None):
     return matchup_results
 
 
-def get_projections(ppr, week=None, year=None):
+def get_projections(ppr=0, week=None, year=None):
     if not week:
         week = current_week()
     if not year:
@@ -71,14 +71,14 @@ def get_projections(ppr, week=None, year=None):
         team_name = user_id_to_name.get(user_id, 'Unknown')
         projection = 0
         for player in roster.starters:
-            try: 
+            try:
                 stats = UPlayerAPIClient.get_player_projections(sport=Sport.NFL, player_id=str(player), season=year, week=1).stats
                 match ppr:
-                    case 1.0:
+                    case 1 | 'full' | '1' | '1.0':
                         pts = stats.pts_ppr
-                    case 0.5:
+                    case 0.5 | 'half' | '0.5' | '.5':
                         pts = stats.pts_half_ppr
-                    case 0:
+                    case _: #anything else
                         pts = stats.pts_std
             except ValueError:
                 pts = 0
