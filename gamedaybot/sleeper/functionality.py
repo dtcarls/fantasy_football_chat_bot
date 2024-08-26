@@ -7,6 +7,7 @@ from gamedaybot.chat.slack import Slack
 from gamedaybot.chat.discord import Discord
 from sleeper.api import LeagueAPIClient
 from sleeper.api import PlayerAPIClient
+from sleeper.api.unofficial import UPlayerAPIClient
 from sleeper.enum import Sport
 from gamedaybot.utils.util import two_step_dominance
 
@@ -26,6 +27,14 @@ def current_week():
     if nfl_state.leg > 0 :
         week = nfl_state.leg #week of regular season
     return week
+
+def current_year():
+    year = 1
+    nfl_state = LeagueAPIClient.get_sport_state(sport=Sport.NFL)
+
+    if nfl_state.league_season > '0':
+        year = nfl_state.league_season
+    return year
 
 
 def get_matchup_results(_matchups=None):
@@ -48,6 +57,35 @@ def get_matchup_results(_matchups=None):
         matchup_results[matchup_id].append((team_name, points, roster_id))
 
     return matchup_results
+
+
+def get_projections(ppr, week=None, year=None):
+    if not week:
+        week = current_week()
+    if not year:
+        year = current_year()
+
+    projections = {}
+    for roster in rosters:
+        user_id = roster.owner_id
+        team_name = user_id_to_name.get(user_id, 'Unknown')
+        projection = 0
+        for player in roster.starters:
+            try: 
+                stats = UPlayerAPIClient.get_player_projections(sport=Sport.NFL, player_id=str(player), season=year, week=1).stats
+                match ppr:
+                    case 1.0:
+                        pts = stats.pts_ppr
+                    case 0.5:
+                        pts = stats.pts_half_ppr
+                    case 0:
+                        pts = stats.pts_std
+            except ValueError:
+                pts = 0
+            projection += pts
+        projections[team_name] = round(projection, 2)
+
+    return projections
 
 
 def get_matchup_data(_roster_id: int, _matchups=None):
@@ -90,9 +128,20 @@ def get_scoreboard():
     text = ['Score Update'] + score
     return '\n'.join(text)
 
-# def get_projected_scoreboard(league_id, week):
-## Difficult
-## https://github.com/joeyagreco/sleeper/blob/main/sleeper/api/unofficial/UPlayerAPIClient.py
+
+def get_projected_scoreboard(ppr):
+    projections = get_projections(ppr)
+    matchup_results = get_matchup_results()
+
+    score=[]
+    for matchup_id, teams in matchup_results.items():
+        if len(teams) == 2:
+            team_1_name, team_1_points, roster_id_1 = teams[0]
+            team_2_name, team_2_points, roster_id_2 = teams[1]
+            score += ['%9s %6.2f - %6.2f %s' % (team_1_name[:9], projections[team_1_name], projections[team_2_name], team_2_name[:9])]
+    text = ['Projected Scores'] + score
+    return '\n'.join(text)
+
 
 def get_standings():
     standings = []
@@ -116,7 +165,7 @@ def get_standings():
     # Print the standings
     output = ["League Standings"]
     for index, team in enumerate(standings, 1):
-        output.append(f"{index:2}. ({team['wins']}-{team['losses']}) {team['team_name'][:9].ljust(9)}")
+        output.append(f"{index:2}. ({str(team['wins']).rjust(2)}-{str(team['losses']).ljust(2)}) {team['team_name'][:9].ljust(9)}")
         # output.append(f"{index:2}. ({team['wins']}-{team['losses']}) {team['team_name'][:9].ljust(9)} | Pts: {team['points_for']:.2f}")
 
     return '\n'.join(output)
@@ -190,10 +239,10 @@ def get_upcoming_matchups():
             team_1_record = standings.get(team_1_name, (0, 0))
             team_2_record = standings.get(team_2_name, (0, 0))
 
-            team_1_wl = f"({team_1_record[0]}-{team_1_record[1]})"
-            team_2_wl = f"({team_2_record[0]}-{team_2_record[1]})"
+            team_1_wl = f"{str(team_1_record[0]).rjust(2)}-{str(team_1_record[1]).ljust(2)}"
+            team_2_wl = f"{str(team_2_record[0]).rjust(2)}-{str(team_2_record[1]).ljust(2)}"
 
-            matchup_line = f"{team_1_name[:9].rjust(9)} {team_1_wl} vs {team_2_wl} {team_2_name[:9].ljust(9)}"
+            matchup_line = f"{team_1_name[:9].rjust(9)} ({team_1_wl}) vs ({team_2_wl}) {team_2_name[:9].ljust(9)}"
             matchups_output.append(matchup_line)
 
     # Return the formatted matchups as a single string
