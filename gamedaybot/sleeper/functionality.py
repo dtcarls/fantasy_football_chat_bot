@@ -260,16 +260,17 @@ def get_upcoming_matchups():
 # TODO: Need reliable way of getting projected points in order to calculate achievers
 def get_achievers_trophy():
     matchup_results = get_matchup_results()
+    projections = get_projections()
     high_achiever_str = ['📈 Overachiever 📈']
     low_achiever_str = ['📉 Underachiever 📉']
     best_performance = -9999
     worst_performance = 9999
     for matchup_id, teams in matchup_results.items():
         if len(teams) == 2:
-            team_1_name, team_1_points, team_1_proj = teams[0]
-            team_2_name, team_2_points, team_2_proj = teams[1]
-            home_performance = team_1_points - round(sum(team_1_proj), 2)
-            away_performance = team_2_points - round(sum(team_2_proj), 2)
+            team_1_name, team_1_points, roster_id = teams[0]
+            team_2_name, team_2_points, roster_id = teams[1]
+            home_performance = team_1_points - projections[team_1_name]
+            away_performance = team_2_points - projections[team_2_name]
 
             if team_1_name != 0:
                 if home_performance > best_performance:
@@ -398,7 +399,7 @@ def get_trophies():
 
 
     text = ['Trophies of the week:'] + high_score_str + low_score_str + close_score_str + blowout_str + \
-            get_lucky_trophy()
+            get_lucky_trophy() + get_achievers_trophy()
     return '\n'.join(text)
 
 
