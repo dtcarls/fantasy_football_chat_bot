@@ -19,22 +19,30 @@ user_id_to_name = {}
 roster_id_to_user_id = {}
 all_matchup_data = {}
 league_id = None
+current_week = None
+current_year = None
 
-def current_week():
-    week = 1
-    nfl_state = LeagueAPIClient.get_sport_state(sport=Sport.NFL)
+def get_current_week():
+    if not current_week:
+        week = 1
+        nfl_state = LeagueAPIClient.get_sport_state(sport=Sport.NFL)
 
-    if nfl_state.leg > 0 :
-        week = nfl_state.leg #week of regular season
-    return week
+        if nfl_state.leg > 0 :
+            week = nfl_state.leg #week of regular season
+        return week
+    else:
+        return current_week
 
-def current_year():
-    year = 1
-    nfl_state = LeagueAPIClient.get_sport_state(sport=Sport.NFL)
+def get_current_year():
+    if not current_year:
+        year = 2024
+        nfl_state = LeagueAPIClient.get_sport_state(sport=Sport.NFL)
 
-    if nfl_state.league_season > '0':
-        year = nfl_state.league_season
-    return year
+        if nfl_state.league_season > '0':
+            year = nfl_state.league_season
+        return year
+    else:
+        return current_year
 
 
 def get_matchup_results(_matchups=None):
@@ -59,11 +67,11 @@ def get_matchup_results(_matchups=None):
     return matchup_results
 
 
-def get_projections(ppr, week=None, year=None):
+def get_projections(ppr=0, week=None, year=None):
     if not week:
-        week = current_week()
+        week = get_current_week()
     if not year:
-        year = current_year()
+        year = get_current_year()
 
     projections = {}
     for roster in rosters:
@@ -71,14 +79,14 @@ def get_projections(ppr, week=None, year=None):
         team_name = user_id_to_name.get(user_id, 'Unknown')
         projection = 0
         for player in roster.starters:
-            try: 
+            try:
                 stats = UPlayerAPIClient.get_player_projections(sport=Sport.NFL, player_id=str(player), season=year, week=1).stats
                 match ppr:
-                    case 1.0:
+                    case 1 | 'full' | '1' | '1.0':
                         pts = stats.pts_ppr
-                    case 0.5:
+                    case 0.5 | 'half' | '0.5' | '.5':
                         pts = stats.pts_half_ppr
-                    case 0:
+                    case _: #anything else
                         pts = stats.pts_std
             except ValueError:
                 pts = 0
@@ -129,7 +137,7 @@ def get_scoreboard():
     return '\n'.join(text)
 
 
-def get_projected_scoreboard(ppr):
+def get_projected_scoreboard(ppr=0):
     projections = get_projections(ppr)
     matchup_results = get_matchup_results()
 
@@ -396,7 +404,7 @@ def get_trophies():
 
 def get_all_matchups(week=None):
     if not week:
-        week = current_week()
+        week = get_current_week()
 
     # Fetch all matchup data for all weeks up to the specified week
     for w in range(1, week + 1):
@@ -422,7 +430,7 @@ def power_rankings(league_id: str=league_id, week: int=None):
 
     # If week is not specified or invalid, use the current week
     if not week or week <= 0:
-        week = current_week()
+        week = get_current_week()
 
     # Fetch teams data from Sleeper API
     teams_data = rosters
@@ -547,9 +555,10 @@ if __name__ == "__main__":
     # Create a mapping of roster_id to user_id
     roster_id_to_user_id = {roster.roster_id: roster.owner_id for roster in rosters}
 
-    # print(get_scoreboard() + '\n')
-    # print(get_standings() + '\n')
-    # print(get_monitor() + '\n')
-    # print(get_upcoming_matchups() + '\n')
-    # print(get_trophies() + '\n')
+    print(get_scoreboard() + '\n')
+    print(get_standings() + '\n')
+    print(get_monitor() + '\n')
+    print(get_upcoming_matchups() + '\n')
+    print(get_trophies() + '\n')
     print(print_power_rankings(2) + '\n')
+    print(get_projected_scoreboard() + '\n')
