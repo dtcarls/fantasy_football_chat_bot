@@ -18,6 +18,8 @@ players = {}
 user_id_to_name = {}
 roster_id_to_user_id = {}
 all_matchup_data = {}
+all_player_stats = {}
+all_player_projs = {}
 league_id = None
 current_week = None
 current_year = None
@@ -32,6 +34,7 @@ def get_current_week():
         return week
     else:
         return current_week
+    
 
 def get_current_year():
     if not current_year:
@@ -66,8 +69,19 @@ def get_matchup_results(_matchups=None):
 
     return matchup_results
 
+def get_player_stats(player_id):
+    for player in all_player_stats:
+        if player.player_id == player_id:
+            return player
 
-def get_projections(ppr=0, week=None, year=None):
+
+def get_player_projs(player_id):
+    for player in all_player_projs:
+        if player.player_id == player_id:
+            return player
+ 
+
+def get_projections(ppr=0, week=2, year=2023):
     if not week:
         week = get_current_week()
     if not year:
@@ -77,23 +91,58 @@ def get_projections(ppr=0, week=None, year=None):
     for roster in rosters:
         user_id = roster.owner_id
         team_name = user_id_to_name.get(user_id, 'Unknown')
-        projection = 0
-        for player in roster.starters:
-            try:
-                stats = UPlayerAPIClient.get_player_projections(sport=Sport.NFL, player_id=str(player), season=year, week=1).stats
+        projection = {}
+        for player_id in roster.starters:
+            player = get_player_projs(player_id)
+            if player is not None:
                 match ppr:
                     case 1 | 'full' | '1' | '1.0':
-                        pts = stats.pts_ppr
+                        pts = 0 if player.stats.ppr is None else int(player.stats.ppr)
                     case 0.5 | 'half' | '0.5' | '.5':
-                        pts = stats.pts_half_ppr
+                        pts = 0 if player.stats.pts_half_ppr is None else int(player.stats.pts_half_ppr)
                     case _: #anything else
-                        pts = stats.pts_std
-            except ValueError:
+                        pts = 0 if player.stats.pts_std is None else int(player.stats.pts_std)
+            else:
                 pts = 0
-            projection += pts
-        projections[team_name] = round(projection, 2)
-
+            projection[player_id] = pts
+        projections[team_name] = projection
     return projections
+
+
+def get_projected_total(roster_id, ppr=0, week=2, year=2023):
+    if not week:
+        week = get_current_week()
+    if not year:
+        year = get_current_year()
+
+    total_projected = 0
+    user_id = rosters[roster_id].owner_id
+    starters = rosters[roster_id].starters
+
+    for player_id in starters:
+        stats = get_player_stats(player_id)
+        played = 0 if stats is None else stats.stats.tm_off_snp
+        projs = get_player_projs(player_id)
+        pts = 0
+        if played > 0:
+            match ppr:
+                case 1 | 'full' | '1' | '1.0':
+                    pts = int(stats.stats.ppr)
+                case 0.5 | 'half' | '0.5' | '.5':
+                    pts = int(stats.stats.pts_half_ppr)
+                case _: #anything else
+                    pts = int(stats.stats.pts_std)
+        else:
+            match ppr:
+                case 1 | 'full' | '1' | '1.0':
+                    pts = int(projs.stats.ppr)
+                case 0.5 | 'half' | '0.5' | '.5':
+                    pts = int(projs.stats.pts_half_ppr)
+                case _: #anything else
+                    pts = int(projs.stats.pts_std)
+        total_projected += pts
+
+    return total_projected
 
 
 def get_matchup_data(_roster_id: int, _matchups=None):
@@ -146,9 +195,45 @@ def get_projected_scoreboard(ppr=0):
         if len(teams) == 2:
             team_1_name, team_1_points, roster_id_1 = teams[0]
             team_2_name, team_2_points, roster_id_2 = teams[1]
-            score += ['%9s %6.2f - %6.2f %s' % (team_1_name[:9], projections[team_1_name], projections[team_2_name], team_2_name[:9])]
+            team_1_proj = round(sum(projections[team_1_name].values()), 2)
+            team_2_proj = round(sum(projections[team_2_name].values()), 2)
+            score += ['%9s %6.2f - %6.2f %s' % (team_1_name[:9], team_1_proj, team_2_proj, team_2_name[:9])]
     text = ['Projected Scores'] + score
     return '\n'.join(text)
+
+
+def get_close_scores():
+    # Gets current projected closest scores (15 points or closer)
+    projections = get_projections()
+    matchup_results = get_matchup_results()
+
+    score = []
+    for matchup_id, teams in matchup_results.items():
+        if len(teams) == 2:
+            team_1_name, team_1_points, roster_id_1 = teams[0]
+            team_2_name, team_2_points, roster_id_2 = teams[1]
+            team_1_proj = get_projected_total(roster_id_1)
+            print(team_1_proj)
+            team_2_proj = get_projected_total(roster_id_2)
+            print(team_2_proj)
+            
+            
+
+    # for i in box_scores:
+    #     if i.away_team:
+    #         away_projected = get_projected_total(i.away_lineup)
+    #         home_projected = get_projected_total(i.home_lineup)
+    #         diffScore = away_projected - home_projected
+
+    #         if (abs(diffScore) <= 15 and (not all_played(i.away_lineup) or not all_played(i.home_lineup))):
+    #             score += ['%4s %6.2f - %6.2f %s' % (i.home_team.team_abbrev, i.home_projected,
+    #                                                 i.away_projected, i.away_team.team_abbrev)]
+
+    if not score:
+        return ('')
+    text = ['Projected Close Scores'] + score
+    return '\n'.join(text)
+
 
 
 def get_standings():
@@ -260,16 +345,17 @@ def get_upcoming_matchups():
 # TODO: Need reliable way of getting projected points in order to calculate achievers
 def get_achievers_trophy():
     matchup_results = get_matchup_results()
+    projections = get_projections()
     high_achiever_str = ['📈 Overachiever 📈']
     low_achiever_str = ['📉 Underachiever 📉']
     best_performance = -9999
     worst_performance = 9999
     for matchup_id, teams in matchup_results.items():
         if len(teams) == 2:
-            team_1_name, team_1_points, team_1_proj = teams[0]
-            team_2_name, team_2_points, team_2_proj = teams[1]
-            home_performance = team_1_points - round(sum(team_1_proj), 2)
-            away_performance = team_2_points - round(sum(team_2_proj), 2)
+            team_1_name, team_1_points, roster_id = teams[0]
+            team_2_name, team_2_points, roster_id = teams[1]
+            home_performance = team_1_points - projections[team_1_name]
+            away_performance = team_2_points - projections[team_2_name]
 
             if team_1_name != 0:
                 if home_performance > best_performance:
@@ -398,7 +484,7 @@ def get_trophies():
 
 
     text = ['Trophies of the week:'] + high_score_str + low_score_str + close_score_str + blowout_str + \
-            get_lucky_trophy()
+            get_lucky_trophy() + get_achievers_trophy()
     return '\n'.join(text)
 
 
@@ -542,12 +628,15 @@ if __name__ == "__main__":
     # league_id = 992179861063786496 #4 man
     # league_id = 932291846812827648 # 10 man, no median
     league_id = 916114371233808384 # includes top half wins
-    week = 1
+    week = 2
 
     matchups = LeagueAPIClient.get_matchups_for_week(league_id=league_id, week=week)
     users = LeagueAPIClient.get_users_in_league(league_id=league_id)
     rosters = LeagueAPIClient.get_rosters(league_id=league_id)
     players = PlayerAPIClient.get_all_players(sport=Sport.NFL)
+
+    all_player_stats = UPlayerAPIClient.get_all_player_stats(sport=Sport.NFL, season="2023", week=week)
+    all_player_projs = UPlayerAPIClient.get_all_player_projections(sport=Sport.NFL, season="2023", week=week)
 
     # Create a mapping of user_id to display name
     user_id_to_name = {user.user_id: user.display_name for user in users}
@@ -555,10 +644,11 @@ if __name__ == "__main__":
     # Create a mapping of roster_id to user_id
     roster_id_to_user_id = {roster.roster_id: roster.owner_id for roster in rosters}
 
-    print(get_scoreboard() + '\n')
-    print(get_standings() + '\n')
-    print(get_monitor() + '\n')
-    print(get_upcoming_matchups() + '\n')
-    print(get_trophies() + '\n')
-    print(print_power_rankings(2) + '\n')
+    # print(get_scoreboard() + '\n')
+    print(get_close_scores() + '\n')
+    # print(get_standings() + '\n')
+    # print(get_monitor() + '\n')
+    # print(get_upcoming_matchups() + '\n')
+    # print(get_trophies() + '\n')
+    # print(print_power_rankings(2) + '\n')
     print(get_projected_scoreboard() + '\n')
