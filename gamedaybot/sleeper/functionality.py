@@ -34,7 +34,7 @@ def get_current_week():
         return week
     else:
         return current_week
-    
+
 
 def get_current_year():
     if not current_year:
@@ -79,9 +79,9 @@ def get_player_projs(player_id):
     for player in all_player_projs:
         if player.player_id == player_id:
             return player
- 
 
-def get_projections(ppr=0, week=2, year=2023):
+
+def get_projections(ppr=0, week=None, year=None):
     if not week:
         week = get_current_week()
     if not year:
@@ -109,7 +109,7 @@ def get_projections(ppr=0, week=2, year=2023):
     return projections
 
 
-def get_projected_total(roster_id, ppr=0, week=2, year=2023):
+def get_projected_total(roster_id, ppr=0, week=None, year=None):
     if not week:
         week = get_current_week()
     if not year:
@@ -216,8 +216,8 @@ def get_close_scores():
             print(team_1_proj)
             team_2_proj = get_projected_total(roster_id_2)
             print(team_2_proj)
-            
-            
+
+
 
     # for i in box_scores:
     #     if i.away_team:
