@@ -35,4 +35,9 @@ jobs:
           tags: ${{ env.TEST_TAG }}
 
       - name: Run image against tests
-        run: docker run ${{ env.TEST_TAG }} python /usr/src/gamedaybot/setup.py test
+        run: |
+            docker run ${{ env.TEST_TAG }} /bin/sh -c "\
+            python -m pip install --upgrade pip && \
+            pip install -r requirements.txt && \
+            pip install -r requirements-test.txt && \
+            pytest"

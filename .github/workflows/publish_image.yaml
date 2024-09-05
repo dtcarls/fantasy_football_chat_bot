@@ -43,7 +43,12 @@ jobs:
           tags: ${{ env.TAG }}
 
       - name: Test image
-        run: docker run ${{ env.TAG }} python /usr/src/gamedaybot/setup.py test
+        run: |
+          docker run ${{ env.TAG }} /bin/sh -c "\
+          python -m pip install --upgrade pip && \
+          pip install -r requirements.txt && \
+          pip install -r requirements-test.txt && \
+          pytest"
 
       - name: Push image to registry
         uses: docker/build-push-action@v2

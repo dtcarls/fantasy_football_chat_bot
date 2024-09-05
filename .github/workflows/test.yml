@@ -1,0 +1,39 @@
+name: Run tests on PRs and commits
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+    types: [opened, synchronize]
+    branches:
+      - main
+      - master
+  workflow_dispatch:
+
+env:
+  BOT_ID: 916ccfd76a7fda25c74d09e1d5
+  LEAGUE_ID: 164483
+  TEST_TAG: user/test_build:test
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+          python -m pip install -r requirements-test.txt
+
+      - name: Test with pytest
+        run: pytest
