@@ -15,7 +15,7 @@ setup(
 
     author_email='deantcarlson@gmail.com',
 
-    install_requires=['espn_api>=0.36.0', 'requests>=2.0.0,<3.0.0', 'apscheduler>=3.3.0,<4.0.0', 'datetime'],
+    install_requires=['espn_api>=0.38.1', 'requests>=2.0.0,<3.0.0', 'apscheduler>=3.3.0,<4.0.0', 'datetime'],
 
     url='https://github.com/dtcarls/fantasy_football_chat_bot',
 
