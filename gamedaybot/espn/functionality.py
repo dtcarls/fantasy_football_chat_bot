@@ -836,9 +836,9 @@ def get_trophies(league, week=None, recap=False):
         week = league.current_week - 1
 
     matchups = league.box_scores(week=week)
-    low_score = 9999
+    low_score = 99999999
     high_score = -1
-    closest_score = 9999
+    closest_score = 99999999
     biggest_blowout = -1
 
     for i in matchups:
