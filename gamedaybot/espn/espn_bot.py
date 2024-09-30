@@ -169,8 +169,9 @@ def espn_bot(function):
     elif function == "get_scoreboard_short":
         text = espn.get_scoreboard_short(league)
         text = text + "\n\n" + espn.get_projected_scoreboard(league)
-        text = text + "\n\n" + espn.get_top_half_scoreboard(league)
-        text = text + "\n\n" + espn.get_projected_top_half_scoreboard(league)
+        if data["top_half_scoring_scoreboard"]:
+            text = text + "\n\n" + espn.get_top_half_scoreboard(league)
+            text = text + "\n\n" + espn.get_projected_top_half_scoreboard(league)
     elif function == "get_projected_scoreboard":
         text = espn.get_projected_scoreboard(league)
     elif function == "get_close_scores":
