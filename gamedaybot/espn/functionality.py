@@ -1,6 +1,54 @@
 from datetime import date
 
 
+def get_top_half_scoreboard(league, week=None):
+    """
+    Get the scoreboard for the given week and sort by top and bottom half of scoring
+
+    Parameters
+    ----------
+    league: espn_api.football.League
+        The league for which to retrieve the scoreboard.
+    week: int
+        The week of the season for which to retrieve the scoreboard.
+
+    Returns
+    -------
+    list of dict
+        A list of dictionaries representing the games on the scoreboard for the given week. Each dictionary contains
+        information about a single game, including the teams and their scores.
+    """
+    # Gets current week's scoreboard
+    box_scores = league.box_scores(week=week)
+
+    # fetch scores and sort them top to bottom
+    all_scores = []
+    for score in box_scores:
+        all_scores.append(
+            {"home_score": score.home_score, "team_abbrev": score.home_team.team_abbrev}
+        )
+        all_scores.append(
+            {"home_score": score.away_score, "team_abbrev": score.away_team.team_abbrev}
+        )
+
+    all_scores = sorted(all_scores, key=lambda x: x["home_score"], reverse=True)
+
+    top_half_cutoff = len(all_scores) / 2 + 1
+    str_list = []
+    i = 0
+    for score_dict in all_scores:
+        i += 1
+        if i == top_half_cutoff:
+            str_list.append("=============")
+        home_score = score_dict["home_score"]
+        abbreviation = score_dict["team_abbrev"]
+        score_str = f"{abbreviation:6s} {home_score:6.2f}"
+        str_list.append(score_str)
+
+    text = ["Top Half Scoring"] + str_list
+    return "\n".join(text)
+
+
 def get_scoreboard_short(league, week=None):
     """
     Retrieve the scoreboard for a given week of the fantasy football season.
