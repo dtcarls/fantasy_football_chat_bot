@@ -26,6 +26,8 @@ services:
       # INIT_MSG:
       # #If set to True, when standings are posted on Wednesday it will also include top half scoring wins
       # TOP_HALF_SCORING:
+      # #If set to True, when scoreboards updates are posted include top half scoring as well
+      # TOP_HALF_SCORING_SCOREBOARD:
       # #If set to True, when matchups are posted on Tuesday it will also include a random phrase
       # RANDOM_PHRASE:
       # #Used for private leagues. See Private Leagues Section for documentation
