@@ -112,6 +112,13 @@ def get_env_vars():
         top_half_scoring = False
 
     data['top_half_scoring'] = top_half_scoring
+    
+    try:
+        top_half_scoring_scoreboard = utils.str_to_bool(os.environ["TOP_HALF_SCORING_SCOREBOARD"])
+    except KeyError:
+        top_half_scoring_scoreboard = False
+
+    data['top_half_scoring_scoreboard'] = top_half_scoring_scoreboard
 
     try:
         random_phrase = utils.str_to_bool(os.environ["RANDOM_PHRASE"])

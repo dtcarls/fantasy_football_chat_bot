@@ -37,19 +37,21 @@ Schedule Link: https://www.gamedaybot.com/message-schedule/
 Table of Contents
 =================
 
-  * [Setting up GroupMe, Discord, or Slack, and deploying app in Heroku](#setting-up-groupme-discord-or-slack-and-deploying-app-in-heroku)
-     * [GroupMe Setup](#groupme-setup)
-     * [Slack setup](#slack-setup)
-     * [Discord setup](#discord-setup)
-     * [Heroku setup](#heroku-setup)
-     * [Private Leagues](#private-leagues)
-  * [Troubleshooting / FAQ](#troubleshooting--faq)
-  * [Getting Started for development and testing](#getting-started-for-development-and-testing)
-     * [Installing for development](#installing-for-development)
-     * [Environment Variables](#environment-variables)
-     * [Running with Docker](#running-with-docker)
-     * [Running without Docker](#running-without-docker)
-     * [Running the tests](#running-the-tests)
+- [ESPN Fantasy Football GroupMe Slack and Discord Chat Bot](#espn-fantasy-football-groupme-slack-and-discord-chat-bot)
+- [Table of Contents](#table-of-contents)
+  - [Setting up GroupMe, Discord, or Slack, and deploying app in Heroku](#setting-up-groupme-discord-or-slack-and-deploying-app-in-heroku)
+    - [GroupMe Setup](#groupme-setup)
+    - [Slack setup](#slack-setup)
+    - [Discord setup](#discord-setup)
+    - [Heroku setup](#heroku-setup)
+  - [Getting Started for development and testing](#getting-started-for-development-and-testing)
+    - [Installing for development](#installing-for-development)
+    - [Environment Variables](#environment-variables)
+    - [Running with Docker](#running-with-docker)
+    - [Running without Docker](#running-without-docker)
+    - [Running the tests](#running-the-tests)
+      - [Private Leagues](#private-leagues)
+  - [FAQ](#faq)
 
 :cold_sweat::cold_sweat::cold_sweat:
 
@@ -313,5 +315,6 @@ Is there a version of this for Messenger/WhatsApp/[insert other chat]?
 My Standings look wrong. I have weird (+1) in it.
 
 * TOP_HALF_SCORING: If set to True, when standings are posted on Wednesday it will also include top half scoring wins
+* TOP_HALF_SCORING_SCOREBOARD: If set to True, when scoreboards updates are posted include top half scoring as well
 * Top half wins is being in the top half of your league for points and you receive an additional "win" for it. The number in parenthesis (+1) tells you how many added wins over the season for top half wins.
 </details>
