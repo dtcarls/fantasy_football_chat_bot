@@ -43,7 +43,7 @@ def scheduler():
                   day_of_week='tue', hour=7, minute=30, start_date=ff_start_date, end_date=ff_end_date,
                   timezone=my_timezone, replace_existing=True)
     
-    sched.add_job(espn_bot, 'cron', ['end_of_week_ai_summary'], id='final',
+    sched.add_job(espn_bot, 'cron', ['end_of_week_ai_summary'], id='end_of_week_ai_summary',
                   day_of_week='tue', hour=8, minute=30, start_date=ff_start_date, end_date=ff_end_date,
                   timezone=my_timezone, replace_existing=True)
 
