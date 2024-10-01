@@ -193,6 +193,8 @@ def espn_bot(function):
         # on Tuesday we need to get the scores of last week
         week = league.current_week - 1
         text = "Final " + espn.get_scoreboard_short(league, week=week)
+        if data["top_half_scoring_scoreboard"]:
+            text = text + "\n\n" + espn.get_top_half_scoreboard(league, week=week)
         text = text + "\n\n" + espn.get_trophies(league, week=week)
     elif function == "get_waiver_report" and swid != '{1}' and espn_s2 != '1':
         faab = league.settings.faab
