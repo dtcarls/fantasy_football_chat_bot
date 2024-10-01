@@ -10,6 +10,7 @@ else:
     import sys
     sys.path.insert(1, os.path.abspath('.'))
     import gamedaybot.utils.util as util
+    import gamedaybot.ai.summarizer as summarizer
     from gamedaybot.chat.groupme import GroupMe
     from gamedaybot.chat.slack import Slack
     from gamedaybot.chat.discord import Discord
@@ -191,6 +192,9 @@ def espn_bot(function):
         week = league.current_week - 1
         text = "Final " + espn.get_scoreboard_short(league, week=week)
         text = text + "\n\n" + espn.get_trophies(league, week=week)
+    elif function == "end_of_week_ai_summary":
+        main_analysis, _ = summarizer.end_of_week_ai_summary(league)
+        text = main_analysis
     elif function == "get_waiver_report" and swid != '{1}' and espn_s2 != '1':
         faab = league.settings.faab
         text = espn.get_waiver_report(league, faab)
