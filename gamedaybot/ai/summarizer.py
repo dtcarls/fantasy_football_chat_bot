@@ -92,7 +92,7 @@ def end_of_week_ai_summary(league):
     message = client.messages.create(
         model="claude-3-5-sonnet-20240620",
         max_tokens=1000,
-        temperature=0,
+        temperature=1.0,
         messages=[
             {
                 "role": "user",
