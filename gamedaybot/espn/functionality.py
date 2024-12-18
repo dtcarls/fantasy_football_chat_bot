@@ -472,45 +472,7 @@ def get_starter_counts(league):
         A dictionary containing the number of players at each position within the starting lineup.
     """
 
-    # Get the box scores for last week
-    box_scores = league.box_scores(week=league.current_week - 1)
-    # Initialize a dictionary to store the home team's starters and their positions
-    h_starters = {}
-    # Initialize a variable to keep track of the number of home team starters
-    h_starter_count = 0
-    # Initialize a dictionary to store the away team's starters and their positions
-    a_starters = {}
-    # Initialize a variable to keep track of the number of away team starters
-    a_starter_count = 0
-    # Iterate through each game in the box scores
-    for i in box_scores:
-        # Iterate through each player in the home team's lineup
-        for player in i.home_lineup:
-            # Check if the player is a starter (not on the bench or injured)
-            if (player.slot_position != 'BE' and player.slot_position != 'IR'):
-                # Increment the number of home team starters
-                h_starter_count += 1
-                try:
-                    # Try to increment the count for this position in the h_starters dictionary
-                    h_starters[player.slot_position] = h_starters[player.slot_position] + 1
-                except KeyError:
-                    # If the position is not in the dictionary yet, add it and set the count to 1
-                    h_starters[player.slot_position] = 1
-        # in the rare case when someone has an empty slot we need to check the other team as well
-        for player in i.away_lineup:
-            if (player.slot_position != 'BE' and player.slot_position != 'IR'):
-                a_starter_count += 1
-                try:
-                    a_starters[player.slot_position] = a_starters[player.slot_position] + 1
-                except KeyError:
-                    a_starters[player.slot_position] = 1
-
-        # if statement for the ultra rare case of a matchup with both entire teams (or one with a bye) on the bench
-        if a_starter_count!=0 and h_starter_count != 0:
-            if a_starter_count > h_starter_count:
-                return a_starters
-            else:
-                return h_starters
+    return {pos: cnt for pos, cnt in league.settings.position_slot_counts.items() if pos not in ['BE', 'IR'] and cnt != 0}
 
 
 def best_flex(flexes, player_pool, num):
