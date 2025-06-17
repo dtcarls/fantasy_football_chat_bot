@@ -13,8 +13,6 @@ from sleeper.api.unofficial import UPlayerAPIClient
 from sleeper.enum import Sport
 from gamedaybot.utils.util import two_step_dominance
 
-league = {}
-scoring_settings = {}
 matchups = {}
 users = {}
 rosters = {}
@@ -581,7 +579,6 @@ if __name__ == "__main__":
     users = LeagueAPIClient.get_users_in_league(league_id=league_id)
     rosters = LeagueAPIClient.get_rosters(league_id=league_id)
     players = PlayerAPIClient.get_all_players(sport=Sport.NFL)
-    league = LeagueAPIClient.get_league(league_id=league_id)
 
     # Create a mapping of user_id to display name
     user_id_to_name = {user.user_id: user.display_name for user in users}
