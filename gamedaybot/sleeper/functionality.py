@@ -1,5 +1,7 @@
 import sys
 import os
+import requests
+import json
 sys.path.insert(1, os.path.abspath('.'))
 
 from gamedaybot.chat.groupme import GroupMe
@@ -25,6 +27,19 @@ all_player_projs = {}
 league_id = None
 current_week = None
 current_year = None
+
+def matchup_legs():
+    url = "https://sleeper.com/graphql"
+    payload = {
+	    "query": "query matchup_legs {matchup_legs(league_id: \"%d\",round: %d){leg matchup_id roster_id round points proj_points max_points}}" % (league_id, current_week),
+    }
+    headers = {
+        "Authorization":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdmF0YXIiOiI0ZjQwOTBlNWU5YzM5NDE0MTRkYjQwYTg3MWUzZTkwOSIsImRpc3BsYXlfbmFtZSI6InRoZVNlYW5PIiwiZXhwIjoxNzc2Mzg1Mjk5LCJpYXQiOjE3NDQ4NDkyOTksImlzX2JvdCI6ZmFsc2UsImlzX21hc3RlciI6ZmFsc2UsInJlYWxfbmFtZSI6bnVsbCwidXNlcl9pZCI6MTEzMTI4Mzg2MjQzMDE0NjU2MCwidmFsaWRfMmZhIjoiIn0.YLFncwXsyquEeBYx_rh1M2Irtgu8SVw-Wcf9nkd1unk"
+    }
+
+    response = requests.post(url, headers=headers, json=payload)
+    response.raise_for_status()  # Raise HTTPError for bad responses (4xx or 5xx)
+    return response.json()
 
 def get_current_week():
     if not current_week:
