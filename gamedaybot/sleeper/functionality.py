@@ -21,25 +21,9 @@ rosters = {}
 players = {}
 user_id_to_name = {}
 roster_id_to_user_id = {}
-all_matchup_data = {}
-all_player_stats = {}
-all_player_projs = {}
 league_id = None
 current_week = None
 current_year = None
-
-def matchup_legs():
-    url = "https://sleeper.com/graphql"
-    payload = {
-	    "query": "query matchup_legs {matchup_legs(league_id: \"%d\",round: %d){leg matchup_id roster_id round points proj_points max_points}}" % (league_id, current_week),
-    }
-    headers = {
-        "Authorization":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdmF0YXIiOiI0ZjQwOTBlNWU5YzM5NDE0MTRkYjQwYTg3MWUzZTkwOSIsImRpc3BsYXlfbmFtZSI6InRoZVNlYW5PIiwiZXhwIjoxNzc2Mzg1Mjk5LCJpYXQiOjE3NDQ4NDkyOTksImlzX2JvdCI6ZmFsc2UsImlzX21hc3RlciI6ZmFsc2UsInJlYWxfbmFtZSI6bnVsbCwidXNlcl9pZCI6MTEzMTI4Mzg2MjQzMDE0NjU2MCwidmFsaWRfMmZhIjoiIn0.YLFncwXsyquEeBYx_rh1M2Irtgu8SVw-Wcf9nkd1unk"
-    }
-
-    response = requests.post(url, headers=headers, json=payload)
-    response.raise_for_status()  # Raise HTTPError for bad responses (4xx or 5xx)
-    return response.json()
 
 def get_current_week():
     if not current_week:
@@ -81,97 +65,41 @@ def get_matchup_results(_matchups=None):
 
         if matchup_id not in matchup_results:
             matchup_results[matchup_id] = []
-
+            
         matchup_results[matchup_id].append((team_name, points, roster_id))
 
     return matchup_results
 
-def get_player_stats(player_id):
-    for player in all_player_stats:
-        if player.player_id == player_id:
-            return player
+def get_matchup_projs():
+    matchup_legs = {}
+    matchup_projs = {}
 
+    url = "https://sleeper.com/graphql"
+    payload = {
+	    "query": "query matchup_legs {matchup_legs(league_id: \"%d\",round: %d){leg matchup_id roster_id round points proj_points}}" % (league_id, current_week),
+    }
+    headers = {
+        "Authorization":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdmF0YXIiOiI0ZjQwOTBlNWU5YzM5NDE0MTRkYjQwYTg3MWUzZTkwOSIsImRpc3BsYXlfbmFtZSI6InRoZVNlYW5PIiwiZXhwIjoxNzgxNjQ2ODU1LCJpYXQiOjE3NTAxMTA4NTUsImlzX2JvdCI6ZmFsc2UsImlzX21hc3RlciI6ZmFsc2UsInJlYWxfbmFtZSI6bnVsbCwidXNlcl9pZCI6MTEzMTI4Mzg2MjQzMDE0NjU2MCwidmFsaWRfMmZhIjoiIn0.2Vua5KKVIdJCNbrk9LlehvHpvm31r9fVuYkdrjrZ3H0"
+    }
 
-def get_player_projs(player_id):
-    for player in all_player_projs:
-        if player.player_id == player_id:
-            return player
+    response = requests.post(url, headers=headers, json=payload)
+    response.raise_for_status()  # Raise HTTPError for bad responses (4xx or 5xx)
+    matchup_legs = response.json()['data']['matchup_legs']
 
+    for matchup in matchup_legs:
+        roster_id = matchup['roster_id']
+        points = matchup['points']
+        proj_points = matchup['proj_points']
+        matchup_id = matchup['matchup_id']
 
-def get_projections(ppr=0, week=None, year=None):
-    if not week:
-        week = get_current_week()
-    if not year:
-        year = get_current_year()
+        team_name = get_team_name_from_roster_id(roster_id)
 
-    projections = {}
-    print(scoring_settings)
-    for roster in rosters:
-        user_id = roster.owner_id
-        team_name = user_id_to_name.get(user_id, 'Unknown')
-        projection = {}
-        for player_id in roster.starters:
-            player = get_player_projs(player_id)
-            populated_stats = player.stats.get_populated_stats()
-            if (team_name == "theSeanO"): print(player_id, player.player.first_name, player.player.last_name, populated_stats)
-            pts = 0
-            for p in populated_stats:
-                if (p in scoring_settings):
-                    s = round(float(populated_stats[p]) * float(scoring_settings[p]), 2)
-                    score = f"{float(populated_stats[p])} * {float(scoring_settings[p])} = {s}"
-                    if (team_name == "theSeanO"): print(p, score)
-                    pts += s
-            if(team_name == "theSeanO"): print(pts)
-            # if player is not None:
-            #     match ppr:
-            #         case 1 | 'full' | '1' | '1.0':
-            #             pts = 0 if player.stats.ppr is None else int(player.stats.ppr)
-            #         case 0.5 | 'half' | '0.5' | '.5':
-            #             pts = 0 if player.stats.pts_half_ppr is None else int(player.stats.pts_half_ppr)
-            #         case _: #anything else
-            #             pts = 0 if player.stats.pts_std is None else int(player.stats.pts_std)
-            # else:
-            #     pts = 0
-            projection[player_id] = pts
-        projections[team_name] = projection
-    return projections
+        if matchup_id not in matchup_projs:
+            matchup_projs[matchup_id] = []
+            
+        matchup_projs[matchup_id].append((team_name, points, proj_points, roster_id))
 
-
-def get_projected_total(roster_id, ppr=0, week=None, year=None):
-    if not week:
-        week = get_current_week()
-    if not year:
-        year = get_current_year()
-
-    total_projected = 0
-    user_id = rosters[roster_id].owner_id
-    starters = rosters[roster_id].starters
-
-    for player_id in starters:
-        stats = get_player_stats(player_id)
-        played = 0 if stats is None else stats.stats.tm_off_snp
-        projs = get_player_projs(player_id)
-        pts = 0
-        if played > 0:
-            match ppr:
-                case 1 | 'full' | '1' | '1.0':
-                    pts = int(stats.stats.ppr)
-                case 0.5 | 'half' | '0.5' | '.5':
-                    pts = int(stats.stats.pts_half_ppr)
-                case _: #anything else
-                    pts = int(stats.stats.pts_std)
-        else:
-            match ppr:
-                case 1 | 'full' | '1' | '1.0':
-                    pts = int(projs.stats.ppr)
-                case 0.5 | 'half' | '0.5' | '.5':
-                    pts = int(projs.stats.pts_half_ppr)
-                case _: #anything else
-                    pts = int(projs.stats.pts_std)
-        total_projected += pts
-
-    return total_projected
-
+    return matchup_projs
 
 def get_matchup_data(_roster_id: int, _matchups=None):
     '''
@@ -214,17 +142,14 @@ def get_scoreboard():
     return '\n'.join(text)
 
 
-def get_projected_scoreboard(ppr=0):
-    projections = get_projections(ppr)
-    matchup_results = get_matchup_results()
+def get_projected_scoreboard():
+    matchup_results = get_matchup_projs()
 
     score=[]
     for matchup_id, teams in matchup_results.items():
         if len(teams) == 2:
-            team_1_name, team_1_points, roster_id_1 = teams[0]
-            team_2_name, team_2_points, roster_id_2 = teams[1]
-            team_1_proj = round(sum(projections[team_1_name].values()), 2)
-            team_2_proj = round(sum(projections[team_2_name].values()), 2)
+            team_1_name, team_1_points, team_1_proj, roster_id_1 = teams[0]
+            team_2_name, team_2_points, team_2_proj, roster_id_2 = teams[1]
             score += ['%9s %6.2f - %6.2f %s' % (team_1_name[:9], team_1_proj, team_2_proj, team_2_name[:9])]
     text = ['Projected Scores'] + score
     return '\n'.join(text)
@@ -232,20 +157,13 @@ def get_projected_scoreboard(ppr=0):
 
 def get_close_scores():
     # Gets current projected closest scores (15 points or closer)
-    projections = get_projections()
     matchup_results = get_matchup_results()
 
     score = []
     for matchup_id, teams in matchup_results.items():
         if len(teams) == 2:
-            team_1_name, team_1_points, roster_id_1 = teams[0]
-            team_2_name, team_2_points, roster_id_2 = teams[1]
-            team_1_proj = get_projected_total(roster_id_1)
-            print(team_1_proj)
-            team_2_proj = get_projected_total(roster_id_2)
-            print(team_2_proj)
-
-
+            team_1_name, team_1_points, team_1_proj, roster_id_1 = teams[0]
+            team_2_name, team_2_points, team_2_proj, roster_id_2 = teams[1]
 
     # for i in box_scores:
     #     if i.away_team:
@@ -372,18 +290,17 @@ def get_upcoming_matchups():
 
 # TODO: Need reliable way of getting projected points in order to calculate achievers
 def get_achievers_trophy():
-    matchup_results = get_matchup_results()
-    projections = get_projections()
+    matchup_results = get_matchup_projs()
     high_achiever_str = ['📈 Overachiever 📈']
     low_achiever_str = ['📉 Underachiever 📉']
     best_performance = -9999
     worst_performance = 9999
     for matchup_id, teams in matchup_results.items():
         if len(teams) == 2:
-            team_1_name, team_1_points, roster_id = teams[0]
-            team_2_name, team_2_points, roster_id = teams[1]
-            home_performance = team_1_points - projections[team_1_name]
-            away_performance = team_2_points - projections[team_2_name]
+            team_1_name, team_1_points, team_1_proj, roster_id = teams[0]
+            team_2_name, team_2_points, team_2_proj, roster_id = teams[1]
+            home_performance = team_1_points - team_1_proj
+            away_performance = team_2_points - team_2_proj
 
             if team_1_name != 0:
                 if home_performance > best_performance:
@@ -657,20 +574,14 @@ if __name__ == "__main__":
     # league_id = 932291846812827648 # 10 man, no median
     # league_id = 916114371233808384 # includes top half wins
     league_id = 1124815370767589376 # 16 man
-    week = 1
-    year = "2024"
+    current_week = week = 4
+    current_year = "2024"
 
     matchups = LeagueAPIClient.get_matchups_for_week(league_id=league_id, week=week)
     users = LeagueAPIClient.get_users_in_league(league_id=league_id)
     rosters = LeagueAPIClient.get_rosters(league_id=league_id)
     players = PlayerAPIClient.get_all_players(sport=Sport.NFL)
     league = LeagueAPIClient.get_league(league_id=league_id)
-    for s in league.scoring_settings.__dict__:
-        if league.scoring_settings.__dict__[s] is not None:
-            scoring_settings[s] = round(league.scoring_settings.__dict__[s], 2)
-
-    all_player_stats = UPlayerAPIClient.get_all_player_stats(sport=Sport.NFL, season=year, week=week)
-    all_player_projs = UPlayerAPIClient.get_all_player_projections(sport=Sport.NFL, season=year, week=week)
 
     # Create a mapping of user_id to display name
     user_id_to_name = {user.user_id: user.display_name for user in users}
@@ -678,11 +589,11 @@ if __name__ == "__main__":
     # Create a mapping of roster_id to user_id
     roster_id_to_user_id = {roster.roster_id: roster.owner_id for roster in rosters}
 
-    # print(get_scoreboard() + '\n')
-    print(get_close_scores() + '\n')
-    # print(get_standings() + '\n')
-    # print(get_monitor() + '\n')
-    # print(get_upcoming_matchups() + '\n')
-    # print(get_trophies() + '\n')
-    # print(print_power_rankings(2) + '\n')
+    print(get_scoreboard() + '\n')
     print(get_projected_scoreboard() + '\n')
+    # print(get_close_scores() + '\n')
+    print(get_standings() + '\n')
+    print(get_monitor() + '\n')
+    print(get_upcoming_matchups() + '\n')
+    print(get_trophies() + '\n')
+    # print(print_power_rankings(2) + '\n')
