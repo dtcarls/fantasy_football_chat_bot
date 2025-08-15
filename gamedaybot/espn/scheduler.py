@@ -5,15 +5,48 @@ from gamedaybot.espn.env_vars import get_env_vars
 
 def scheduler():
     """
-    This function is used to schedule jobs to send messages.
-
-    Parameters
-    ----------
-    None
-
+    Initialize and start the fantasy football bot scheduler.
+    
+    This function sets up all scheduled jobs for sending fantasy football messages
+    throughout the week. The scheduler runs continuously and sends messages to 
+    configured chat platforms (GroupMe, Slack, Discord) at predetermined times.
+    
+    Scheduled Jobs
+    --------------
+    - Monday 6:30 PM ET: Close scores (games within 16 points)
+    - Tuesday 7:30 AM Local: Final scores and trophies from previous week
+    - Tuesday 6:30 PM Local: Power rankings
+    - Wednesday 7:30 AM Local: Current standings
+    - Wednesday 7:31 AM Local: Waiver report (if enabled)
+    - Thursday 7:30 PM ET: Upcoming matchups
+    - Friday/Monday 7:30 AM Local: Scoreboard updates
+    - Sunday 7:30 AM Local: Player monitor report (if enabled)
+    - Sunday 4:00 PM & 8:00 PM ET: Live scoreboard updates
+    
+    Optional Jobs
+    -------------
+    - Daily waiver reports: Runs daily at 7:31 AM Local (if DAILY_WAIVER=True)
+    - Player monitor: Sunday mornings (if MONITOR_REPORT=True)
+    
+    Environment Variables
+    --------------------
+    The scheduler uses environment variables loaded via get_env_vars():
+    - START_DATE/END_DATE: Season date range
+    - TIMEZONE: Local timezone for scheduling
+    - DAILY_WAIVER: Enable daily waiver reports
+    - MONITOR_REPORT: Enable player monitoring
+    
+    Notes
+    -----
+    - Uses blocking scheduler - this function will run indefinitely
+    - Misfire grace time is set to 15 minutes
+    - Game times use America/New_York timezone
+    - Local times use the configured TIMEZONE
+    
     Returns
     -------
     None
+        This function runs indefinitely until interrupted
     """
     data = get_env_vars()
     game_timezone = 'America/New_York'

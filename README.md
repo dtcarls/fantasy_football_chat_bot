@@ -50,6 +50,8 @@ Table of Contents
      * [Running with Docker](#running-with-docker)
      * [Running without Docker](#running-without-docker)
      * [Running the tests](#running-the-tests)
+  * [Documentation](#documentation)
+  * [Contributing](#contributing)
 
 :cold_sweat::cold_sweat::cold_sweat:
 
@@ -315,3 +317,25 @@ My Standings look wrong. I have weird (+1) in it.
 * TOP_HALF_SCORING: If set to True, when standings are posted on Wednesday it will also include top half scoring wins
 * Top half wins is being in the top half of your league for points and you receive an additional "win" for it. The number in parenthesis (+1) tells you how many added wins over the season for top half wins.
 </details>
+
+## Documentation
+
+Comprehensive documentation is available in the `/docs` directory:
+
+- **[API Reference](docs/API_REFERENCE.md)**: Complete API documentation for all modules, classes, and functions
+- **[Architecture Guide](docs/ARCHITECTURE.md)**: Internal architecture and system design explanation  
+- **[Developer Guide](docs/DEVELOPER_GUIDE.md)**: Detailed development setup and workflow guide
+- **[Contributing Guidelines](CONTRIBUTING.md)**: How to contribute to the project
+- **[Changelog](CHANGELOG.md)**: Version history and release notes
+
+## Contributing
+
+We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.md) for details on:
+
+- How to report issues and request features
+- Development environment setup
+- Code style guidelines  
+- Pull request process
+- Testing requirements
+
+For questions or support, join our [Discord community](https://discord.gg/VFXSkcgjxh).

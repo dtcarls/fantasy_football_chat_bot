@@ -4,6 +4,39 @@ import gamedaybot.utils.util as utils
 
 
 def get_env_vars():
+    """
+    Retrieve and validate environment variables for the fantasy football bot.
+    
+    This function collects all necessary environment variables required for the bot
+    to function, including league information, messaging platform configurations,
+    and various feature flags.
+    
+    Returns
+    -------
+    dict
+        A dictionary containing all environment variables with their values.
+        Keys include:
+        - ff_start_date: Fantasy football season start date
+        - ff_end_date: Fantasy football season end date
+        - my_timezone: Timezone for scheduling messages
+        - daily_waiver: Whether to send daily waiver reports
+        - monitor_report: Whether to send player monitor reports
+        - league_id: ESPN league ID
+        - league_year: Fantasy football season year
+        - swid: ESPN SWID for private leagues
+        - espn_s2: ESPN S2 cookie for private leagues
+        - test: Whether bot is in test mode
+        - top_half_scoring: Whether to include top half scoring in standings
+        - random_phrase: Whether to include random phrases in matchups
+        - waiver_report: Whether to send waiver reports
+        - init_msg: Initial message sent when bot starts
+    
+    Raises
+    ------
+    Exception
+        If no messaging platform information is provided (BOT_ID, SLACK_WEBHOOK_URL, 
+        or DISCORD_WEBHOOK_URL must be set).
+    """
     data = {}
     try:
         ff_start_date = os.environ["START_DATE"]
