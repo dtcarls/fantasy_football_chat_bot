@@ -325,6 +325,8 @@ Comprehensive documentation is available in the `/docs` directory:
 - **[API Reference](docs/API_REFERENCE.md)**: Complete API documentation for all modules, classes, and functions
 - **[Architecture Guide](docs/ARCHITECTURE.md)**: Internal architecture and system design explanation  
 - **[Developer Guide](docs/DEVELOPER_GUIDE.md)**: Detailed development setup and workflow guide
+- **[Message Schedule](docs/MESSAGE_SCHEDULE.md)**: Complete schedule of when messages are sent throughout the week
+- **[Environment Variables](docs/ENVIRONMENT_VARIABLES.md)**: Comprehensive reference for all configuration options
 - **[Contributing Guidelines](CONTRIBUTING.md)**: How to contribute to the project
 - **[Changelog](CHANGELOG.md)**: Version history and release notes
 
