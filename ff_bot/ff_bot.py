@@ -400,49 +400,66 @@ def get_trophies(league,  matchupPeriod=None):
 
     text = ['Brent Sucks. Here are the trophies of the week:'] + low_score_str + high_score_str + close_score_str + blowout_str
     return '\n'.join(text)
-def get_batter_points(league,  matchupPeriod=None):
-  matchups = league.box_scores( matchup_period= matchupPeriod)
-  espn_matchup = matchupPeriod + 15
-  for i in matchups:
-    home_team = i.home_team
-    away_team = i.away_team
-    home_team_name = i.home_team.team_name
-    away_team_name = i.away_team.team_name
-    p_points = 0 
-    h_points = 0
+
+
+PITCHING_SLOTS = {'SP', 'RP', 'P'}
+BENCH_SLOTS = {'BE', 'IL', 'IR'}
+
+
+def get_hitting_pitching_trophies(league, matchupPeriod=None):
+    # Reports best & worst hitting team and best & worst pitching team for the week.
+    # Mirrors ffscrapr::espn_hitter_points() / espn_pitcher_points() logic:
+    # hitting = all active non-pitching slots; pitching = SP, RP, P slots.
+    box_scores = league.box_scores(matchup_period=matchupPeriod)
+
+    best_hitting_pts = -1
     best_hitting_name = ''
+    worst_hitting_pts = 9999
     worst_hitting_name = ''
-    best_hitting_points = 0
-    worst_hitting_points = 999
-    for y in home_team.roster:
-      if y.lineupSlot == 'SP' or y.lineupSlot == 'RP':  
-          p_points += y.stats[espn_matchup]['points']
-      else: 
-          h_points += y.stats[espn_matchup]['points']
-    if h_points > best_hitting_points: 
-      best_hitting_points = h_points
-      best_hitting_name = home_team_name
-    if h_points < worst_hitting_points:
-      worst_hitting_points = h_points
-      worst_hitting_name = home_team_name
-    p_points = 0 
-    h_points = 0
-    for y in away_team.roster:
-       if y.lineupSlot == 'SP' or y.lineupSlot == 'RP':  
-          p_points += y.stats[espn_matchup]['points']
-       else: 
-          h_points += y.stats[espn_matchup]['points']
-    if h_points > best_hitting_points: 
-      best_hitting_points = h_points
-      best_hitting_name = away_team_name
-    if h_points < worst_hitting_points:
-      worst_hitting_points = h_points
-      worst_hitting_name = away_team_name
-  low_score_str = ['worst hitting: %s with %.2f points' % (worst_hitting_name, worst_hitting_points)]
-  high_score_str = ['besthitting: %s with %.2f points' % (best_hitting_name, best_hitting_points)]
-  text = ['Trophies of the week:'] + low_score_str + high_score_str
-  return '\n'.join(text)     
-  
+    best_pitching_pts = -1
+    best_pitching_name = ''
+    worst_pitching_pts = 9999
+    worst_pitching_name = ''
+
+    for matchup in box_scores:
+        for team, lineup in [
+            (matchup.home_team, matchup.home_lineup),
+            (matchup.away_team, matchup.away_lineup),
+        ]:
+            if not team:
+                continue
+            hitting_pts = 0.0
+            pitching_pts = 0.0
+            for player in lineup:
+                if player.slot_position in BENCH_SLOTS:
+                    continue
+                if player.slot_position in PITCHING_SLOTS:
+                    pitching_pts += player.points
+                else:
+                    hitting_pts += player.points
+
+            if hitting_pts > best_hitting_pts:
+                best_hitting_pts = hitting_pts
+                best_hitting_name = team.team_name
+            if hitting_pts < worst_hitting_pts:
+                worst_hitting_pts = hitting_pts
+                worst_hitting_name = team.team_name
+            if pitching_pts > best_pitching_pts:
+                best_pitching_pts = pitching_pts
+                best_pitching_name = team.team_name
+            if pitching_pts < worst_pitching_pts:
+                worst_pitching_pts = pitching_pts
+                worst_pitching_name = team.team_name
+
+    text = [
+        'Hitting & Pitching Awards:',
+        'Best Hitting:   %s (%.2f pts)' % (best_hitting_name, best_hitting_pts),
+        'Worst Hitting:  %s (%.2f pts)' % (worst_hitting_name, worst_hitting_pts),
+        'Best Pitching:  %s (%.2f pts)' % (best_pitching_name, best_pitching_pts),
+        'Worst Pitching: %s (%.2f pts)' % (worst_pitching_name, worst_pitching_pts),
+    ]
+    return '\n'.join(text)
+
 
 def str_to_bool(check):
     return check.lower() in ("yes", "true", "t", "1")
@@ -497,7 +514,7 @@ def bot_main(function):
     try:
         year = int(os.environ["LEAGUE_YEAR"])
     except KeyError:
-        year = 2021
+        year = 2026
 
     try:
         swid = os.environ["SWID"]
@@ -560,6 +577,7 @@ def bot_main(function):
         print(get_monitor(league))
         if waiver_report and swid != '{1}' and espn_s2 != '1':
             print(get_waiver_report(league, faab))
+        print(get_hitting_pitching_trophies(league))
         function = "get_final"
         # bot.send_message("Testing")
         # slack_bot.send_message("Testing")
@@ -588,11 +606,15 @@ def bot_main(function):
         text = get_standings(league, top_half_scoring)
         if waiver_report and swid != '{1}' and espn_s2 != '1':
             text += '\n\n' + get_waiver_report(league, faab)
+    elif function == "get_hitting_pitching_trophies":
+        matchupPeriod = league.currentMatchupPeriod - 1
+        text = get_hitting_pitching_trophies(league, matchupPeriod=matchupPeriod)
     elif function == "get_final":
-        # on Tuesday we need to get the scores of last week
+        # on Monday we need to get the scores of last week
         matchupPeriod = league.currentMatchupPeriod - 1
         text = "Final " + get_scoreboard_short(league,  matchupPeriod= matchupPeriod)
         text = text + "\n\n" + get_trophies(league,  matchupPeriod= matchupPeriod)
+        text = text + "\n\n" + get_hitting_pitching_trophies(league, matchupPeriod=matchupPeriod)
     elif function == "get_waiver_report" and swid != '{1}' and espn_s2 != '1':
         text = get_waiver_report(league, faab)
     elif function == "init":
@@ -620,12 +642,12 @@ if __name__ == '__main__':
     try:
         ff_start_date = os.environ["START_DATE"]
     except KeyError:
-        ff_start_date = '2021-09-09'
+        ff_start_date = '2026-03-27'
 
     try:
         ff_end_date = os.environ["END_DATE"]
     except KeyError:
-        ff_end_date = '2022-01-04'
+        ff_end_date = '2026-10-01'
 
     try:
         my_timezone = os.environ["TIMEZONE"]
