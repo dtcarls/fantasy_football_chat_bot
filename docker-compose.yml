@@ -22,6 +22,8 @@ services:
       # TIMEZONE:
       # #The message that the bot will say when it is started (can be blank for no message)
       # INIT_MSG:
+      # #Largest projected point difference that still counts as a close matchup (15 by default)
+      # CLOSE_SCORES_THRESHOLD:
       # #Used for private leagues. See Private Leagues Section for documentation
       # ESPN_S2:
       # #Used for private leagues. See Private Leagues Section for documentation

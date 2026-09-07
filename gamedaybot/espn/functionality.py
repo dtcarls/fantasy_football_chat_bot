@@ -13,6 +13,11 @@ else:
 
 logger = logging.getLogger(__name__)
 
+# Largest projected point difference that still counts as a close matchup.
+# Overridable per deployment with the CLOSE_SCORES_THRESHOLD env var, which
+# env_vars.get_env_vars() reads; this is the fallback when it is unset.
+CLOSE_SCORES_DEFAULT_THRESHOLD = 15
+
 
 def season_started(league):
     """
@@ -352,9 +357,9 @@ def get_matchups(league, week=None, box_scores=None):
     return '\n'.join(text)
 
 
-def get_close_scores(league, week=None, box_scores=None):
+def get_close_scores(league, week=None, box_scores=None, threshold=CLOSE_SCORES_DEFAULT_THRESHOLD):
     """
-    Retrieve the projected closest scores (15 points or closer) for a given week in a fantasy football league.
+    Retrieve the projected closest scores for a given week in a fantasy football league.
 
     Parameters
     ----------
@@ -364,6 +369,10 @@ def get_close_scores(league, week=None, box_scores=None):
         The week number for which to retrieve the closest scores, by default None.
     box_scores: list, optional
         Pre-fetched box scores for the same week, to avoid a duplicate API call.
+    threshold : int, optional
+        Largest projected point difference a matchup can have and still be
+        reported as close. Defaults to CLOSE_SCORES_DEFAULT_THRESHOLD; set the
+        CLOSE_SCORES_THRESHOLD environment variable to change it.
 
     Returns
     -------
@@ -371,7 +380,7 @@ def get_close_scores(league, week=None, box_scores=None):
         A string containing the projected closest scores for the given week, formatted as a list of team names and abbreviation.
     """
 
-    # Gets current projected closest scores (15 points or closer)
+    # Gets current projected closest scores (within the threshold)
     if box_scores is None:
         box_scores = fetch_box_scores(league, week=week)
     score = []
@@ -382,9 +391,15 @@ def get_close_scores(league, week=None, box_scores=None):
             home_projected = get_projected_total(i.home_lineup)
             diffScore = away_projected - home_projected
 
-            if (abs(diffScore) <= 15 and (not all_played(i.away_lineup) or not all_played(i.home_lineup))):
-                score += ['%4s %6.2f - %6.2f %s' % (i.home_team.team_abbrev, i.home_projected,
-                                                    i.away_projected, i.away_team.team_abbrev)]
+            if (abs(diffScore) <= threshold and (not all_played(i.away_lineup) or not all_played(i.home_lineup))):
+                # Print the lineup-derived projections, the same numbers the
+                # margin above was measured from. i.home_projected /
+                # i.away_projected are the BoxScore's own totals, which are
+                # matchup-period aggregates during a 2-week playoff matchup --
+                # so the printed gap could disagree with the threshold that
+                # selected this matchup in the first place.
+                score += ['%4s %6.2f - %6.2f %s' % (i.home_team.team_abbrev, home_projected,
+                                                    away_projected, i.away_team.team_abbrev)]
 
     if not score:
         return ('')

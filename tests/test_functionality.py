@@ -15,7 +15,7 @@ class FakePlayer:
 
     def __init__(self, position='WR', name='Player', slot_position='WR',
                  injuryStatus='ACTIVE', game_played=0, on_bye_week=False,
-                 projected_points=10.0):
+                 projected_points=10.0, points=0.0):
         self.position = position
         self.name = name
         self.slot_position = slot_position
@@ -23,6 +23,7 @@ class FakePlayer:
         self.game_played = game_played
         self.on_bye_week = on_bye_week
         self.projected_points = projected_points
+        self.points = points
 
 
 class FakeTeam:
@@ -153,3 +154,79 @@ class TestIsByeBox:
         class Bare:
             pass
         assert espn.is_bye_box(Bare()) == True
+
+
+class FakeBox:
+    """Stands in for an espn_api BoxScore for the close-scores tests."""
+
+    def __init__(self, home_abbrev, home_proj, away_abbrev, away_proj, played=False):
+        self.home_team = FakeTeam(home_abbrev)
+        self.away_team = FakeTeam(away_abbrev)
+        self.home_team.team_abbrev = home_abbrev
+        self.away_team.team_abbrev = away_abbrev
+        # game_played 100 means the games are over, which excludes the matchup
+        # from the report regardless of how close it is. A finished player's
+        # actual points stand in for their projection in get_projected_total,
+        # so they are set equal here -- the projected totals come out the same
+        # either way and `played` changes nothing but all_played().
+        gp = 100 if played else 0
+        self.home_lineup = [FakePlayer(projected_points=home_proj, game_played=gp,
+                                       points=home_proj if played else 0.0)]
+        self.away_lineup = [FakePlayer(projected_points=away_proj, game_played=gp,
+                                       points=away_proj if played else 0.0)]
+
+
+class TestGetCloseScores:
+    ############ For `get_close_scores`
+    # The default threshold is the module constant
+    def test_close_scores_default_threshold_is_constant(self):
+        assert espn.CLOSE_SCORES_DEFAULT_THRESHOLD == 15
+
+    def test_close_scores_includes_matchup_inside_default(self):
+        boxes = [FakeBox('AAA', 100.0, 'BBB', 110.0)]  # 10 apart
+        assert 'AAA' in espn.get_close_scores(None, box_scores=boxes)
+
+    def test_close_scores_excludes_matchup_outside_default(self):
+        boxes = [FakeBox('AAA', 100.0, 'BBB', 130.0)]  # 30 apart
+        assert espn.get_close_scores(None, box_scores=boxes) == ''
+
+    # An explicit threshold overrides the default, both directions
+    def test_close_scores_wider_threshold_includes_more(self):
+        boxes = [FakeBox('AAA', 100.0, 'BBB', 130.0)]  # 30 apart
+        assert 'AAA' in espn.get_close_scores(None, box_scores=boxes, threshold=40)
+
+    def test_close_scores_tighter_threshold_excludes(self):
+        boxes = [FakeBox('AAA', 100.0, 'BBB', 110.0)]  # 10 apart
+        assert espn.get_close_scores(None, box_scores=boxes, threshold=5) == ''
+
+    # The threshold is inclusive
+    def test_close_scores_exactly_at_threshold_included(self):
+        boxes = [FakeBox('AAA', 100.0, 'BBB', 115.0)]  # exactly 15
+        assert 'AAA' in espn.get_close_scores(None, box_scores=boxes, threshold=15)
+
+    def test_close_scores_one_over_threshold_excluded(self):
+        boxes = [FakeBox('AAA', 100.0, 'BBB', 115.01)]
+        assert espn.get_close_scores(None, box_scores=boxes, threshold=15) == ''
+
+    # Direction does not matter -- the margin is absolute
+    def test_close_scores_home_ahead_also_counts(self):
+        boxes = [FakeBox('AAA', 120.0, 'BBB', 110.0)]
+        assert 'AAA' in espn.get_close_scores(None, box_scores=boxes)
+
+    # A finished matchup is never reported, however close
+    def test_close_scores_skips_completed_games(self):
+        boxes = [FakeBox('AAA', 100.0, 'BBB', 101.0, played=True)]
+        assert espn.get_close_scores(None, box_scores=boxes) == ''
+
+    # Only the qualifying matchups appear
+    def test_close_scores_filters_mixed_slate(self):
+        boxes = [
+            FakeBox('CLS', 100.0, 'OPP', 105.0),   # 5 apart, in
+            FakeBox('FAR', 100.0, 'AWY', 150.0),   # 50 apart, out
+        ]
+        out = espn.get_close_scores(None, box_scores=boxes)
+        assert 'CLS' in out and 'FAR' not in out
+
+    def test_close_scores_header_present_when_any_match(self):
+        boxes = [FakeBox('AAA', 100.0, 'BBB', 105.0)]
+        assert espn.get_close_scores(None, box_scores=boxes).splitlines()[0] == 'Projected Close Scores'

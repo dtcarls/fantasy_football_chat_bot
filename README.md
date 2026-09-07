@@ -225,6 +225,7 @@ pip install -r requirements.txt
 |TIMEZONE|String|Yes|America/New_York|The timezone that the messages will look to send in.|
 |INIT_MSG|String|No|None|The message that the bot will say when it is started.|
 |MONITOR_REPORT|Bool|No|True|If set to True, will provide a report of players in your starting lineup that carry an injury status (Questionable, Doubtful, Out, etc.), are on a bye week, or are projected to score 0. Players left in an IR slot who are no longer IR-eligible are reported too.|
+|CLOSE_SCORES_THRESHOLD|Int|No|15|The largest projected point difference a matchup can have and still appear in the Monday close scores message. Lower it for fewer, tighter games; raise it for more. A value that is not a whole number is ignored and the default is used.|
 |WAIVER_REPORT|Bool|No|False|If set to True, will provide a waiver report of add/drops. :warning: ESPN_S2 and SWID are required for this to work :warning:|
 |DAILY_WAIVER|Bool|No|False|If set to True, will provide a waiver report of add/drops daily. :warning: ESPN_S2 and SWID are required for this to work :warning:|
 |ESPN_S2|String|For Private leagues|None|Used for private leagues. See [Private Leagues Section](#private-leagues) for documentation|

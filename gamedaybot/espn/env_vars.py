@@ -40,6 +40,16 @@ def get_env_vars():
 
     data['monitor_report'] = monitor_report
 
+    try:
+        close_scores_threshold = int(os.environ["CLOSE_SCORES_THRESHOLD"])
+    except (KeyError, ValueError):
+        # Unset, or set to something that is not a whole number. A typo in one
+        # optional env var should not take down every scheduled message, so
+        # fall back to the default rather than raise.
+        close_scores_threshold = espn.CLOSE_SCORES_DEFAULT_THRESHOLD
+
+    data['close_scores_threshold'] = close_scores_threshold
+
     str_limit = 40000  # slack char limit
 
     try:
