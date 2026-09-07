@@ -484,9 +484,11 @@ def get_power_rankings(league, week=None):
     # Convert normalized previous rankings to a dictionary for easy lookup
     previous_rankings_dict = {team.team_abbrev: score for score, team in normalized_previous_rankings}
 
-    # Prepare the output string
+    # Prepare the output string. Scores are padded to a common width so the
+    # columns after them stay aligned when a team's score drops below 10.
     rankings_text = ['Power Rankings (Playoff %)']
-    for normalized_current_score, current_team in normalized_current_rankings:
+    aligned_scores = util.align_scores([score for score, _ in normalized_current_rankings])
+    for (normalized_current_score, current_team), score_text in zip(normalized_current_rankings, aligned_scores):
         team_abbrev = current_team.team_abbrev
         rank_change_text = ''
 
@@ -497,7 +499,7 @@ def get_power_rankings(league, week=None):
             rank_change_emoji = p_rank_up_emoji if rank_change_percent > 0 else p_rank_down_emoji if rank_change_percent < 0 else p_rank_same_emoji
             rank_change_text = f"[{rank_change_emoji}{abs(rank_change_percent):4.1f}%]"
 
-        rankings_text.append(f"{normalized_current_score}{rank_change_text} ({current_team.playoff_pct:4.1f}) - {team_abbrev}")
+        rankings_text.append(f"{score_text}{rank_change_text} ({current_team.playoff_pct:4.1f}) - {team_abbrev}")
 
     return '\n'.join(rankings_text)
 

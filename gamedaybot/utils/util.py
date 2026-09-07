@@ -197,3 +197,28 @@ def currently_in_season(season_start_date=None, season_end_date=None, current_da
     season_end_date = str_to_datetime(season_end_date)
 
     return season_start_date <= current_date <= season_end_date
+
+
+def align_scores(scores: List[str]) -> List[str]:
+    """
+    Right-justify score strings to the width of the widest one.
+
+    Power-ranking scores render to two decimals but can differ in width: the
+    leader is always 99.99, while a team below a tenth of the leader's score is
+    a character shorter. Without a common width, every column after the score
+    on that line -- the change annotation, the playoff percentage, the team
+    abbreviation -- shifts left by one and the block stops lining up. Scores
+    that are already the same width come back unchanged.
+
+    Parameters
+    ----------
+    scores : List[str]
+        Score strings, already formatted to their final text.
+
+    Returns
+    -------
+    List[str]
+        The same scores, in the same order, right-justified to a common width.
+    """
+    width = max((len(score) for score in scores), default=0)
+    return [f"{score:>{width}}" for score in scores]

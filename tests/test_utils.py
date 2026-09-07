@@ -276,3 +276,36 @@ class TestHasSendableContent:
 
     def test_has_sendable_content_sentinels_are_distinct(self):
         assert util.NO_MATCHUP_DATA != util.NO_TROPHY_DATA
+
+
+class TestAlignScores:
+    ############ For `align_scores`
+    # A shorter score is padded to the widest one
+    def test_align_scores_pads_shorter(self):
+        assert util.align_scores(["99.99", "9.99"]) == ["99.99", " 9.99"]
+
+    def test_align_scores_pads_only_what_is_short(self):
+        assert util.align_scores(["100.00", "99.99", "9.99"]) == ["100.00", " 99.99", "  9.99"]
+
+    # Equal-width input comes back untouched
+    def test_align_scores_equal_widths_unchanged(self):
+        scores = ["99.99", "94.34", "47.29"]
+        assert util.align_scores(scores) == scores
+
+    # Order is preserved, not sorted
+    def test_align_scores_preserves_order(self):
+        assert util.align_scores(["9.99", "99.99", "5.00"]) == [" 9.99", "99.99", " 5.00"]
+
+    # Negative scores are the widest case
+    def test_align_scores_negative(self):
+        assert util.align_scores(["99.99", "-5.00"]) == ["99.99", "-5.00"]
+
+    def test_align_scores_negative_widest(self):
+        assert util.align_scores(["9.99", "-5.00"]) == [" 9.99", "-5.00"]
+
+    # Degenerate inputs
+    def test_align_scores_empty_list(self):
+        assert util.align_scores([]) == []
+
+    def test_align_scores_single(self):
+        assert util.align_scores(["99.99"]) == ["99.99"]
