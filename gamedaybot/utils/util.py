@@ -199,6 +199,49 @@ def currently_in_season(season_start_date=None, season_end_date=None, current_da
     return season_start_date <= current_date <= season_end_date
 
 
+# When the winning FAAB bid beats the runner-up by this many dollars or fewer,
+# name the outbid team in the waiver report. Raise it to widen the callout.
+WAIVER_OUTBID_CALLOUT_THRESHOLD = 1
+
+
+def faab_bid_callout(winning_bid, runner_up_bid, runner_up_team,
+                     threshold=WAIVER_OUTBID_CALLOUT_THRESHOLD):
+    """
+    Return the text appended after the winning "$bid" on a waiver ADD line.
+
+    Parameters
+    ----------
+    winning_bid : int
+        The FAAB amount the successful claim was made for.
+    runner_up_bid : int or None
+        The best losing bid on the same player, or None when the claim was
+        uncontested.
+    runner_up_team : str
+        The name of the team that placed the runner-up bid.
+    threshold : int, optional
+        Margins at or below this name the outbid team. Defaults to
+        WAIVER_OUTBID_CALLOUT_THRESHOLD.
+
+    Returns
+    -------
+    str
+        One of '' (uncontested), ', TIED with <team>' (equal bids, won on
+        waiver priority), ', <team> outbid by $<margin>' (a narrow win), or
+        ', won by $<margin>' (a comfortable one).
+    """
+    if runner_up_bid is None:
+        return ''
+    margin = winning_bid - runner_up_bid
+    if margin < 0:
+        # The winner should always have bid at least as much; guard anyway.
+        return ''
+    if margin == 0:
+        return f', TIED with {runner_up_team}'
+    if margin <= threshold:
+        return f', {runner_up_team} outbid by ${margin}'
+    return f', won by ${margin}'
+
+
 def align_records(records: List[str]) -> List[str]:
     """
     Pad win-loss records so they line up in a column.

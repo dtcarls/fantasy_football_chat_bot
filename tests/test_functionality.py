@@ -1,7 +1,9 @@
+from datetime import datetime
 import sys
 import os
 sys.path.insert(1, os.path.abspath('.'))
 import gamedaybot.espn.functionality as espn
+import gamedaybot.utils.util as utils
 
 
 class FakePlayer:
@@ -230,3 +232,217 @@ class TestGetCloseScores:
     def test_close_scores_header_present_when_any_match(self):
         boxes = [FakeBox('AAA', 100.0, 'BBB', 105.0)]
         assert espn.get_close_scores(None, box_scores=boxes).splitlines()[0] == 'Projected Close Scores'
+
+
+class FakeItem:
+    def __init__(self, type, playerId, player):
+        self.type = type
+        self.playerId = playerId
+        self.player = player
+
+
+class FakeTxn:
+    """Stands in for an espn_api Transaction.
+
+    date is a ms epoch, as ESPN sends it. bid_amount is always set as an
+    attribute (espn_api does data.get('bidAmount')) but is None for a league
+    that does not use FAAB -- which is the case the None handling is about.
+    """
+
+    def __init__(self, team_name, items, date_ms, status='EXECUTED', bid_amount=None):
+        self.team = FakeTeam(team_name)
+        self.items = items
+        self.date = date_ms
+        self.status = status
+        self.bid_amount = bid_amount
+
+
+class FakeLeague:
+    """League stub exposing only what get_waiver_report touches."""
+
+    def __init__(self, transactions, positions=None, raise_on_transactions=None):
+        self.scoringPeriodId = 5
+        self._transactions = transactions
+        self._positions = positions or {}
+        self._raise = raise_on_transactions
+        self.player_info_calls = []
+
+    def transactions(self, scoring_period, types=None):
+        if self._raise is not None:
+            raise self._raise
+        return self._transactions
+
+    def player_info(self, name=None, playerId=None):
+        self.player_info_calls.append(playerId)
+        found = []
+        for pid in (playerId if isinstance(playerId, list) else [playerId]):
+            if pid in self._positions:
+                player = FakePlayer(position=self._positions[pid])
+                player.playerId = pid
+                found.append(player)
+        if not found:
+            return None
+        return found if len(found) > 1 else found[0]
+
+
+DAY_MS = int(datetime(2024, 9, 4, 12, 0).timestamp() * 1000)
+DAY = '2024-09-04'
+OTHER_DAY_MS = DAY_MS - 86400 * 1000
+FAILED = 'FAILED_INVALIDPLAYERSOURCE'
+
+
+class TestGetWaiverReport:
+    ############ For `get_waiver_report`
+    # A quiet waiver wire is normal, not an error. espn_api raises rather than
+    # returning an empty list when a scoring period holds no transactions.
+    def test_waiver_report_no_transactions_returns_empty(self):
+        league = FakeLeague([], raise_on_transactions=Exception('No transactions found'))
+        assert espn.get_waiver_report(league, test_date=DAY) == ''
+
+    # Any other failure must still surface
+    def test_waiver_report_other_exception_propagates(self):
+        league = FakeLeague([], raise_on_transactions=Exception('401 Unauthorized'))
+        try:
+            espn.get_waiver_report(league, test_date=DAY)
+        except Exception as exc:
+            assert '401' in str(exc)
+        else:
+            raise AssertionError('expected the auth failure to propagate')
+
+    # A non-FAAB league leaves bid_amount None; it must not render "$None"
+    def test_waiver_report_none_bid_renders_zero(self):
+        txn = FakeTxn('Team A', [FakeItem('ADD', 1, 'Player One')], DAY_MS, bid_amount=None)
+        out = espn.get_waiver_report(FakeLeague([txn], {1: 'RB'}), faab=True, test_date=DAY)
+        assert '$None' not in out
+        assert '($0' in out
+
+    # ... and must not crash the descending sort
+    def test_waiver_report_none_bid_sorts(self):
+        txns = [
+            FakeTxn('Team A', [FakeItem('ADD', 1, 'One')], DAY_MS, bid_amount=None),
+            FakeTxn('Team B', [FakeItem('ADD', 2, 'Two')], DAY_MS, bid_amount=12),
+        ]
+        out = espn.get_waiver_report(FakeLeague(txns, {1: 'RB', 2: 'WR'}), faab=True, test_date=DAY)
+        assert out.index('Team B') < out.index('Team A')
+
+    # An unresolvable player falls back to N/A rather than crashing
+    def test_waiver_report_unresolved_position_is_na(self):
+        txn = FakeTxn('Team A', [FakeItem('ADD', 99, 'Unknown')], DAY_MS, bid_amount=3)
+        out = espn.get_waiver_report(FakeLeague([txn], {}), test_date=DAY)
+        assert 'ADDED N/A - Unknown' in out
+
+    # Positions are resolved in ONE batched call, not one per item
+    def test_waiver_report_batches_player_lookups(self):
+        items = [FakeItem('ADD', 1, 'One'), FakeItem('DROP', 2, 'Two'),
+                 FakeItem('ADD', 3, 'Three'), FakeItem('DROP', 4, 'Four')]
+        league = FakeLeague([FakeTxn('Team A', items, DAY_MS, bid_amount=5)],
+                            {1: 'RB', 2: 'WR', 3: 'TE', 4: 'QB'})
+        espn.get_waiver_report(league, test_date=DAY)
+        assert len(league.player_info_calls) == 1
+        assert sorted(league.player_info_calls[0]) == [1, 2, 3, 4]
+
+    # Adds are listed before drops regardless of item order
+    def test_waiver_report_adds_precede_drops(self):
+        items = [FakeItem('DROP', 2, 'Dropped Guy'), FakeItem('ADD', 1, 'Added Guy')]
+        league = FakeLeague([FakeTxn('Team A', items, DAY_MS, bid_amount=5)], {1: 'RB', 2: 'WR'})
+        out = espn.get_waiver_report(league, test_date=DAY)
+        assert out.index('ADDED') < out.index('DROPPED')
+
+    # Only the report date's transactions are included
+    def test_waiver_report_filters_by_date(self):
+        txns = [FakeTxn('Today Team', [FakeItem('ADD', 1, 'One')], DAY_MS, bid_amount=1),
+                FakeTxn('Yesterday Team', [FakeItem('ADD', 2, 'Two')], OTHER_DAY_MS, bid_amount=1)]
+        out = espn.get_waiver_report(FakeLeague(txns, {1: 'RB', 2: 'WR'}), test_date=DAY)
+        assert 'Today Team' in out and 'Yesterday Team' not in out
+
+    # Only executed claims are reported as moves
+    def test_waiver_report_skips_failed_claims(self):
+        txns = [FakeTxn('Winner', [FakeItem('ADD', 1, 'One')], DAY_MS, bid_amount=10),
+                FakeTxn('Loser', [FakeItem('ADD', 1, 'One')], DAY_MS, status=FAILED, bid_amount=9)]
+        out = espn.get_waiver_report(FakeLeague(txns, {1: 'RB'}), test_date=DAY)
+        assert 'Winner' in out
+        assert 'Loser \n' not in out
+
+    # The runner-up callout names a narrowly outbid rival
+    def test_waiver_report_narrow_win_names_rival(self):
+        txns = [FakeTxn('Winner', [FakeItem('ADD', 1, 'One')], DAY_MS, bid_amount=10),
+                FakeTxn('Loser', [FakeItem('ADD', 1, 'One')], DAY_MS, status=FAILED, bid_amount=9)]
+        out = espn.get_waiver_report(FakeLeague(txns, {1: 'RB'}), faab=True, test_date=DAY)
+        assert 'Loser outbid by $1' in out
+
+    def test_waiver_report_comfortable_win_reports_margin(self):
+        txns = [FakeTxn('Winner', [FakeItem('ADD', 1, 'One')], DAY_MS, bid_amount=30),
+                FakeTxn('Loser', [FakeItem('ADD', 1, 'One')], DAY_MS, status=FAILED, bid_amount=9)]
+        out = espn.get_waiver_report(FakeLeague(txns, {1: 'RB'}), faab=True, test_date=DAY)
+        assert 'won by $21' in out
+
+    def test_waiver_report_tied_bid_reports_tie(self):
+        txns = [FakeTxn('Winner', [FakeItem('ADD', 1, 'One')], DAY_MS, bid_amount=10),
+                FakeTxn('Loser', [FakeItem('ADD', 1, 'One')], DAY_MS, status=FAILED, bid_amount=10)]
+        out = espn.get_waiver_report(FakeLeague(txns, {1: 'RB'}), faab=True, test_date=DAY)
+        assert 'TIED with Loser' in out
+
+    # The best losing bid wins the callout, not merely the last one seen
+    def test_waiver_report_uses_best_losing_bid(self):
+        txns = [FakeTxn('Winner', [FakeItem('ADD', 1, 'One')], DAY_MS, bid_amount=20),
+                FakeTxn('Low', [FakeItem('ADD', 1, 'One')], DAY_MS, status=FAILED, bid_amount=2),
+                FakeTxn('High', [FakeItem('ADD', 1, 'One')], DAY_MS, status=FAILED, bid_amount=19)]
+        out = espn.get_waiver_report(FakeLeague(txns, {1: 'RB'}), faab=True, test_date=DAY)
+        assert 'High outbid by $1' in out
+
+    # A team that outbid its OWN failed claim beat nobody
+    def test_waiver_report_own_failed_claim_is_not_competition(self):
+        txns = [FakeTxn('Same Team', [FakeItem('ADD', 1, 'One')], DAY_MS, bid_amount=10),
+                FakeTxn('Same Team', [FakeItem('ADD', 1, 'One')], DAY_MS, status=FAILED, bid_amount=9)]
+        out = espn.get_waiver_report(FakeLeague(txns, {1: 'RB'}), faab=True, test_date=DAY)
+        assert 'outbid' not in out
+        assert 'won by' not in out
+
+    # An uncontested claim gets no callout
+    def test_waiver_report_uncontested_has_no_callout(self):
+        txn = FakeTxn('Team A', [FakeItem('ADD', 1, 'One')], DAY_MS, bid_amount=7)
+        out = espn.get_waiver_report(FakeLeague([txn], {1: 'RB'}), faab=True, test_date=DAY)
+        assert '($7)' in out
+
+    # Without faab, no dollar amounts appear at all
+    def test_waiver_report_non_faab_omits_bids(self):
+        txn = FakeTxn('Team A', [FakeItem('ADD', 1, 'One')], DAY_MS, bid_amount=7)
+        out = espn.get_waiver_report(FakeLeague([txn], {1: 'RB'}), faab=False, test_date=DAY)
+        assert '$' not in out
+
+    # Nothing on the report date at all
+    def test_waiver_report_nothing_today_returns_empty(self):
+        txn = FakeTxn('Team A', [FakeItem('ADD', 1, 'One')], OTHER_DAY_MS, bid_amount=1)
+        assert espn.get_waiver_report(FakeLeague([txn], {1: 'RB'}), test_date=DAY) == ''
+
+    # A transaction with no timestamp can never match the report date
+    def test_waiver_report_undated_transaction_skipped(self):
+        txn = FakeTxn('Team A', [FakeItem('ADD', 1, 'One')], None, bid_amount=1)
+        assert espn.get_waiver_report(FakeLeague([txn], {1: 'RB'}), test_date=DAY) == ''
+
+    # The header carries the report date
+    def test_waiver_report_header(self):
+        txn = FakeTxn('Team A', [FakeItem('ADD', 1, 'One')], DAY_MS, bid_amount=1)
+        out = espn.get_waiver_report(FakeLeague([txn], {1: 'RB'}), test_date=DAY)
+        assert out.splitlines()[0] == 'Waiver Report ' + DAY + ':'
+
+
+class TestFaabBidCallout:
+    ############ For `util.faab_bid_callout`
+    def test_faab_callout_uncontested(self):
+        assert utils.faab_bid_callout(10, None, None) == ''
+
+    def test_faab_callout_tied(self):
+        assert utils.faab_bid_callout(10, 10, 'Rival') == ', TIED with Rival'
+
+    def test_faab_callout_narrow(self):
+        assert utils.faab_bid_callout(10, 9, 'Rival') == ', Rival outbid by $1'
+
+    def test_faab_callout_comfortable(self):
+        assert utils.faab_bid_callout(30, 9, 'Rival') == ', won by $21'
+
+    def test_faab_callout_threshold_is_configurable(self):
+        assert utils.faab_bid_callout(10, 7, 'Rival', threshold=3) == ', Rival outbid by $3'
+
+    def test_faab_callout_negative_margin_guarded(self):
+        assert utils.faab_bid_callout(5, 9, 'Rival') == ''

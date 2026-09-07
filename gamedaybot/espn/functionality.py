@@ -18,6 +18,15 @@ logger = logging.getLogger(__name__)
 # env_vars.get_env_vars() reads; this is the fallback when it is unset.
 CLOSE_SCORES_DEFAULT_THRESHOLD = 15
 
+# Transaction status and item types, as ESPN spells them.
+TXN_STATUS_EXECUTED = 'EXECUTED'
+TXN_ITEM_ADD = 'ADD'
+TXN_ITEM_DROP = 'DROP'
+
+# Player ids per player-card request. espn_api sends the id filter in a request
+# header and ESPN rejects very large ones, so batches stay well inside that.
+PLAYER_CARD_BATCH = 50
+
 
 def season_started(league):
     """
@@ -407,6 +416,86 @@ def get_close_scores(league, week=None, box_scores=None, threshold=CLOSE_SCORES_
     return '\n'.join(text)
 
 
+def transaction_date(txn):
+    """
+    Return the date ESPN stamped on a transaction, as 'YYYY-MM-DD'.
+
+    Parameters
+    ----------
+    txn : object
+        An espn_api Transaction.
+
+    Returns
+    -------
+    str or None
+        The date string, or None when the transaction carries no timestamp, so
+        that it can never match a report date.
+    """
+    timestamp = getattr(txn, 'date', None)
+    if not timestamp:
+        return None
+    return date.fromtimestamp(timestamp / 1000).strftime('%Y-%m-%d')
+
+
+def waiver_player_positions(league, transactions, today):
+    """
+    Map {playerId: position} for the players in a day's executed waiver claims.
+
+    league.player_info costs one request per call, and the report wants a
+    position for every add and every drop -- N requests for an N-move waiver
+    day, every day, for one field per player. espn_api accepts a list of ids
+    and resolves them in a single player-card request, so one batched call
+    replaces all of them.
+
+    Parameters
+    ----------
+    league : object
+        The league object the transactions belong to.
+    transactions : list
+        The transactions returned for the scoring period.
+    today : str
+        The report date, as 'YYYY-MM-DD'.
+
+    Returns
+    -------
+    dict
+        playerId to position. Ids ESPN does not resolve are simply absent, and
+        callers fall back to 'N/A'.
+    """
+    player_ids = []
+    for txn in transactions:
+        if getattr(txn, 'status', None) != TXN_STATUS_EXECUTED:
+            continue
+        if transaction_date(txn) != today:
+            continue
+        for item in getattr(txn, 'items', []):
+            player_id = getattr(item, 'playerId', None)
+            if player_id is not None and player_id not in player_ids:
+                player_ids.append(player_id)
+
+    positions = {}
+    for start in range(0, len(player_ids), PLAYER_CARD_BATCH):
+        chunk = player_ids[start:start + PLAYER_CARD_BATCH]
+        try:
+            found = league.player_info(playerId=chunk)
+        except Exception:
+            # A failed lookup costs this chunk its positions ('N/A') rather
+            # than failing the whole daily report.
+            logger.warning('Could not resolve waiver player positions for %s', chunk, exc_info=True)
+            continue
+        if found is None:
+            continue
+        # Keyed off each returned Player's own playerId rather than by zipping
+        # against the request: espn_api does not guarantee response order and
+        # omits ids it cannot resolve.
+        for player in (found if isinstance(found, list) else [found]):
+            player_id = getattr(player, 'playerId', None)
+            position = getattr(player, 'position', None)
+            if player_id is not None and position:
+                positions[player_id] = position
+    return positions
+
+
 def get_waiver_report(league, faab=False, scoring_period=None, test_date=None):
     """
     Generate a waiver report for a given league and scoring period.
@@ -436,46 +525,100 @@ def get_waiver_report(league, faab=False, scoring_period=None, test_date=None):
     # Allow testing with a specific scoring period and date
     if scoring_period is None:
         scoring_period = league.scoringPeriodId
-    transactions = league.transactions(scoring_period, types={'WAIVER'})
-    report = []
-    report_items = []  # For sorting if faab
-    today = test_date if test_date else date.today().strftime('%Y-%m-%d')
-    text = ''
 
+    try:
+        # WAIVER_ERROR comes along so the losing claims on a contested player
+        # are available for the outbid callout below. Only EXECUTED claims are
+        # ever reported.
+        transactions = league.transactions(scoring_period, types={'WAIVER', 'WAIVER_ERROR'})
+    except Exception as exc:
+        # espn_api raises instead of returning an empty list when a scoring
+        # period has no transactions at all (league.py: `raise Exception('No
+        # transactions found')`). This report runs every day, so a quiet waiver
+        # wire is the normal case, not a failure -- and an empty report is not
+        # worth messaging anyone about. Matching on the message is unpleasant,
+        # but espn_api raises a bare Exception so there is no type to catch.
+        # Anything else -- auth, a 5xx, a genuine outage -- must still surface.
+        if 'No transactions found' not in str(exc):
+            raise
+        logger.info('No transactions for scoring period %s; nothing to report', scoring_period)
+        return ''
+
+    today = test_date if test_date else date.today().strftime('%Y-%m-%d')
+
+    # Losing claims are used only to find each contested add's runner-up (best
+    # losing) bid on the same player, so the report can say what the winner had
+    # to beat. Keyed by playerId rather than the resolved name, since espn_api
+    # maps ids it cannot resolve to the literal 'Unknown'.
+    runner_ups = {}  # playerId -> (bid, team_name)
     for txn in transactions:
-        # Only include transactions matching the test date and type WAIVER
-        txn_date = None
-        if txn.date:
-            txn_date = date.fromtimestamp(txn.date / 1000).strftime('%Y-%m-%d')
-        if txn_date == today and txn.status == 'EXECUTED':
-            team_name = txn.team.team_name
-            faab_amount = txn.bid_amount if hasattr(txn, 'bid_amount') else 0
-            add_str = ''
-            drop_str = ''
-            for item in txn.items:
-                if item.type == 'ADD':
-                    if faab:
-                        add_str += f"ADDED {league.player_info(item.player).position} - {item.player} (${faab_amount})\n"
-                    else:
-                        add_str += f"ADDED {league.player_info(item.player).position} - {item.player}\n"
-                elif item.type == 'DROP':
-                    drop_str += f"DROPPED {league.player_info(item.player).position} - {item.player}\n"
-            s = f"{team_name} \n{add_str}{drop_str}"
-            if faab:
-                report_items.append((faab_amount, s.lstrip()))
-            else:
-                report.append(s.lstrip())
+        if getattr(txn, 'status', None) == TXN_STATUS_EXECUTED:
+            continue
+        if transaction_date(txn) != today:
+            continue
+        bid = getattr(txn, 'bid_amount', None)
+        if bid is None:
+            continue
+        team_name = getattr(getattr(txn, 'team', None), 'team_name', None)
+        for item in getattr(txn, 'items', []):
+            if getattr(item, 'type', None) != TXN_ITEM_ADD:
+                continue
+            player_id = getattr(item, 'playerId', None)
+            if player_id is None:
+                continue
+            existing = runner_ups.get(player_id)
+            if existing is None or bid > existing[0]:
+                runner_ups[player_id] = (bid, team_name)
+
+    positions = waiver_player_positions(league, transactions, today)
+
+    entries = []  # (faab_amount, formatted block)
+    for txn in transactions:
+        # Only include transactions matching the report date that went through
+        if transaction_date(txn) != today or txn.status != TXN_STATUS_EXECUTED:
+            continue
+        team_name = txn.team.team_name
+        # espn_api always sets bid_amount but leaves it None for a non-FAAB
+        # claim, which would render "$None" and break the descending sort.
+        faab_amount = getattr(txn, 'bid_amount', None) or 0
+
+        # Adds and drops are collected separately rather than in item order, so
+        # every ADDED line precedes every DROPPED line in the rendered block.
+        adds, drops = [], []
+        for item in txn.items:
+            # 'N/A' when ESPN did not resolve the id; league.player_info
+            # returns None for those and None.position would crash the report.
+            position = positions.get(getattr(item, 'playerId', None), 'N/A')
+            if item.type == TXN_ITEM_DROP:
+                drops.append(f"DROPPED {position} - {item.player}")
+            elif item.type == TXN_ITEM_ADD:
+                if not faab:
+                    adds.append(f"ADDED {position} - {item.player}")
+                    continue
+                # Only a *rival's* losing bid is competition: a team that also
+                # outbid its own failed claim on the same player beat nobody.
+                runner_up = runner_ups.get(getattr(item, 'playerId', None))
+                if runner_up and runner_up[1] == team_name:
+                    runner_up = None
+                callout = util.faab_bid_callout(
+                    faab_amount,
+                    runner_up[0] if runner_up else None,
+                    runner_up[1] if runner_up else None,
+                )
+                adds.append(f"ADDED {position} - {item.player} (${faab_amount}{callout})")
+
+        block = f"{team_name} \n" + ''.join(f"{move}\n" for move in adds + drops)
+        entries.append((faab_amount, block.lstrip()))
 
     if faab:
         # Sort by faab_amount descending
-        report_items.sort(key=lambda x: x[0], reverse=True)
-        report = [item[1] for item in report_items]
+        entries.sort(key=lambda entry: entry[0], reverse=True)
 
     # Only return a report if there are transactions
-    if report:
-        text = [f'Waiver Report {today}:'] + report
+    if not entries:
+        return ''
 
-    return '\n'.join(text)
+    return '\n'.join([f'Waiver Report {today}:'] + [block for _, block in entries])
 
 
 def get_power_rankings(league, week=None):
