@@ -44,15 +44,10 @@ def scheduler():
     sched.add_job(espn_bot, 'cron', ['get_standings'], id='standings',
                   day_of_week='wed', hour=7, minute=30, start_date=ff_start_date, end_date=ff_end_date,
                   timezone=my_timezone, replace_existing=True)
+    waiver_days = '*' if data['daily_waiver'] else 'wed'
     sched.add_job(espn_bot, 'cron', ['get_waiver_report'], id='waiver_report',
-                  day_of_week='wed', hour=7, minute=31, start_date=ff_start_date, end_date=ff_end_date,
+                  day_of_week=waiver_days, hour=7, minute=31, start_date=ff_start_date, end_date=ff_end_date,
                   timezone=my_timezone, replace_existing=True)
-
-    if data['daily_waiver']:
-        sched.add_job(
-            espn_bot, 'cron', ['get_waiver_report'],
-            id='waiver_report', day_of_week='mon, tue, thu, fri, sat, sun', hour=7, minute=31, start_date=ff_start_date,
-            end_date=ff_end_date, timezone=my_timezone, replace_existing=True)
 
     sched.add_job(espn_bot, 'cron', ['get_matchups'], id='matchups',
                   day_of_week='thu', hour=19, minute=30, start_date=ff_start_date, end_date=ff_end_date,
