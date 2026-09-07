@@ -270,3 +270,9 @@ class TestHasSendableContent:
     # The empty monitor report is deliberately still sent
     def test_has_sendable_content_empty_monitor_report(self):
         assert util.has_sendable_content("No Players to Monitor this week. Good Luck!") == True
+
+    def test_has_sendable_content_no_trophy_data(self):
+        assert util.has_sendable_content(util.NO_TROPHY_DATA) == False
+
+    def test_has_sendable_content_sentinels_are_distinct(self):
+        assert util.NO_MATCHUP_DATA != util.NO_TROPHY_DATA

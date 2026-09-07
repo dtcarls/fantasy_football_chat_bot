@@ -7,6 +7,9 @@ from typing import List
 # place of a bare section header with no rows under it.
 NO_MATCHUP_DATA = 'No matchup data available.'
 
+# Returned by get_trophies when the week has no completed matchup to award for.
+NO_TROPHY_DATA = 'No matchup data available for trophies.'
+
 # Exact-match placeholder strings that a report returns when it has nothing
 # worth saying. has_sendable_content drops these rather than broadcasting them.
 #
@@ -14,6 +17,7 @@ NO_MATCHUP_DATA = 'No matchup data available.'
 # empty monitor report is a useful weekly all-clear, so it still sends.
 _NO_DATA_SENTINELS = frozenset({
     NO_MATCHUP_DATA,
+    NO_TROPHY_DATA,
 })
 
 

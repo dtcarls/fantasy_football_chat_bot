@@ -502,6 +502,32 @@ def get_power_rankings(league, week=None):
     return '\n'.join(rankings_text)
 
 
+def is_bye_box(box):
+    """
+    Check whether a box score is a bye, meaning one side has no team.
+
+    espn_api sets the missing side's team to None (older versions used 0), and
+    Matchup objects from scoreboard() never assign the attribute at all. The
+    team that is present played nobody that week, so it takes part in no
+    head-to-head trophy.
+
+    This matters beyond the regular season: playoff weeks routinely carry byes
+    for the top seeds, and a `team != 0` check lets a None team through, since
+    None != 0 is True.
+
+    Parameters
+    ----------
+    box : object
+        A box score representing a single matchup.
+
+    Returns
+    -------
+    bool
+        True when either side of the matchup is missing.
+    """
+    return not getattr(box, 'home_team', None) or not getattr(box, 'away_team', None)
+
+
 def get_starter_counts(league):
     """
     Get the number of starters for each position
@@ -589,12 +615,18 @@ def optimal_lineup_score(lineup, starter_counts):
     best_score = 0
 
     for player in lineup:
+        if player.slot_position == 'IR':
+            # An IR-slotted player cannot legally be started, so they are never
+            # a candidate for the optimal lineup. Bench players still are.
+            # Counting them inflates the optimal score and so understates every
+            # manager's percentage of it.
+            continue
         try:
             position_players[player.position][player.name] = player.points
         except KeyError:
             position_players[player.position] = {}
             position_players[player.position][player.name] = player.points
-        if player.slot_position not in ['BE', 'IR']:
+        if player.slot_position != 'BE':
             score += player.points
 
     # sort players by position for points
@@ -621,6 +653,22 @@ def optimal_lineup_score(lineup, starter_counts):
         flex = ['RB', 'WR', 'TE', 'QB']
         result = best_flex(flex, position_players, starter_counts['OP'])
         best_lineup['OP'] = result[0]
+        position_players = result[1]
+
+    # Defensive Line flex (DT/DE). Resolve before the wider DP flex below, so
+    # DP does not take a lineman that DL was going to need.
+    if 'DL' in starter_counts:
+        flex = ['DT', 'DE']
+        result = best_flex(flex, position_players, starter_counts['DL'])
+        best_lineup['DL'] = result[0]
+        position_players = result[1]
+
+    # Defensive Back flex (CB/S). Resolve before the wider DP flex, for the
+    # same reason as DL above.
+    if 'DB' in starter_counts:
+        flex = ['CB', 'S']
+        result = best_flex(flex, position_players, starter_counts['DB'])
+        best_lineup['DB'] = result[0]
         position_players = result[1]
 
     # Defensive Player. need to figure out best in other positions first
@@ -670,12 +718,19 @@ def optimal_team_scores(league, week=None, full_report=False, recap=False, box_s
     starter_counts = get_starter_counts(league)
 
     for i in box_scores:
-        if i.home_team != 0:
-            best_scores[i.home_team] = optimal_lineup_score(i.home_lineup, starter_counts)
-        if i.away_team != 0:
-            best_scores[i.away_team] = optimal_lineup_score(i.away_lineup, starter_counts)
+        if is_bye_box(i):
+            continue
+        best_scores[i.home_team] = optimal_lineup_score(i.home_lineup, starter_counts)
+        best_scores[i.away_team] = optimal_lineup_score(i.away_lineup, starter_counts)
 
     best_scores = {key: value for key, value in sorted(best_scores.items(), key=lambda item: item[1][3], reverse=True)}
+
+    if not best_scores:
+        # No lineups were scored this week (an empty or all-bye slate), so
+        # there is no manager to award. next()/popitem() below would raise.
+        if full_report:
+            return ''
+        return None if recap else []
 
     if full_report:
         i = 1
@@ -741,34 +796,37 @@ def get_achievers_trophy(league, week=None, recap=False, box_scores=None):
     low_achiever_str = ['📉 Underachiever 📉']
     best_performance = -9999
     worst_performance = 9999
+    over_achiever = None
+    under_achiever = None
     for i in box_scores:
+        if is_bye_box(i):
+            continue
         home_performance = i.home_score - i.home_projected
         away_performance = i.away_score - i.away_projected
 
-        if i.home_team != 0:
-            if home_performance > best_performance:
-                best_performance = home_performance
-                over_achiever = i.home_team
-            if home_performance < worst_performance:
-                worst_performance = home_performance
-                under_achiever = i.home_team
-        if i.away_team != 0:
-            if away_performance > best_performance:
-                best_performance = away_performance
-                over_achiever = i.away_team
-            if away_performance < worst_performance:
-                worst_performance = away_performance
-                under_achiever = i.away_team
+        if home_performance > best_performance:
+            best_performance = home_performance
+            over_achiever = i.home_team
+        if home_performance < worst_performance:
+            worst_performance = home_performance
+            under_achiever = i.home_team
+        if away_performance > best_performance:
+            best_performance = away_performance
+            over_achiever = i.away_team
+        if away_performance < worst_performance:
+            worst_performance = away_performance
+            under_achiever = i.away_team
 
     if recap:
-        return over_achiever.team_abbrev, under_achiever.team_abbrev
+        return (over_achiever.team_abbrev if over_achiever else None,
+                under_achiever.team_abbrev if under_achiever else None)
 
-    if best_performance > 0:
+    if over_achiever is not None and best_performance > 0:
         high_achiever_str += ['%s was %.2f points over their projection' % (over_achiever.team_name, best_performance)]
     else:
         high_achiever_str += ['No team out performed their projection']
 
-    if worst_performance < 0:
+    if under_achiever is not None and worst_performance < 0:
         low_achiever_str += ['%s was %.2f points under their projection' % (under_achiever.team_name, abs(worst_performance))]
     else:
         low_achiever_str += ['No team was worse than their projection']
@@ -781,13 +839,17 @@ def get_weekly_score_with_win_loss(league, week=None, box_scores=None):
         box_scores = fetch_box_scores(league, week=week)
     weekly_scores = {}
     for i in box_scores:
-        if i.home_team != 0 and i.away_team != 0:
-            if i.home_score > i.away_score:
-                weekly_scores[i.home_team] = [i.home_score, 'W']
-                weekly_scores[i.away_team] = [i.away_score, 'L']
-            else:
-                weekly_scores[i.home_team] = [i.home_score, 'L']
-                weekly_scores[i.away_team] = [i.away_score, 'W']
+        # A bye has no result to record. The old `!= 0` test let a None team
+        # through and put None in this dict as a key, which then blew up in
+        # every caller that read `.team_abbrev` off it.
+        if is_bye_box(i):
+            continue
+        if i.home_score > i.away_score:
+            weekly_scores[i.home_team] = [i.home_score, 'W']
+            weekly_scores[i.away_team] = [i.away_score, 'L']
+        else:
+            weekly_scores[i.home_team] = [i.home_score, 'L']
+            weekly_scores[i.away_team] = [i.away_score, 'W']
     return dict(sorted(weekly_scores.items(), key=lambda item: item[1], reverse=True))
 
 
@@ -803,6 +865,8 @@ def get_lucky_trophy(league, week=None, recap=False, box_scores=None):
     """
     weekly_scores = get_weekly_score_with_win_loss(league, week=week, box_scores=box_scores)
     losses = 0
+    unlucky_team = None
+    lucky_team = None
     unlucky_record = ''
     lucky_record = ''
     num_teams = len(weekly_scores) - 1
@@ -824,11 +888,18 @@ def get_lucky_trophy(league, week=None, recap=False, box_scores=None):
         wins += 1
 
     if recap:
-        return lucky_team.team_abbrev, unlucky_team.team_abbrev, weekly_scores
+        return (lucky_team.team_abbrev if lucky_team else None,
+                unlucky_team.team_abbrev if unlucky_team else None,
+                weekly_scores)
 
-    lucky_str = ['🍀 Lucky 🍀']+['%s was %s against the league, but still got the win' % (lucky_team.team_name, lucky_record)]
-    unlucky_str = ['😡 Unlucky 😡']+['%s was %s against the league, but still took an L' % (unlucky_team.team_name, unlucky_record)]
-    return (lucky_str + unlucky_str)
+    # A week with no games, or one where every team won or every team lost,
+    # leaves one of these unset. Award only the trophies that have a winner.
+    trophies = []
+    if lucky_team is not None:
+        trophies += ['🍀 Lucky 🍀'] + ['%s was %s against the league, but still got the win' % (lucky_team.team_name, lucky_record)]
+    if unlucky_team is not None:
+        trophies += ['😡 Unlucky 😡'] + ['%s was %s against the league, but still took an L' % (unlucky_team.team_name, unlucky_record)]
+    return trophies
 
 
 def get_trophies(league, week=None, recap=False, box_scores=None):
@@ -861,53 +932,75 @@ def get_trophies(league, week=None, recap=False, box_scores=None):
     high_score = -1
     closest_score = 99999999
     biggest_blowout = -1
+    high_team = None
+    low_team = None
+    close_winner = None
+    close_loser = None
+    ownerer = None
+    blown_out = None
 
     for i in matchups:
-        if i.home_team != 0:
-            if i.home_score > high_score:
-                high_score = i.home_score
-                high_team = i.home_team
-            if i.home_score < low_score:
-                low_score = i.home_score
-                low_team = i.home_team
-        if i.away_team != 0:
-            if i.away_score > high_score:
-                high_score = i.away_score
-                high_team = i.away_team
-            if i.away_score < low_score:
-                low_score = i.away_score
-                low_team = i.away_team
+        # A team on a bye played nobody, so it competes for none of these.
+        if is_bye_box(i):
+            continue
 
-        if i.away_team != 0 and i.home_team != 0:
-            if i.away_score - i.home_score != 0 and \
-                    abs(i.away_score - i.home_score) < closest_score:
-                closest_score = abs(i.away_score - i.home_score)
-                if i.away_score - i.home_score < 0:
-                    close_winner = i.home_team
-                    close_loser = i.away_team
-                else:
-                    close_winner = i.away_team
-                    close_loser = i.home_team
-            if abs(i.away_score - i.home_score) > biggest_blowout:
-                biggest_blowout = abs(i.away_score - i.home_score)
-                if i.away_score - i.home_score < 0:
-                    ownerer = i.home_team
-                    blown_out = i.away_team
-                else:
-                    ownerer = i.away_team
-                    blown_out = i.home_team
+        if i.home_score > high_score:
+            high_score = i.home_score
+            high_team = i.home_team
+        if i.home_score < low_score:
+            low_score = i.home_score
+            low_team = i.home_team
+        if i.away_score > high_score:
+            high_score = i.away_score
+            high_team = i.away_team
+        if i.away_score < low_score:
+            low_score = i.away_score
+            low_team = i.away_team
+
+        margin = i.away_score - i.home_score
+        if margin != 0 and abs(margin) < closest_score:
+            closest_score = abs(margin)
+            if margin < 0:
+                close_winner = i.home_team
+                close_loser = i.away_team
+            else:
+                close_winner = i.away_team
+                close_loser = i.home_team
+        # margin != 0 so a tied matchup cannot claim the blowout. Without it an
+        # unplayed week of 0-0 scores awards a "0.00 point blow out".
+        if margin != 0 and abs(margin) > biggest_blowout:
+            biggest_blowout = abs(margin)
+            if margin < 0:
+                ownerer = i.home_team
+                blown_out = i.away_team
+            else:
+                ownerer = i.away_team
+                blown_out = i.home_team
 
     if (recap):
-        return high_team.team_abbrev, low_team.team_abbrev, blown_out.team_abbrev, close_winner.team_abbrev
+        return (high_team.team_abbrev if high_team else None,
+                low_team.team_abbrev if low_team else None,
+                blown_out.team_abbrev if blown_out else None,
+                close_winner.team_abbrev if close_winner else None)
+
+    if high_team is None:
+        # Nothing was played this week, so there is no trophy to award.
+        return util.NO_TROPHY_DATA
 
     high_score_str = ['👑 High score 👑']+['%s with %.2f points' % (high_team.team_name, high_score)]
     low_score_str = ['💩 Low score 💩']+['%s with %.2f points' % (low_team.team_name, low_score)]
-    close_score_str = ['😅 Close win 😅']+['%s barely beat %s by %.2f points' %
-                                         (close_winner.team_name, close_loser.team_name, closest_score)]
-    blowout_str = ['😱 Blow out 😱']+['%s blew out %s by %.2f points' % (ownerer.team_name, blown_out.team_name, biggest_blowout)]
 
-    text = ['Trophies of the week:'] + high_score_str + low_score_str + blowout_str + close_score_str + \
-        get_lucky_trophy(league, week, box_scores=box_scores) + \
+    text = ['Trophies of the week:'] + high_score_str + low_score_str
+
+    # Both of these need a non-zero margin somewhere in the week; a slate of
+    # ties (including an unplayed week) has neither.
+    if blown_out is not None:
+        text += ['😱 Blow out 😱'] + ['%s blew out %s by %.2f points' % (ownerer.team_name, blown_out.team_name, biggest_blowout)]
+    if close_winner is not None:
+        text += ['😅 Close win 😅'] + ['%s barely beat %s by %.2f points' %
+                                      (close_winner.team_name, close_loser.team_name, closest_score)]
+
+    text += get_lucky_trophy(league, week, box_scores=box_scores) + \
         get_achievers_trophy(league, week, box_scores=box_scores) + \
         optimal_team_scores(league, week, box_scores=box_scores)
     return '\n'.join(text)

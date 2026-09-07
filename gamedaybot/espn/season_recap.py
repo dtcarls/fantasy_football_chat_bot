@@ -36,6 +36,13 @@ def trophy_recap(league):
         team_trophies[team.team_abbrev] = [0 for i in range(len(ICONS))]
         team_names.append(team.team_abbrev)
 
+    def award(team_abbrev, index):
+        # A trophy can go unawarded for a week -- a playoff week where the
+        # matchup was a bye, or a week with no completed games -- and that week
+        # simply does not count toward anyone's total.
+        if team_abbrev is not None:
+            team_trophies[team_abbrev][index] += 1
+
     for week in range(1, league.current_week):
         # All four trophy lookups below read the same week, so fetch it once
         # and hand the same box scores to each of them.
@@ -44,27 +51,27 @@ def trophy_recap(league):
         # Get high score, low score, blown out, and close win trophies
         high_score_team, low_score_team, blown_out_team, close_win_team = espn.get_trophies(
             league=league, week=week, recap=True, box_scores=box_scores)
-        team_trophies[high_score_team][0] += 1
-        team_trophies[low_score_team][1] += 1
-        team_trophies[blown_out_team][2] += 1
-        team_trophies[close_win_team][3] += 1
+        award(high_score_team, 0)
+        award(low_score_team, 1)
+        award(blown_out_team, 2)
+        award(close_win_team, 3)
 
         # Get lucky and unlucky trophies
         lucky_team, unlucky_team, scores = espn.get_lucky_trophy(
             league=league, week=week, recap=True, box_scores=box_scores)
-        team_trophies[lucky_team][4] += 1
-        team_trophies[unlucky_team][5] += 1
+        award(lucky_team, 4)
+        award(unlucky_team, 5)
 
         # Get overachiever and underachiever trophies
         overachiever_team, underachiever_team = espn.get_achievers_trophy(
             league=league, week=week, recap=True, box_scores=box_scores)
-        team_trophies[overachiever_team][6] += 1
-        team_trophies[underachiever_team][7] += 1
+        award(overachiever_team, 6)
+        award(underachiever_team, 7)
 
         # Get most points left on bench trophy
         best_manager_team = espn.optimal_team_scores(
             league=league, week=week, recap=True, box_scores=box_scores)
-        team_trophies[best_manager_team][8] += 1
+        award(best_manager_team, 8)
 
     result = 'Season Recap!\n'
     result += "Team".ljust(7, ' ')
