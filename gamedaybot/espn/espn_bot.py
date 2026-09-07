@@ -162,13 +162,15 @@ def espn_bot(function):
     logger.info("Function: " + function)
 
     if function == "get_matchups":
-        text = espn.get_matchups(league, random_phrase)
-        text = text + "\n\n" + espn.get_projected_scoreboard(league)
+        box_scores = league.box_scores()
+        text = espn.get_matchups(league, random_phrase, box_scores=box_scores)
+        text = text + "\n\n" + espn.get_projected_scoreboard(league, box_scores=box_scores)
     elif function == "get_monitor":
         text = espn.get_monitor(league)
     elif function == "get_scoreboard_short":
-        text = espn.get_scoreboard_short(league)
-        text = text + "\n\n" + espn.get_projected_scoreboard(league)
+        box_scores = league.box_scores()
+        text = espn.get_scoreboard_short(league, box_scores=box_scores)
+        text = text + "\n\n" + espn.get_projected_scoreboard(league, box_scores=box_scores)
     elif function == "get_projected_scoreboard":
         text = espn.get_projected_scoreboard(league)
     elif function == "get_close_scores":
@@ -189,8 +191,9 @@ def espn_bot(function):
     elif function == "get_final":
         # on Tuesday we need to get the scores of last week
         week = league.current_week - 1
-        text = "Final " + espn.get_scoreboard_short(league, week=week)
-        text = text + "\n\n" + espn.get_trophies(league, week=week)
+        box_scores = league.box_scores(week=week)
+        text = "Final " + espn.get_scoreboard_short(league, week=week, box_scores=box_scores)
+        text = text + "\n\n" + espn.get_trophies(league, week=week, box_scores=box_scores)
     elif function == "get_waiver_report" and swid != '{1}' and espn_s2 != '1':
         faab = league.settings.faab
         text = espn.get_waiver_report(league, faab)

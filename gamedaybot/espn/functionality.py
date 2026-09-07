@@ -1,7 +1,7 @@
 from datetime import date
 
 
-def get_scoreboard_short(league, week=None):
+def get_scoreboard_short(league, week=None, box_scores=None):
     """
     Retrieve the scoreboard for a given week of the fantasy football season.
 
@@ -11,6 +11,8 @@ def get_scoreboard_short(league, week=None):
         The league for which to retrieve the scoreboard.
     week: int
         The week of the season for which to retrieve the scoreboard.
+    box_scores: list, optional
+        Pre-fetched box scores for the same week, to avoid a duplicate API call.
 
     Returns
     -------
@@ -20,7 +22,8 @@ def get_scoreboard_short(league, week=None):
     """
 
     # Gets current week's scoreboard
-    box_scores = league.box_scores(week=week)
+    if box_scores is None:
+        box_scores = league.box_scores(week=week)
     score = ['%4s %6.2f - %6.2f %s' % (i.home_team.team_abbrev, i.home_score,
                                        i.away_score, i.away_team.team_abbrev) for i in box_scores
              if i.away_team]
@@ -28,7 +31,7 @@ def get_scoreboard_short(league, week=None):
     return '\n'.join(text)
 
 
-def get_projected_scoreboard(league, week=None):
+def get_projected_scoreboard(league, week=None, box_scores=None):
     """
     Retrieve the projected scoreboard for a given week of the fantasy football season.
 
@@ -38,6 +41,8 @@ def get_projected_scoreboard(league, week=None):
         The league for which to retrieve the projected scoreboard.
     week: int
         The week of the season for which to retrieve the projected scoreboard.
+    box_scores: list, optional
+        Pre-fetched box scores for the same week, to avoid a duplicate API call.
 
     Returns
     -------
@@ -47,7 +52,8 @@ def get_projected_scoreboard(league, week=None):
     """
 
     # Gets current week's scoreboard projections
-    box_scores = league.box_scores(week=week)
+    if box_scores is None:
+        box_scores = league.box_scores(week=week)
     score = ['%4s %6.2f - %6.2f %s' % (i.home_team.team_abbrev, get_projected_total(i.home_lineup),
                                        get_projected_total(i.away_lineup), i.away_team.team_abbrev) for i in box_scores
              if i.away_team]
@@ -166,7 +172,7 @@ def all_played(lineup):
     return True
 
 
-def get_monitor(league):
+def get_monitor(league, box_scores=None):
     """
     Retrieve a list of players from a given fantasy football league that should be monitored during a game.
 
@@ -174,6 +180,8 @@ def get_monitor(league):
     ----------
     league: object
         The league object for which to retrieve the monitor players.
+    box_scores: list, optional
+        Pre-fetched box scores for the current week, to avoid a duplicate API call.
 
     Returns
     -------
@@ -181,7 +189,8 @@ def get_monitor(league):
         A string containing the list of players to monitor, formatted as a list of player names and status.
     """
 
-    box_scores = league.box_scores()
+    if box_scores is None:
+        box_scores = league.box_scores()
     monitor = []
     text = ''
     for i in box_scores:
@@ -244,7 +253,7 @@ def scan_roster(lineup, team):
     return report
 
 
-def get_matchups(league, week=None):
+def get_matchups(league, week=None, box_scores=None):
     """
     Retrieve the matchups for a given week in a fantasy football league.
 
@@ -254,6 +263,8 @@ def get_matchups(league, week=None):
         The league object for which to retrieve the matchups.
     week : int, optional
         The week number for which to retrieve the matchups, by default None.
+    box_scores: list, optional
+        Pre-fetched box scores for the same week, to avoid a duplicate API call.
 
     Returns
     -------
@@ -262,7 +273,9 @@ def get_matchups(league, week=None):
     """
 
     # Gets current week's Matchups
-    matchups = league.box_scores(week=week)
+    if box_scores is None:
+        box_scores = league.box_scores(week=week)
+    matchups = box_scores
 
     full_names = ['%s vs %s' % (i.home_team.team_name, i.away_team.team_name) for i in matchups if i.away_team]
 
@@ -274,7 +287,7 @@ def get_matchups(league, week=None):
     return '\n'.join(text)
 
 
-def get_close_scores(league, week=None):
+def get_close_scores(league, week=None, box_scores=None):
     """
     Retrieve the projected closest scores (15 points or closer) for a given week in a fantasy football league.
 
@@ -284,6 +297,8 @@ def get_close_scores(league, week=None):
         The league object for which to retrieve the closest scores.
     week : int, optional
         The week number for which to retrieve the closest scores, by default None.
+    box_scores: list, optional
+        Pre-fetched box scores for the same week, to avoid a duplicate API call.
 
     Returns
     -------
@@ -292,7 +307,8 @@ def get_close_scores(league, week=None):
     """
 
     # Gets current projected closest scores (15 points or closer)
-    box_scores = league.box_scores(week=week)
+    if box_scores is None:
+        box_scores = league.box_scores(week=week)
     score = []
 
     for i in box_scores:
@@ -594,7 +610,7 @@ def optimal_lineup_score(lineup, starter_counts):
     return (best_score, score, best_score - score, score_pct)
 
 
-def optimal_team_scores(league, week=None, full_report=False, recap=False):
+def optimal_team_scores(league, week=None, full_report=False, recap=False, box_scores=None):
     """
     This function returns the optimal team scores or managers.
 
@@ -606,6 +622,8 @@ def optimal_team_scores(league, week=None, full_report=False, recap=False):
         The week for which the optimal team scores are to be returned (default is the previous week)
     full_report : bool, optional
         A boolean indicating if a full report should be returned (default is False)
+    box_scores : list, optional
+        Pre-fetched box scores for the same week, to avoid a duplicate API call.
 
     Returns
     -------
@@ -616,7 +634,8 @@ def optimal_team_scores(league, week=None, full_report=False, recap=False):
 
     if not week:
         week = league.current_week - 1
-    box_scores = league.box_scores(week=week)
+    if box_scores is None:
+        box_scores = league.box_scores(week=week)
     results = []
     best_scores = {}
     starter_counts = get_starter_counts(league)
@@ -667,7 +686,7 @@ def optimal_team_scores(league, week=None, full_report=False, recap=False):
         return (best_mgr_str + worst_mgr_str)
 
 
-def get_achievers_trophy(league, week=None, recap=False):
+def get_achievers_trophy(league, week=None, recap=False, box_scores=None):
     """
     This function returns the overachiever and underachiever of the league
     based on the difference between the projected score and the actual score.
@@ -678,6 +697,8 @@ def get_achievers_trophy(league, week=None, recap=False):
         The league object for which the overachiever and underachiever are being determined
     week : int, optional
         The week for which the overachiever and underachiever are to be returned (default is current week)
+    box_scores : list, optional
+        Pre-fetched box scores for the same week, to avoid a duplicate API call.
 
     Returns
     -------
@@ -685,7 +706,8 @@ def get_achievers_trophy(league, week=None, recap=False):
         A string representing the overachiever and underachiever of the league
     """
 
-    box_scores = league.box_scores(week=week)
+    if box_scores is None:
+        box_scores = league.box_scores(week=week)
     high_achiever_str = ['📈 Overachiever 📈']
     low_achiever_str = ['📉 Underachiever 📉']
     best_performance = -9999
@@ -725,8 +747,9 @@ def get_achievers_trophy(league, week=None, recap=False):
     return (high_achiever_str + low_achiever_str)
 
 
-def get_weekly_score_with_win_loss(league, week=None):
-    box_scores = league.box_scores(week=week)
+def get_weekly_score_with_win_loss(league, week=None, box_scores=None):
+    if box_scores is None:
+        box_scores = league.box_scores(week=week)
     weekly_scores = {}
     for i in box_scores:
         if i.home_team != 0 and i.away_team != 0:
@@ -739,16 +762,17 @@ def get_weekly_score_with_win_loss(league, week=None):
     return dict(sorted(weekly_scores.items(), key=lambda item: item[1], reverse=True))
 
 
-def get_lucky_trophy(league, week=None, recap=False):
+def get_lucky_trophy(league, week=None, recap=False, box_scores=None):
     """
     This function takes in a league object and an optional week parameter. It retrieves the box scores for the specified league and week, and creates a dictionary with the weekly scores for each team. The teams are sorted in descending order by their scores, and the team with the lowest score and won is determined to be the lucky team for the week. The team with the highest score and lost is determined to be the unlucky team for the week. The function returns a list containing the lucky and unlucky teams, along with their records for the week.
     Parameters:
     league (object): A league object containing information about the league and its teams.
     week (int, optional): The week for which the box scores should be retrieved. If no week is specified, the current week will be used.
+    box_scores (list, optional): Pre-fetched box scores for the same week, to avoid a duplicate API call.
     Returns:
     list: A list containing the lucky and unlucky teams, along with their records for the week.
     """
-    weekly_scores = get_weekly_score_with_win_loss(league, week=week)
+    weekly_scores = get_weekly_score_with_win_loss(league, week=week, box_scores=box_scores)
     losses = 0
     unlucky_record = ''
     lucky_record = ''
@@ -778,7 +802,7 @@ def get_lucky_trophy(league, week=None, recap=False):
     return (lucky_str + unlucky_str)
 
 
-def get_trophies(league, week=None, recap=False):
+def get_trophies(league, week=None, recap=False, box_scores=None):
     """
     Returns trophies for the highest score, lowest score, closest score, and biggest win.
 
@@ -788,6 +812,10 @@ def get_trophies(league, week=None, recap=False):
         The league object for which the trophies are to be returned
     week : int, optional
         The week for which the trophies are to be returned (default is current week)
+    box_scores : list, optional
+        Pre-fetched box scores for the same week, to avoid a duplicate API call.
+        Also passed on to the lucky, achiever and optimal-lineup trophies, so
+        the whole trophy set costs a single box_scores call.
 
     Returns
     -------
@@ -797,7 +825,9 @@ def get_trophies(league, week=None, recap=False):
     if not week:
         week = league.current_week - 1
 
-    matchups = league.box_scores(week=week)
+    if box_scores is None:
+        box_scores = league.box_scores(week=week)
+    matchups = box_scores
     low_score = 99999999
     high_score = -1
     closest_score = 99999999
@@ -848,5 +878,7 @@ def get_trophies(league, week=None, recap=False):
     blowout_str = ['😱 Blow out 😱']+['%s blew out %s by %.2f points' % (ownerer.team_name, blown_out.team_name, biggest_blowout)]
 
     text = ['Trophies of the week:'] + high_score_str + low_score_str + blowout_str + close_score_str + \
-        get_lucky_trophy(league, week) + get_achievers_trophy(league, week) + optimal_team_scores(league, week)
+        get_lucky_trophy(league, week, box_scores=box_scores) + \
+        get_achievers_trophy(league, week, box_scores=box_scores) + \
+        optimal_team_scores(league, week, box_scores=box_scores)
     return '\n'.join(text)
