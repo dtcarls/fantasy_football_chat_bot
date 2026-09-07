@@ -232,3 +232,41 @@ class TestCurrentlyInSeason:
     def test_currently_in_season_non_string_end_date(self):
         with pytest.raises(ValueError):
             util.currently_in_season("2022-09-01", None, datetime(2022, 10, 15))
+
+
+class TestHasSendableContent:
+    ############ For `has_sendable_content`
+    # Real content is always sendable
+    def test_has_sendable_content_normal_text(self):
+        assert util.has_sendable_content("Score Update\n TEAM 100.00 - 90.00 OPP") == True
+
+    def test_has_sendable_content_single_word(self):
+        assert util.has_sendable_content("Trophies") == True
+
+    # Empty or whitespace-only messages are not
+    def test_has_sendable_content_empty_string(self):
+        assert util.has_sendable_content("") == False
+
+    def test_has_sendable_content_none(self):
+        assert util.has_sendable_content(None) == False
+
+    def test_has_sendable_content_whitespace(self):
+        assert util.has_sendable_content("   \n \t ") == False
+
+    # Known "nothing to report" placeholders are dropped
+    def test_has_sendable_content_no_matchup_data(self):
+        assert util.has_sendable_content(util.NO_MATCHUP_DATA) == False
+
+    def test_has_sendable_content_sentinel_with_surrounding_whitespace(self):
+        assert util.has_sendable_content("\n" + util.NO_MATCHUP_DATA + "  ") == False
+
+    # A sentinel is only dropped on an exact match, never as a substring
+    def test_has_sendable_content_sentinel_as_prefix(self):
+        assert util.has_sendable_content("Final " + util.NO_MATCHUP_DATA) == True
+
+    def test_has_sendable_content_sentinel_within_longer_message(self):
+        assert util.has_sendable_content(util.NO_MATCHUP_DATA + "\nBut here are the trophies") == True
+
+    # The empty monitor report is deliberately still sent
+    def test_has_sendable_content_empty_monitor_report(self):
+        assert util.has_sendable_content("No Players to Monitor this week. Good Luck!") == True

@@ -39,7 +39,7 @@ def trophy_recap(league):
     for week in range(1, league.current_week):
         # All four trophy lookups below read the same week, so fetch it once
         # and hand the same box scores to each of them.
-        box_scores = league.box_scores(week=week)
+        box_scores = espn.fetch_box_scores(league, week=week)
 
         # Get high score, low score, blown out, and close win trophies
         high_score_team, low_score_team, blown_out_team, close_win_team = espn.get_trophies(

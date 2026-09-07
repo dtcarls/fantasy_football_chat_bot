@@ -224,8 +224,6 @@ pip install -r requirements.txt
 |LEAGUE_YEAR|String|Yes|Currernt Year (YYYY)|ESPN League year to look at|
 |TIMEZONE|String|Yes|America/New_York|The timezone that the messages will look to send in.|
 |INIT_MSG|String|No|None|The message that the bot will say when it is started.|
-|TOP_HALF_SCORING|Bool|No|False|If set to True, when standings are posted on Wednesday it will also include being in the top half of your league for points and you receive an additional "win" for it.|
-|RANDOM_PHRASE|Bool|No|False|If set to True, when matchups are posted on Tuesday it will also include a random phrase|
 |MONITOR_REPORT|Bool|No|False|If set to True, will provide a report of players in starting lineup that are Questionable, Doubtful, Out, or projected for less than 4 points|
 |WAIVER_REPORT|Bool|No|False|If set to True, will provide a waiver report of add/drops. :warning: ESPN_S2 and SWID are required for this to work :warning:|
 |DAILY_WAIVER|Bool|No|False|If set to True, will provide a waiver report of add/drops daily. :warning: ESPN_S2 and SWID are required for this to work :warning:|
@@ -316,8 +314,4 @@ Is there a version of this for Messenger/WhatsApp/[insert other chat]?
 
 * No, but I am open to pull requests implementing their API for additional cross platform support.
 
-My Standings look wrong. I have weird (+1) in it.
-
-* TOP_HALF_SCORING: If set to True, when standings are posted on Wednesday it will also include top half scoring wins
-* Top half wins is being in the top half of your league for points and you receive an additional "win" for it. The number in parenthesis (+1) tells you how many added wins over the season for top half wins.
 </details>

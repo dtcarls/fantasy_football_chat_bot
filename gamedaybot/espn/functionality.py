@@ -1,4 +1,70 @@
+import logging
+import os
 from datetime import date
+
+if os.environ.get("AWS_EXECUTION_ENV") is not None:
+    # For use in lambda function
+    import utils.util as util
+else:
+    # For local use
+    import sys
+    sys.path.insert(1, os.path.abspath('.'))
+    import gamedaybot.utils.util as util
+
+logger = logging.getLogger(__name__)
+
+
+def season_started(league):
+    """
+    Check whether the league has reached a scoring period yet.
+
+    ESPN reports scoringPeriodId == 0 for a league whose season has not begun:
+    one that has not drafted, one abandoned mid-season, and every league before
+    week 1 is scored. In that state league.box_scores() raises
+    KeyError('rosterForCurrentScoringPeriod'), because the team payload has no
+    roster for a period that does not exist.
+
+    Only an explicit 0 counts. A scoring period we cannot read is not evidence
+    of anything, so it proceeds exactly as before.
+
+    Parameters
+    ----------
+    league : espn_api.football.League
+        The league to check.
+
+    Returns
+    -------
+    bool
+        True when box scores can safely be fetched.
+    """
+    period = getattr(league, 'scoringPeriodId', None)
+    return not (isinstance(period, int) and period == 0)
+
+
+def fetch_box_scores(league, week=None):
+    """
+    Fetch box scores, or return an empty list when the season has not started.
+
+    Every box-score read goes through here so the guard cannot be forgotten at
+    one call site. Callers must treat an empty list as "nothing to report"
+    rather than rendering an empty report.
+
+    Parameters
+    ----------
+    league : espn_api.football.League
+        The league to fetch for.
+    week : int, optional
+        The week to fetch. Defaults to the league's current week.
+
+    Returns
+    -------
+    list
+        The box scores, or an empty list when the season has not started.
+    """
+    if not season_started(league):
+        logger.info('Season has not started (scoringPeriodId=0); skipping box scores')
+        return []
+    return league.box_scores(week=week)
 
 
 def get_scoreboard_short(league, week=None, box_scores=None):
@@ -23,10 +89,14 @@ def get_scoreboard_short(league, week=None, box_scores=None):
 
     # Gets current week's scoreboard
     if box_scores is None:
-        box_scores = league.box_scores(week=week)
+        box_scores = fetch_box_scores(league, week=week)
     score = ['%4s %6.2f - %6.2f %s' % (i.home_team.team_abbrev, i.home_score,
                                        i.away_score, i.away_team.team_abbrev) for i in box_scores
              if i.away_team]
+    if not score:
+        # A bare 'Score Update' header with nothing under it is not worth
+        # sending; espn_bot drops this sentinel instead.
+        return util.NO_MATCHUP_DATA
     text = ['Score Update'] + score
     return '\n'.join(text)
 
@@ -53,26 +123,25 @@ def get_projected_scoreboard(league, week=None, box_scores=None):
 
     # Gets current week's scoreboard projections
     if box_scores is None:
-        box_scores = league.box_scores(week=week)
+        box_scores = fetch_box_scores(league, week=week)
     score = ['%4s %6.2f - %6.2f %s' % (i.home_team.team_abbrev, get_projected_total(i.home_lineup),
                                        get_projected_total(i.away_lineup), i.away_team.team_abbrev) for i in box_scores
              if i.away_team]
+    if not score:
+        # Mirrors get_scoreboard_short: a bare header is not worth sending.
+        return util.NO_MATCHUP_DATA
     text = ['Approximate Projected Scores'] + score
     return '\n'.join(text)
 
 
-def get_standings(league, top_half_scoring=False, week=None):
+def get_standings(league):
     """
-    Retrieve the current standings for a fantasy football league, with an option to include top-half scoring.
+    Retrieve the current standings for a fantasy football league.
 
     Parameters
     ----------
     league: object
         The league object for which to retrieve the standings.
-    top_half_scoring: bool, optional
-        If True, include top-half scoring in the standings calculation. Defaults to False.
-    week: int, optional
-        The week for which to retrieve the standings. Defaults to the current week of the league.
 
     Returns
     -------
@@ -80,47 +149,12 @@ def get_standings(league, top_half_scoring=False, week=None):
         A string containing the current standings, formatted as a list of teams with their records and positions.
     """
 
-    standings_txt = ''
-    teams = league.teams
-    standings = []
-    if not top_half_scoring:
-        standings = league.standings()
-        standings_txt = [f"{pos + 1:2}: ({team.wins}-{team.losses}) {team.team_name} " for
-                         pos, team in enumerate(standings)]
-    else:
-        # top half scoring can be enabled by default in ESPN now.
-        # this should generally not be used
-        top_half_totals = {t.team_name: 0 for t in teams}
-        if not week:
-            week = league.current_week
-        for w in range(1, week):
-            top_half_totals = top_half_wins(league, top_half_totals, w)
-
-        for t in teams:
-            wins = top_half_totals[t.team_name] + t.wins
-            standings.append((wins, t.losses, t.team_name))
-
-        standings = sorted(standings, key=lambda tup: tup[0], reverse=True)
-        standings_txt = [f"{pos + 1:2}: {team_name} ({wins}-{losses}) (+{top_half_totals[team_name]})" for
-                         pos, (wins, losses, team_name) in enumerate(standings)]
+    standings = league.standings()
+    standings_txt = [f"{pos + 1:2}: ({team.wins}-{team.losses}) {team.team_name} " for
+                     pos, team in enumerate(standings)]
     text = ["Current Standings"] + standings_txt
 
     return "\n".join(text)
-
-
-def top_half_wins(league, top_half_totals, week):
-    box_scores = league.box_scores(week=week)
-
-    scores = [(i.home_score, i.home_team.team_name) for i in box_scores] + \
-        [(i.away_score, i.away_team.team_name) for i in box_scores if i.away_team]
-
-    scores = sorted(scores, key=lambda tup: tup[0], reverse=True)
-
-    for i in range(0, len(scores) // 2):
-        points, team_name = scores[i]
-        top_half_totals[team_name] += 1
-
-    return top_half_totals
 
 
 def get_projected_total(lineup):
@@ -190,7 +224,7 @@ def get_monitor(league, box_scores=None):
     """
 
     if box_scores is None:
-        box_scores = league.box_scores()
+        box_scores = fetch_box_scores(league)
     monitor = []
     text = ''
     for i in box_scores:
@@ -274,8 +308,12 @@ def get_matchups(league, week=None, box_scores=None):
 
     # Gets current week's Matchups
     if box_scores is None:
-        box_scores = league.box_scores(week=week)
+        box_scores = fetch_box_scores(league, week=week)
     matchups = box_scores
+
+    if not any(i.away_team for i in matchups):
+        # Nothing to pair up: every slot is a bye, or the week has no data.
+        return util.NO_MATCHUP_DATA
 
     full_names = ['%s vs %s' % (i.home_team.team_name, i.away_team.team_name) for i in matchups if i.away_team]
 
@@ -308,7 +346,7 @@ def get_close_scores(league, week=None, box_scores=None):
 
     # Gets current projected closest scores (15 points or closer)
     if box_scores is None:
-        box_scores = league.box_scores(week=week)
+        box_scores = fetch_box_scores(league, week=week)
     score = []
 
     for i in box_scores:
@@ -626,7 +664,7 @@ def optimal_team_scores(league, week=None, full_report=False, recap=False, box_s
     if not week:
         week = league.current_week - 1
     if box_scores is None:
-        box_scores = league.box_scores(week=week)
+        box_scores = fetch_box_scores(league, week=week)
     results = []
     best_scores = {}
     starter_counts = get_starter_counts(league)
@@ -698,7 +736,7 @@ def get_achievers_trophy(league, week=None, recap=False, box_scores=None):
     """
 
     if box_scores is None:
-        box_scores = league.box_scores(week=week)
+        box_scores = fetch_box_scores(league, week=week)
     high_achiever_str = ['📈 Overachiever 📈']
     low_achiever_str = ['📉 Underachiever 📉']
     best_performance = -9999
@@ -740,7 +778,7 @@ def get_achievers_trophy(league, week=None, recap=False, box_scores=None):
 
 def get_weekly_score_with_win_loss(league, week=None, box_scores=None):
     if box_scores is None:
-        box_scores = league.box_scores(week=week)
+        box_scores = fetch_box_scores(league, week=week)
     weekly_scores = {}
     for i in box_scores:
         if i.home_team != 0 and i.away_team != 0:
@@ -817,7 +855,7 @@ def get_trophies(league, week=None, recap=False, box_scores=None):
         week = league.current_week - 1
 
     if box_scores is None:
-        box_scores = league.box_scores(week=week)
+        box_scores = fetch_box_scores(league, week=week)
     matchups = box_scores
     low_score = 99999999
     high_score = -1
@@ -881,7 +919,7 @@ def get_player_achievers(league, week=None, return_number=2):
     """
     if not week:
         week = league.current_week - 1
-    box_scores = league.box_scores(week=week)
+    box_scores = fetch_box_scores(league, week=week)
     player_diffs = []
     for matchup in box_scores:
         for team, team_lineup in zip([matchup.home_team, matchup.away_team], [matchup.home_lineup, matchup.away_lineup]):

@@ -3,6 +3,40 @@ import os
 from typing import List
 
 
+# Returned by the box-score reports when the week has nothing to report, in
+# place of a bare section header with no rows under it.
+NO_MATCHUP_DATA = 'No matchup data available.'
+
+# Exact-match placeholder strings that a report returns when it has nothing
+# worth saying. has_sendable_content drops these rather than broadcasting them.
+#
+# Deliberately NOT listed: 'No Players to Monitor this week. Good Luck!' -- an
+# empty monitor report is a useful weekly all-clear, so it still sends.
+_NO_DATA_SENTINELS = frozenset({
+    NO_MATCHUP_DATA,
+})
+
+
+def has_sendable_content(message) -> bool:
+    """
+    Check whether a generated message is worth broadcasting.
+
+    Parameters
+    ----------
+    message : str or None
+        The generated message text to check.
+
+    Returns
+    -------
+    bool
+        False when the message is empty, whitespace-only, or exactly one of the
+        known "nothing to report" placeholders; True otherwise.
+    """
+    if not message or not message.strip():
+        return False
+    return message.strip() not in _NO_DATA_SENTINELS
+
+
 def str_to_bool(check: str) -> bool:
     """
     Converts a string to a boolean value.
