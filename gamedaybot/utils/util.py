@@ -199,6 +199,33 @@ def currently_in_season(season_start_date=None, season_end_date=None, current_da
     return season_start_date <= current_date <= season_end_date
 
 
+def align_records(records: List[str]) -> List[str]:
+    """
+    Pad win-loss records so they line up in a column.
+
+    Wins are right-justified and everything after the first hyphen -- the
+    losses, plus ties for a record that carries them -- is left-justified, each
+    against the widest entry in the same message. So a 10-win team next to a
+    9-win one renders as "10-4" and " 9-5", and a 14-loss team next to a 6-loss
+    one as "0-14" and "8-6 ". Records that are already a common width come back
+    unchanged.
+
+    Parameters
+    ----------
+    records : List[str]
+        Record strings in "W-L" (or "W-L-T") form.
+
+    Returns
+    -------
+    List[str]
+        The same records, in the same order, padded to a common width.
+    """
+    parts = [record.split('-', 1) for record in records]
+    wins_width = max((len(wins) for wins, _ in parts), default=0)
+    rest_width = max((len(rest) for _, rest in parts), default=0)
+    return [f"{wins:>{wins_width}}-{rest:<{rest_width}}" for wins, rest in parts]
+
+
 def align_scores(scores: List[str]) -> List[str]:
     """
     Right-justify score strings to the width of the widest one.

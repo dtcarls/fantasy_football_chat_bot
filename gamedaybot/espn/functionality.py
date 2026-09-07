@@ -150,8 +150,11 @@ def get_standings(league):
     """
 
     standings = league.standings()
-    standings_txt = [f"{pos + 1:2}: ({team.wins}-{team.losses}) {team.team_name} " for
-                     pos, team in enumerate(standings)]
+    # Records are padded to a common width so the team names all start in the
+    # same column, whatever mix of 1- and 2-digit win/loss counts the league has.
+    records = util.align_records([f"{team.wins}-{team.losses}" for team in standings])
+    standings_txt = [f"{pos + 1:2}: ({record}) {team.team_name} " for
+                     pos, (team, record) in enumerate(zip(standings, records))]
     text = ["Current Standings"] + standings_txt
 
     return "\n".join(text)
@@ -315,11 +318,16 @@ def get_matchups(league, week=None, box_scores=None):
         # Nothing to pair up: every slot is a bye, or the week has no data.
         return util.NO_MATCHUP_DATA
 
-    full_names = ['%s vs %s' % (i.home_team.team_name, i.away_team.team_name) for i in matchups if i.away_team]
+    played = [i for i in matchups if i.away_team]
 
-    abbrevs = ['%4s (%s-%s) vs (%s-%s) %s' % (i.home_team.team_abbrev, i.home_team.wins, i.home_team.losses,
-                                              i.away_team.wins, i.away_team.losses, i.away_team.team_abbrev) for i in matchups
-               if i.away_team]
+    full_names = ['%s vs %s' % (i.home_team.team_name, i.away_team.team_name) for i in played]
+
+    # Every record in the message is padded against the widest one, home and
+    # away together, so the "vs" and the away abbreviation stay in one column.
+    records = util.align_records(
+        [f"{team.wins}-{team.losses}" for i in played for team in (i.home_team, i.away_team)])
+    abbrevs = ['%4s (%s) vs (%s) %s' % (i.home_team.team_abbrev, home, away, i.away_team.team_abbrev)
+               for i, home, away in zip(played, records[::2], records[1::2])]
 
     text = ['Matchups'] + full_names + [''] + abbrevs
     return '\n'.join(text)

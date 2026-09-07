@@ -309,3 +309,38 @@ class TestAlignScores:
 
     def test_align_scores_single(self):
         assert util.align_scores(["99.99"]) == ["99.99"]
+
+
+class TestAlignRecords:
+    ############ For `align_records`
+    # Wins are right-justified so the hyphens line up
+    def test_align_records_two_digit_wins(self):
+        assert util.align_records(["10-4", "9-5"]) == ["10-4", " 9-5"]
+
+    # Losses are left-justified so the closing paren lines up
+    def test_align_records_two_digit_losses(self):
+        assert util.align_records(["0-14", "8-6"]) == ["0-14", "8-6 "]
+
+    # Both at once
+    def test_align_records_both_sides(self):
+        assert util.align_records(["10-4", "0-14", "9-5"]) == ["10-4 ", " 0-14", " 9-5 "]
+
+    # Equal-width input comes back untouched
+    def test_align_records_equal_widths_unchanged(self):
+        records = ["7-7", "6-8", "5-9"]
+        assert util.align_records(records) == records
+
+    # Order is preserved, not sorted
+    def test_align_records_preserves_order(self):
+        assert util.align_records(["9-5", "10-4"]) == [" 9-5", "10-4"]
+
+    # A record carrying ties keeps them on the left-justified side
+    def test_align_records_with_ties(self):
+        assert util.align_records(["9-4-1", "10-5"]) == [" 9-4-1", "10-5  "]
+
+    # Degenerate inputs
+    def test_align_records_empty_list(self):
+        assert util.align_records([]) == []
+
+    def test_align_records_single(self):
+        assert util.align_records(["9-5"]) == ["9-5"]
