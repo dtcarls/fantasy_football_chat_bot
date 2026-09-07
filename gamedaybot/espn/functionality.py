@@ -327,82 +327,73 @@ def get_close_scores(league, week=None, box_scores=None):
     return '\n'.join(text)
 
 
-def get_waiver_report(league, faab=False):
+def get_waiver_report(league, faab=False, scoring_period=None, test_date=None):
     """
-    This function generates a waiver report for a given league.
-    The report lists all the waiver transactions that occurred on the current day,
-    including the team that made the transaction, the player added and the player dropped (if applicable).
+    Generate a waiver report for a given league and scoring period.
+
+    The report lists all waiver transactions that occurred on the specified date (defaults to today),
+    including the team that made the transaction, the player(s) added, and the player(s) dropped (if applicable).
+    If faab is True, the report will include FAAB amount spent and will be sorted from largest to smallest FAAB bid.
 
     Parameters
     ----------
-    league: object
-        The league object for which the report is being generated
+    league : object
+        The league object for which the report is being generated.
     faab : bool, optional
-        A flag to indicate whether the report should include FAAB amount spent, by default False.
+        If True, include FAAB amount spent and sort report by FAAB descending. Defaults to False.
+    scoring_period : int, optional
+        The scoring period to query transactions for. Defaults to league.scoringPeriodId.
+    test_date : str, optional
+        Date string (YYYY-MM-DD) to simulate 'today' for testing historical transactions. Defaults to current date.
 
     Returns
     -------
     str
-        A string containing the waiver report
+        A formatted string containing the waiver report.
     """
 
-    # Get the recent activity of the league
-    activities = league.recent_activity(50)
-    # Initialize an empty list to store the report
+
+    # Allow testing with a specific scoring period and date
+    if scoring_period is None:
+        scoring_period = league.scoringPeriodId
+    transactions = league.transactions(scoring_period, types={'WAIVER'})
     report = []
-    # Get the current date
-    today = date.today().strftime('%Y-%m-%d')
+    report_items = []  # For sorting if faab
+    today = test_date if test_date else date.today().strftime('%Y-%m-%d')
     text = ''
 
-    # Iterate through each activity
-    for activity in activities:
-        actions = activity.actions
-        # Get the date of the activity
-        d2 = date.fromtimestamp(activity.date / 1000).strftime('%Y-%m-%d')
-        # Check if the activity is from today
-        if d2 == today:
-            # Check if the activity is a waiver add (not a drop)
-            if len(actions) == 1 and actions[0][1] == 'WAIVER ADDED':
-                # Get the team, player name and position
-                team_name = actions[0][0].team_name
-                player_name = actions[0][2].name
-                player_position = actions[0][2].position
-                if faab:
-                    # Get the FAAB amount spent
-                    faab_amount = actions[0][3]
-                    # Add the transaction to the report
-                    s = f'{team_name} \nADDED {player_position} {player_name} (${faab_amount})\n'
-                else:
-                    s = f'{team_name} \nADDED {player_position} {player_name}\n'
-                report += [s.lstrip()]
-            elif len(actions) > 1:
-                if actions[0][1] == 'WAIVER ADDED' or actions[1][1] == 'WAIVER ADDED':
-                    if actions[0][1] == 'WAIVER ADDED':
-                        if faab:
-                            s = '%s \nADDED %s %s ($%s)\nDROPPED %s %s\n' % (
-                                actions[0][0].team_name, actions[0][2].position, actions[0][2].name,
-                                actions[0][3], actions[1][2].position, actions[1][2].name)
-                        else:
-                            s = '%s \nADDED %s %s\nDROPPED %s %s\n' % (
-                                actions[0][0].team_name, actions[0][2].position, actions[0][2].name,
-                                actions[1][2].position, actions[1][2].name)
+    for txn in transactions:
+        # Only include transactions matching the test date and type WAIVER
+        txn_date = None
+        if txn.date:
+            txn_date = date.fromtimestamp(txn.date / 1000).strftime('%Y-%m-%d')
+        if txn_date == today and txn.status == 'EXECUTED':
+            team_name = txn.team.team_name
+            faab_amount = txn.bid_amount if hasattr(txn, 'bid_amount') else 0
+            add_str = ''
+            drop_str = ''
+            for item in txn.items:
+                if item.type == 'ADD':
+                    if faab:
+                        add_str += f"ADDED {league.player_info(item.player).position} - {item.player} (${faab_amount})\n"
                     else:
-                        if faab:
-                            s = '%s \nADDED %s %s ($%s)\nDROPPED %s %s\n' % (
-                                actions[0][0].team_name, actions[1][2].position, actions[1][2].name,
-                                actions[1][3], actions[0][2].position, actions[0][2].name)
-                        else:
-                            s = '%s \nADDED %s %s\nDROPPED %s %s\n' % (
-                                actions[0][0].team_name, actions[1][2].position, actions[1][2].name,
-                                actions[0][2].position, actions[0][2].name)
-                    report += [s.lstrip()]
+                        add_str += f"ADDED {league.player_info(item.player).position} - {item.player}\n"
+                elif item.type == 'DROP':
+                    drop_str += f"DROPPED {league.player_info(item.player).position} - {item.player}\n"
+            s = f"{team_name} \n{add_str}{drop_str}"
+            if faab:
+                report_items.append((faab_amount, s.lstrip()))
+            else:
+                report.append(s.lstrip())
 
-    report.reverse()
+    if faab:
+        # Sort by faab_amount descending
+        report_items.sort(key=lambda x: x[0], reverse=True)
+        report = [item[1] for item in report_items]
 
-    if not report:
-        report += ['No waiver transactions']
-    else:
-        text = ['Waiver Report %s: ' % today] + report
+    # Only return a report if there are transactions
+    if report:
+        text = [f'Waiver Report {today}:'] + report
 
     return '\n'.join(text)
 
@@ -882,3 +873,30 @@ def get_trophies(league, week=None, recap=False, box_scores=None):
         get_achievers_trophy(league, week, box_scores=box_scores) + \
         optimal_team_scores(league, week, box_scores=box_scores)
     return '\n'.join(text)
+
+
+def get_player_achievers(league, week=None, return_number=2):
+    """
+    Returns the top and bottom N players who exceeded or fell short of their projection the most in starting lineups for the given week.
+    """
+    if not week:
+        week = league.current_week - 1
+    box_scores = league.box_scores(week=week)
+    player_diffs = []
+    for matchup in box_scores:
+        for team, team_lineup in zip([matchup.home_team, matchup.away_team], [matchup.home_lineup, matchup.away_lineup]):
+            for player in team_lineup:
+                if player.slot_position not in ['BE', 'IR'] and hasattr(player, 'projected_points') and player.projected_points is not None:
+                    diff = round(player.points - player.projected_points, 2)
+                    player_diffs.append({
+                        'name': player.name,
+                        'team': player.proTeam if hasattr(player, 'proTeam') else '',
+                        'fantasy_team': team.team_abbrev if team else '',
+                        'points': player.points,
+                        'projected': player.projected_points,
+                        'diff': diff
+                    })
+    sorted_diffs = sorted(player_diffs, key=lambda x: x['diff'], reverse=True)
+    best = sorted_diffs[:return_number]
+    worst = sorted_diffs[-return_number:]
+    return best, worst

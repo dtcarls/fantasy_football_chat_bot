@@ -21,13 +21,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
+        uses: docker/setup-buildx-action@v2
 
       - name: Build container
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v4
         with:
           push: false
           context: .
@@ -41,3 +41,11 @@ jobs:
             pip install -r requirements.txt && \
             pip install -r requirements-test.txt && \
             pytest"
+
+      - name: Upload coverage from image run (optional)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: image-coverage-report
+          path: coverage.xml
+        continue-on-error: true

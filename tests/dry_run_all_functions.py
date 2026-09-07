@@ -14,9 +14,16 @@ from gamedaybot.chat.groupme import GroupMe
 
 ## Manually populate
 LEAGUE_ID = 164483
-LEAGUE_YEAR = 2023
+LEAGUE_YEAR = 2025
+swid = '{1}'
+espn_s2 = '1'
+league = None
 
-league = League(league_id=LEAGUE_ID, year=LEAGUE_YEAR)
+if swid != '{1}' and espn_s2 != '1':
+    league = League(league_id=LEAGUE_ID, year=LEAGUE_YEAR, espn_s2=espn_s2, swid=swid)
+else:
+    league = League(league_id=LEAGUE_ID, year=LEAGUE_YEAR)
+
 print(espn.get_scoreboard_short(league))
 print(espn.get_projected_scoreboard(league))
 print(espn.get_standings(league))
@@ -26,23 +33,10 @@ print(espn.get_matchups(league))
 print(espn.get_power_rankings(league))
 print(espn.get_trophies(league))
 print(espn.optimal_team_scores(league, full_report=True))
+print(espn.get_waiver_report(league, True))
 
 print(recap.win_matrix(league))
 print(recap.trophy_recap(league))
-
-try:
-    swid = os.environ["SWID"]
-except KeyError:
-    swid = '{1}'
-try:
-    espn_s2 = os.environ["ESPN_S2"]
-except KeyError:
-    espn_s2 = '1'
-
-if swid != '{1}' and espn_s2 != '1':
-    league = League(league_id=LEAGUE_ID, year=LEAGUE_YEAR, espn_s2=espn_s2, swid=swid)
-    print(espn.get_waiver_report(league))
-    print(espn.get_waiver_report(league, True))
 
 # bot = GroupMe(os.environ['BOT_ID'])
 # bot.send_message(recap.trophy_recap(league), file_path='/tmp/season_recap.png')

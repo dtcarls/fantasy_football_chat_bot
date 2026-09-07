@@ -154,7 +154,7 @@ def espn_bot(function):
         broadcast_message = None
 
     # always let init and broadcast run
-    if function not in ["init", "broadcast", "win_matrix", "trophy_recap"] and league.scoringPeriodId > len(league.settings.matchup_periods):
+    if function not in ["init", "broadcast", "win_matrix", "trophy_recap"] and (league.scoringPeriodId > league.finalScoringPeriod or league.scoringPeriodId < league.firstScoringPeriod):
         logger.info("Not in active season")
         return
 
@@ -194,7 +194,7 @@ def espn_bot(function):
         box_scores = league.box_scores(week=week)
         text = "Final " + espn.get_scoreboard_short(league, week=week, box_scores=box_scores)
         text = text + "\n\n" + espn.get_trophies(league, week=week, box_scores=box_scores)
-    elif function == "get_waiver_report" and swid != '{1}' and espn_s2 != '1':
+    elif function == "get_waiver_report":
         faab = league.settings.faab
         text = espn.get_waiver_report(league, faab)
     elif function == "broadcast":

@@ -10,9 +10,6 @@ Like the bot? Star the repository and consider making a donation to buy me a cof
 ------
 * PayPal:
 [![paypal](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=ZDLFECJVGG6RG&currency_code=USD&source=url)
-* BTC: bc1q3wxm269mdmwdqjqkxgt7s5zp8ah05dexdua0zv
-* ETH: 0x8c096710e3621fe5f8E384efBd17D8E3E798Dc0c (Cryptik.eth)
-* DOGE: D6n2g2KGdqEwR4MhhT7uAdvZFaTwqwd6rS
 * Venmo: @dtcarls
 
 # ESPN Fantasy Football GroupMe Slack and Discord Chat Bot
@@ -213,8 +210,6 @@ git clone https://github.com/dtcarls/fantasy_football_chat_bot
 cd fantasy_football_chat_bot
 
 pip install -r requirements.txt
-# or
-#python3 setup.py install
 ```
 
 ### Environment Variables
@@ -254,6 +249,11 @@ Use BOT_ID if using Groupme, DISCORD_WEBHOOK_URL if using Discord, and SLACK_WEB
 fantasy_football_chat_bot
 ```
 
+Alternatively, utilize docker compose and fill in your variables into docker-compose.yml
+```bash
+docker-compose up -d
+```
+
 ### Running without Docker
 
 Use BOT_ID if using Groupme, DISCORD_WEBHOOK_URL if using Discord, and SLACK_WEBHOOK_URL if using Slack (or multiple to get messages in multiple places)
@@ -271,15 +271,19 @@ Use BOT_ID if using Groupme, DISCORD_WEBHOOK_URL if using Discord, and SLACK_WEB
 Automated tests for this package are included in the `tests` directory. After installation,
 you can run these tests by changing the directory to the `gamedaybot` directory and running the following:
 
-```python3
+```bash
+# install test dependencies then run tests
 pip install -r requirements-test.txt
-pytest
+pytest -q
 ```
 </details>
 
 #### Private Leagues
 
 For private league you will need to get your swid and espn_s2.
+You can use this chrome extension: https://chromewebstore.google.com/detail/espn-private-league-setup/bjmalaafoepfooflcnhjejnopgefjgia?authuser=0&hl=en
+
+Or manually:
 You can find these two values after logging into your espn fantasy football account on espn's website.
 (Chrome Browser)
 Right click anywhere on the website and click inspect option.
@@ -298,9 +302,11 @@ How are power ranks calculated?
 
 * They are calculated using 2 step dominance, as well as a combination of points scored and margin of victory. Weighted 80/15/5 respectively. I wouldn't so much pay attention to the actual number but more of the gap between teams. Full source of the calculations can be seen here: https://github.com/cwendt94/espn-api/pull/12/files. If you want a tutorial on dominance matrices: https://www.youtube.com/watch?v=784TmwaHPOw
 
-Is there a version of this for Yahoo/CBS/NFL/[insert other site]?
-
-* No, this would require a significant rework for other sites.
+What fantasy sites do you support?
+* ESPN Public
+* ESPN Private
+* Sleeper (gamedaybot.com)
+* Yahoo (gamedaybot.com) (Coming soon)
 
 How do I set another timezone?
 

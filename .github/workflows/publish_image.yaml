@@ -15,28 +15,28 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
+        uses: docker/setup-buildx-action@v2
 
       - name: Login to GitHub Container Registry
-        uses: docker/login-action@v1
+        uses: docker/login-action@v2
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ github.token }}
 
-      - name: Set tag name for releases
-        if: ${{ github.event_name == 'release' }}
-        run: echo "TAG=ghcr.io/${GITHUB_REPOSITORY,,}:${GITHUB_REF##*/}" >>${GITHUB_ENV}
-
-      - name: Set tag name for commits
-        if: ${{ github.event_name == 'push' }}
-        run: echo "TAG=ghcr.io/${GITHUB_REPOSITORY,,}:${{ github.sha }}" >>${GITHUB_ENV}
+      - name: Set TAG for image
+        run: |
+          if [ "${{ github.event_name }}" = "release" ]; then
+            echo "TAG=ghcr.io/${GITHUB_REPOSITORY,,}:${GITHUB_REF##*/}" >> $GITHUB_ENV
+          else
+            echo "TAG=ghcr.io/${GITHUB_REPOSITORY,,}:${{ github.sha }}" >> $GITHUB_ENV
+          fi
 
       - name: Build image
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v4
         with:
           load: true
           push: false
@@ -50,8 +50,16 @@ jobs:
           pip install -r requirements-test.txt && \
           pytest"
 
+      - name: Upload coverage from image (optional)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: publish-image-coverage
+          path: coverage.xml
+        continue-on-error: true
+
       - name: Push image to registry
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v4
         with:
           push: true
           tags: ${{ env.TAG }}
