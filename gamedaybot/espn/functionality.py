@@ -252,6 +252,11 @@ def scan_roster(lineup, team):
     team : object
         The team object for which to retrieve the monitor players
 
+    A starter is flagged for one reason only, in priority order: a non-active
+    injury status, then a bye week, then a pre-game projection of zero. A
+    player in an IR slot is reported separately when they are no longer
+    IR-eligible.
+
     Returns
     -------
     list
@@ -262,13 +267,27 @@ def scan_roster(lineup, team):
     players = []
     for i in lineup:
         # exclude bench and injured players and active or normal players
-        if i.slot_position != 'BE' and i.slot_position != 'IR' and \
-            i.injuryStatus != 'ACTIVE' and i.injuryStatus != 'NORMAL' \
-                and i.game_played == 0:
+        if i.slot_position != 'BE' and i.slot_position != 'IR':
+            if i.injuryStatus != 'ACTIVE' and i.injuryStatus != 'NORMAL' \
+                    and i.game_played == 0:
 
-            count += 1
-            player = i.position + ' ' + i.name + ' - ' + i.injuryStatus.title().replace('_', ' ')
-            players += [player]
+                count += 1
+                player = i.position + ' ' + i.name + ' - ' + i.injuryStatus.title().replace('_', ' ')
+                players += [player]
+
+            elif i.on_bye_week:
+                # espn_api leaves game_played at 100 for a bye (it is only set
+                # for players whose pro team has a game that week), so neither
+                # the injury rule above nor the projection rule below can catch
+                # these -- a bye needs its own branch.
+                count += 1
+                player = i.position + ' ' + i.name + ' - BYE'
+                players += [player]
+
+            elif i.projected_points == 0 and i.game_played == 0:
+                count += 1
+                player = i.position + ' ' + i.name + ' - Projected 0'
+                players += [player]
 
         if i.slot_position == 'IR' and \
             i.injuryStatus != 'INJURY_RESERVE' and i.injuryStatus != 'OUT':
@@ -277,14 +296,14 @@ def scan_roster(lineup, team):
             player = i.position + ' ' + i.name + ' - Not IR eligible'
             players += [player]
 
-    list = ""
+    roster_lines = ""
     report = ""
 
     for p in players:
-        list += p + "\n"
+        roster_lines += p + "\n"
 
     if count > 0:
-        s = '%s: \n%s \n' % (team.team_name, list[:-1])
+        s = '%s: \n%s \n' % (team.team_name, roster_lines[:-1])
         report = [s.lstrip()]
 
     return report

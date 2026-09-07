@@ -224,7 +224,7 @@ pip install -r requirements.txt
 |LEAGUE_YEAR|String|Yes|Currernt Year (YYYY)|ESPN League year to look at|
 |TIMEZONE|String|Yes|America/New_York|The timezone that the messages will look to send in.|
 |INIT_MSG|String|No|None|The message that the bot will say when it is started.|
-|MONITOR_REPORT|Bool|No|False|If set to True, will provide a report of players in starting lineup that are Questionable, Doubtful, Out, or projected for less than 4 points|
+|MONITOR_REPORT|Bool|No|True|If set to True, will provide a report of players in your starting lineup that carry an injury status (Questionable, Doubtful, Out, etc.), are on a bye week, or are projected to score 0. Players left in an IR slot who are no longer IR-eligible are reported too.|
 |WAIVER_REPORT|Bool|No|False|If set to True, will provide a waiver report of add/drops. :warning: ESPN_S2 and SWID are required for this to work :warning:|
 |DAILY_WAIVER|Bool|No|False|If set to True, will provide a waiver report of add/drops daily. :warning: ESPN_S2 and SWID are required for this to work :warning:|
 |ESPN_S2|String|For Private leagues|None|Used for private leagues. See [Private Leagues Section](#private-leagues) for documentation|
