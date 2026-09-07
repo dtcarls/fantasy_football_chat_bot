@@ -9,6 +9,16 @@ on:
     types:
       - published
 
+permissions:
+  contents: write # create the tag and release on a push to main
+  packages: write # push the image to GHCR
+
+# Two pushes to main in quick succession would otherwise race for the same
+# date tag and one of them would fail to create its release. Queue instead.
+concurrency:
+  group: publish-image
+  cancel-in-progress: false
+
 jobs:
   push-image:
     runs-on: ubuntu-latest
@@ -27,13 +37,47 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ github.token }}
 
-      - name: Set TAG for image
+      - name: Work out the version and image tags
         run: |
+          IMAGE="ghcr.io/${GITHUB_REPOSITORY,,}"
+
           if [ "${{ github.event_name }}" = "release" ]; then
-            echo "TAG=ghcr.io/${GITHUB_REPOSITORY,,}:${GITHUB_REF##*/}" >> $GITHUB_ENV
+            # A release cut by hand keeps whatever tag it was given.
+            VERSION="${GITHUB_REF##*/}"
+            echo "CREATE_RELEASE=false" >> "$GITHUB_ENV"
           else
-            echo "TAG=ghcr.io/${GITHUB_REPOSITORY,,}:${{ github.sha }}" >> $GITHUB_ENV
+            # Every push to main becomes a dated release: v2026.09.10. A second
+            # push the same day takes v2026.09.10.1, a third .2, and so on, so
+            # the tag is always free. Read from the remote rather than local
+            # refs -- checkout does not fetch tags by default.
+            BASE="v$(date -u +'%Y.%m.%d')"
+            TAKEN="$(git ls-remote --tags origin | sed 's#.*refs/tags/##; s#\^{}##' | sort -u)"
+            VERSION="$BASE"
+            N=1
+            while printf '%s\n' "$TAKEN" | grep -qx -- "$VERSION"; do
+              VERSION="${BASE}.${N}"
+              N=$((N + 1))
+            done
+            echo "CREATE_RELEASE=true" >> "$GITHUB_ENV"
           fi
+
+          echo "VERSION=${VERSION}" >> "$GITHUB_ENV"
+          # TAG is the single ref the build and test steps below load and run.
+          echo "TAG=${IMAGE}:${VERSION}" >> "$GITHUB_ENV"
+
+          # TAGS is everything the push publishes. The commit SHA rides along so
+          # an exact commit stays pinnable. `latest` moves for every release
+          # except a prerelease -- GitHub fires release:published for those too,
+          # and moving `latest` onto one would ship it to everyone tracking it.
+          {
+            echo "TAGS<<EOF"
+            echo "${IMAGE}:${VERSION}"
+            echo "${IMAGE}:${GITHUB_SHA}"
+            if [ "${{ github.event.release.prerelease }}" != "true" ]; then
+              echo "${IMAGE}:latest"
+            fi
+            echo "EOF"
+          } >> "$GITHUB_ENV"
 
       - name: Build image
         uses: docker/build-push-action@v4
@@ -62,4 +106,18 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           push: true
-          tags: ${{ env.TAG }}
+          tags: ${{ env.TAGS }}
+
+      # Last, so a build or test failure never leaves a release pointing at an
+      # image that was never published. Creating this with GITHUB_TOKEN is
+      # deliberate: releases made with it do not trigger workflows, so this
+      # cannot re-enter the release: published path above and build twice.
+      - name: Tag and release
+        if: env.CREATE_RELEASE == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$VERSION" \
+            --target "$GITHUB_SHA" \
+            --title "$VERSION" \
+            --generate-notes
